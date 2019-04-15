@@ -4,10 +4,7 @@
         "XRTK"
     ],
     "optionalUnityReferences": [],
-    "includePlatforms": [
-        "Editor",
-        "Lumin"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
