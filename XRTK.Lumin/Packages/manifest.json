@@ -1,7 +1,11 @@
 {
   "dependencies": {
+    "com.unity.2d.sprite": "1.0.0",
+    "com.unity.2d.tilemap": "1.0.0",
+    "com.unity.ext.nunit": "1.0.0",
     "com.unity.multiplayer-hlapi": "1.0.2",
-    "com.unity.package-manager-ui": "2.1.2",
+    "com.unity.package-manager-ui": "2.2.0",
+    "com.unity.test-framework": "1.0.9",
     "com.unity.textmeshpro": "2.0.0",
     "com.unity.timeline": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.0.2",
@@ -10,6 +14,7 @@
     "com.xrtk.core": "https://github.com/XRTK/XRTK-Core.git#0.1.0",
     "com.xrtk.upm-git-extension": "https://github.com/XRTK/UpmGitExtension.git#0.9.3",
     "com.unity.modules.ai": "1.0.0",
+    "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
@@ -39,5 +44,11 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.xrtk.upm-git-extension": {
+      "hash": "8885b5cdc1010d4f22a2cbcb7f187d5ebdb28834",
+      "revision": "0.9.3"
+    }
   }
 }
