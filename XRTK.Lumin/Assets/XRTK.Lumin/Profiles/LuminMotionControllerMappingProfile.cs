@@ -16,7 +16,7 @@ namespace XRTK.Lumin.Profiles
         public override SupportedControllerType ControllerType => SupportedControllerType.Lumin;
 
         /// <inheritdoc />
-        public override string TexturePath => $"{base.TexturePath}MotionController";
+        public override string TexturePath => $"{base.TexturePath}LuminController";
 
         protected override void Awake()
         {
