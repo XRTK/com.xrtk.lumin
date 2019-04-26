@@ -12,7 +12,7 @@
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.1.2",
-    "com.unity.xr.magicleap": "2.0.0-preview.16"
+    "com.unity.xr.magicleap": "2.0.0-preview.16",
+    "com.xrtk.core": "0.1.4"
   }
 }
