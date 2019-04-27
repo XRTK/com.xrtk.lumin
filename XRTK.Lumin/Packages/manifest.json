@@ -1,20 +1,14 @@
 {
   "dependencies": {
-    "com.unity.2d.sprite": "1.0.0",
-    "com.unity.2d.tilemap": "1.0.0",
-    "com.unity.ext.nunit": "1.0.0",
-    "com.unity.multiplayer-hlapi": "1.0.2",
-    "com.unity.package-manager-ui": "2.2.0",
-    "com.unity.test-framework": "1.0.9",
+    "com.unity.package-manager-ui": "2.1.2",
     "com.unity.textmeshpro": "2.0.0",
-    "com.unity.timeline": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.0.2",
     "com.unity.xr.magicleap": "2.0.0-preview.16",
-    "com.unity.xr.oculus.standalone": "1.29.1",
-    "com.xrtk.core": "https://github.com/XRTK/XRTK-Core.git#0.1.0",
-    "com.xrtk.upm-git-extension": "https://github.com/XRTK/UpmGitExtension.git#0.9.3",
+    "com.xrtk.core": "https://github.com/XRTK/XRTK-Core.git#0.1.4",
+    "com.xrtk.sdk": "https://github.com/XRTK/SDK.git#0.1.2",
+    "com.xrtk.upm-git-extension": "https://github.com/XRTK/UpmGitExtension.git#0.9.4",
+    "com.xrtk.wmr": "https://github.com/XRTK/WindowsMixedReality.git#0.1.1",
     "com.unity.modules.ai": "1.0.0",
-    "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
@@ -46,9 +40,21 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "lock": {
+    "com.xrtk.core": {
+      "hash": "925940cff60d2619045d6624c03989d96feacb91",
+      "revision": "0.1.4"
+    },
+    "com.xrtk.sdk": {
+      "hash": "783847ae6aed405fc1ef5af62e9b4a014d01901f",
+      "revision": "0.1.2"
+    },
     "com.xrtk.upm-git-extension": {
-      "hash": "8885b5cdc1010d4f22a2cbcb7f187d5ebdb28834",
-      "revision": "0.9.3"
+      "hash": "869a63adece6138e88881e85f89f7994983db696",
+      "revision": "0.9.4"
+    },
+    "com.xrtk.wmr": {
+      "hash": "590a21635dff21d93fd8dd14e66fcdd0424cf63d",
+      "revision": "0.1.1"
     }
   }
 }
