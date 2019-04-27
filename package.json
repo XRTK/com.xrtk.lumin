@@ -1,0 +1,18 @@
+{
+  "name": "com.xrtk.lumin",
+  "displayName": "XRTK.Lumin",
+  "description": "The Lumin platform components for the Mixed Reality Toolkit",
+  "version": "0.1.1",
+  "unity": "2019.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XRTK/Lumin.git"
+  },
+  "src": "Assets/XRTK.Lumin",
+  "author": "XRTK Team (https://github.com/XRTK)",
+  "dependencies": {
+    "com.unity.xr.magicleap": "2.0.0-preview.16",
+    "com.xrtk.core": "0.1.5"
+  }
+}
