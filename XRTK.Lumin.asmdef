@@ -1,3 +1,15 @@
-﻿{
-	"name": "XRTK.Lumin"
+{
+    "name": "XRTK.Lumin",
+    "references": [
+        "XRTK"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }
