@@ -25,7 +25,7 @@ namespace XRTK.Lumin.Controllers
         /// <param name="name"></param>
         /// <param name="priority"></param>
         /// <param name="profile"></param>
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile) 
+        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
             : base(name, priority, profile)
         {
         }
@@ -42,9 +42,9 @@ namespace XRTK.Lumin.Controllers
         {
             var list = new List<IMixedRealityController>();
 
-            foreach (LuminController value in activeControllers.Values)
+            foreach (var controller in activeControllers.Values)
             {
-                list.Add(value);
+                list.Add(controller);
             }
 
             return list.ToArray();
@@ -91,6 +91,37 @@ namespace XRTK.Lumin.Controllers
 
             MLInput.OnControllerConnected += OnControllerConnected;
             MLInput.OnControllerDisconnected += OnControllerDisconnected;
+            MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
+            MLInput.OnControllerButtonUp += MlInputOnControllerButtonUp;
+        }
+
+        private void MlInputOnControllerButtonUp(byte controllerId, MLInputControllerButton button)
+        {
+            if (activeControllers.TryGetValue(controllerId, out var controller))
+            {
+                switch (button)
+                {
+                    case MLInputControllerButton.Bumper:
+                        controller.IsBumperPressed = true;
+                        break;
+                    case MLInputControllerButton.HomeTap:
+                        controller.IsHomePressed = true;
+                        break;
+                }
+            }
+        }
+
+        private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
+        {
+            if (activeControllers.TryGetValue(controllerId, out var controller))
+            {
+                switch (button)
+                {
+                    case MLInputControllerButton.Bumper:
+                        controller.IsBumperPressed = false;
+                        break;
+                }
+            }
         }
 
         /// <inheritdoc />

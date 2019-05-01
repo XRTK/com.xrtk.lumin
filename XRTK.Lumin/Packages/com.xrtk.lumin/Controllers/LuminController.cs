@@ -50,6 +50,9 @@ namespace XRTK.Lumin.Controllers
         internal MLInputController MlControllerReference { get; set; }
         //internal LuminControllerGestureSettings ControllerGestureSettings { get; set; }
 
+        internal bool IsBumperPressed;
+        internal bool IsHomePressed;
+
         private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose currentControllerPose = MixedRealityPose.ZeroIdentity;
@@ -166,12 +169,18 @@ namespace XRTK.Lumin.Controllers
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.Digital);
 
-            var buttonId = interactionMapping.Description.Contains("Home")
-                ? (int)MLInputControllerButton.HomeTap
-                : (int)MLInputControllerButton.Bumper;
+            var isHomeButton = interactionMapping.Description.Contains("Home");
 
             // Update the interaction data source
-            interactionMapping.BoolData = MlControllerReference.State.ButtonState[buttonId] == 1;
+            if (!isHomeButton)
+            {
+                interactionMapping.BoolData = MlControllerReference.State.ButtonState[(int)MLInputControllerButton.Bumper] > 0;
+            }
+            else
+            {
+                interactionMapping.BoolData = IsHomePressed;
+                IsHomePressed = false;
+            }
 
             // If our value changed raise it.
             if (interactionMapping.Changed)
