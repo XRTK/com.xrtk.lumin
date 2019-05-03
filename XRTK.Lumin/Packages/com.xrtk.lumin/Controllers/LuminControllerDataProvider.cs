@@ -1,9 +1,6 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using MagicLeapInternal;
-using XRTK.Definitions.InputSystem;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
@@ -95,9 +92,6 @@ namespace XRTK.Lumin.Controllers
             MLInput.OnControllerConnected += OnControllerConnected;
             MLInput.OnControllerDisconnected += OnControllerDisconnected;
             MLInput.OnControllerButtonUp += MlInputOnControllerButtonUp;
-            MLInput.OnControllerTouchpadGestureStart += MlInputOnOnControllerTouchpadGestureStart;
-            MLInput.OnControllerTouchpadGestureContinue += MlInputOnOnControllerTouchpadGestureContinue;
-            MLInput.OnControllerTouchpadGestureEnd += MlInputOnOnControllerTouchpadGestureEnd;
         }
 
         /// <inheritdoc />
@@ -115,9 +109,6 @@ namespace XRTK.Lumin.Controllers
             MLInput.OnControllerConnected -= OnControllerConnected;
             MLInput.OnControllerDisconnected -= OnControllerDisconnected;
             MLInput.OnControllerButtonUp -= MlInputOnControllerButtonUp;
-            MLInput.OnControllerTouchpadGestureStart -= MlInputOnOnControllerTouchpadGestureStart;
-            MLInput.OnControllerTouchpadGestureContinue -= MlInputOnOnControllerTouchpadGestureContinue;
-            MLInput.OnControllerTouchpadGestureEnd -= MlInputOnOnControllerTouchpadGestureEnd;
             MLInput.Stop();
             MLHands.Stop();
 
@@ -211,31 +202,6 @@ namespace XRTK.Lumin.Controllers
             }
 
             activeControllers.Remove(controllerId);
-        }
-
-        private void MlInputOnOnControllerTouchpadGestureEnd(byte controllerId, MLInputControllerTouchpadGesture touchpadGesture)
-        {
-            if (activeControllers.TryGetValue(controllerId, out var controller))
-            {
-                if (touchpadGesture.PosAndForce.HasValue)
-                {
-
-                }
-            }
-        }
-
-        private void MlInputOnOnControllerTouchpadGestureContinue(byte controllerId, MLInputControllerTouchpadGesture touchpadGesture)
-        {
-            if (activeControllers.TryGetValue(controllerId, out var controller))
-            {
-            }
-        }
-
-        private void MlInputOnOnControllerTouchpadGestureStart(byte controllerId, MLInputControllerTouchpadGesture touchpadGesture)
-        {
-            if (activeControllers.TryGetValue(controllerId, out var controller))
-            {
-            }
         }
 
         private void MlInputOnControllerButtonUp(byte controllerId, MLInputControllerButton button)

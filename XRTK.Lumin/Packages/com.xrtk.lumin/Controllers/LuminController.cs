@@ -274,7 +274,6 @@ namespace XRTK.Lumin.Controllers
             // If our value changed raise it.
             if (interactionMapping.Updated)
             {
-                Debug.Log("Touch data was updated!");
                 // Raise input system Event if it enabled
                 MixedRealityToolkit.InputSystem?.RaisePositionInputChanged(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.Vector2Data);
             }
