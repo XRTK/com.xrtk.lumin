@@ -32,6 +32,7 @@ namespace XRTK.Lumin.Controllers
             new MixedRealityInteractionMapping(5, "Home Press", AxisType.Digital, DeviceInputType.ButtonPress, MixedRealityInputAction.None),
             new MixedRealityInteractionMapping(6, "Touchpad Position", AxisType.DualAxis, DeviceInputType.Touchpad, MixedRealityInputAction.None),
             new MixedRealityInteractionMapping(7, "Touchpad Press", AxisType.SingleAxis, DeviceInputType.TouchpadPress, MixedRealityInputAction.None),
+            new MixedRealityInteractionMapping(8, "Touchpad Touch", AxisType.SingleAxis, DeviceInputType.TouchpadTouch, MixedRealityInputAction.None),
         };
 
         /// <inheritdoc />
@@ -49,6 +50,8 @@ namespace XRTK.Lumin.Controllers
 
         internal MLInputController MlControllerReference { get; set; }
         //internal LuminControllerGestureSettings ControllerGestureSettings { get; set; }
+
+        internal bool IsHomePressed;
 
         private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
@@ -166,12 +169,18 @@ namespace XRTK.Lumin.Controllers
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.Digital);
 
-            var buttonId = interactionMapping.Description.Contains("Home")
-                ? (int)MLInputControllerButton.HomeTap
-                : (int)MLInputControllerButton.Bumper;
+            var isHomeButton = interactionMapping.Description.Contains("Home");
 
             // Update the interaction data source
-            interactionMapping.BoolData = MlControllerReference.State.ButtonState[buttonId] == 1;
+            if (!isHomeButton)
+            {
+                interactionMapping.BoolData = MlControllerReference.State.ButtonState[(int)MLInputControllerButton.Bumper] > 0;
+            }
+            else
+            {
+                interactionMapping.BoolData = IsHomePressed;
+                IsHomePressed = false;
+            }
 
             // If our value changed raise it.
             if (interactionMapping.Changed)
@@ -186,12 +195,11 @@ namespace XRTK.Lumin.Controllers
                     MixedRealityToolkit.InputSystem?.RaiseOnInputUp(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction);
                 }
             }
-            else
+
+
+            if (interactionMapping.Updated)
             {
-                if (interactionMapping.BoolData)
-                {
-                    MixedRealityToolkit.InputSystem?.RaiseOnInputPressed(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction);
-                }
+                MixedRealityToolkit.InputSystem?.RaiseOnInputPressed(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction);
             }
         }
 
@@ -207,21 +215,22 @@ namespace XRTK.Lumin.Controllers
             {
                 case DeviceInputType.Select:
                 case DeviceInputType.TriggerPress:
+                case DeviceInputType.TouchpadPress:
                     // Update the interaction data source
-                    interactionMapping.BoolData = singleAxisValue.Equals(1);
+                    interactionMapping.BoolData = singleAxisValue.Equals(1f);
                     break;
                 case DeviceInputType.TriggerTouch:
+                case DeviceInputType.TouchpadTouch:
                 case DeviceInputType.TriggerNearTouch:
                     // Update the interaction data source
-                    interactionMapping.BoolData = !singleAxisValue.Equals(0);
+                    interactionMapping.BoolData = !singleAxisValue.Equals(0f);
                     break;
                 case DeviceInputType.Trigger:
-                case DeviceInputType.TouchpadPress:
                     // Update the interaction data source
                     interactionMapping.FloatData = singleAxisValue;
 
                     // If our value changed raise it.
-                    if (interactionMapping.Changed)
+                    if (interactionMapping.Updated)
                     {
                         // Raise input system Event if it enabled
                         MixedRealityToolkit.InputSystem?.RaiseOnInputPressed(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.FloatData);
@@ -245,12 +254,10 @@ namespace XRTK.Lumin.Controllers
                     MixedRealityToolkit.InputSystem?.RaiseOnInputUp(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction);
                 }
             }
-            else
+
+            if (interactionMapping.Updated)
             {
-                if (interactionMapping.BoolData)
-                {
-                    MixedRealityToolkit.InputSystem?.RaiseOnInputPressed(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, singleAxisValue);
-                }
+                MixedRealityToolkit.InputSystem?.RaiseOnInputPressed(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, singleAxisValue);
             }
         }
 
@@ -265,7 +272,7 @@ namespace XRTK.Lumin.Controllers
             interactionMapping.Vector2Data = dualAxisPosition;
 
             // If our value changed raise it.
-            if (interactionMapping.Changed)
+            if (interactionMapping.Updated)
             {
                 // Raise input system Event if it enabled
                 MixedRealityToolkit.InputSystem?.RaisePositionInputChanged(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.Vector2Data);
@@ -291,7 +298,7 @@ namespace XRTK.Lumin.Controllers
             interactionMapping.PoseData = currentPointerPose;
 
             // If our value changed raise it.
-            if (interactionMapping.Changed)
+            if (interactionMapping.Updated)
             {
                 // Raise input system Event if it enabled 
                 MixedRealityToolkit.InputSystem?.RaisePoseInputChanged(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.PoseData);
