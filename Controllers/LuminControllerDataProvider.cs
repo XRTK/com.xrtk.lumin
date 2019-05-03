@@ -25,7 +25,7 @@ namespace XRTK.Lumin.Controllers
         /// <param name="name"></param>
         /// <param name="priority"></param>
         /// <param name="profile"></param>
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile) 
+        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
             : base(name, priority, profile)
         {
         }
@@ -42,9 +42,9 @@ namespace XRTK.Lumin.Controllers
         {
             var list = new List<IMixedRealityController>();
 
-            foreach (LuminController value in activeControllers.Values)
+            foreach (var controller in activeControllers.Values)
             {
-                list.Add(value);
+                list.Add(controller);
             }
 
             return list.ToArray();
@@ -91,6 +91,7 @@ namespace XRTK.Lumin.Controllers
 
             MLInput.OnControllerConnected += OnControllerConnected;
             MLInput.OnControllerDisconnected += OnControllerDisconnected;
+            MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
         }
 
         /// <inheritdoc />
@@ -100,8 +101,6 @@ namespace XRTK.Lumin.Controllers
             {
                 controller.Value?.UpdateController();
             }
-
-            // TODO Update hand gestures
         }
 
         /// <inheritdoc />
@@ -109,6 +108,7 @@ namespace XRTK.Lumin.Controllers
         {
             MLInput.OnControllerConnected -= OnControllerConnected;
             MLInput.OnControllerDisconnected -= OnControllerDisconnected;
+            MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
             MLInput.Stop();
             MLHands.Stop();
 
@@ -188,9 +188,8 @@ namespace XRTK.Lumin.Controllers
             if (controller != null)
             {
                 MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
+                controller.UpdateController();
             }
-
-            controller?.UpdateController();
         }
 
         private void OnControllerDisconnected(byte controllerId)
@@ -203,6 +202,19 @@ namespace XRTK.Lumin.Controllers
             }
 
             activeControllers.Remove(controllerId);
+        }
+
+        private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
+        {
+            if (activeControllers.TryGetValue(controllerId, out var controller))
+            {
+                switch (button)
+                {
+                    case MLInputControllerButton.HomeTap:
+                        controller.IsHomePressed = true;
+                        break;
+                }
+            }
         }
 
         #endregion Controller Events
