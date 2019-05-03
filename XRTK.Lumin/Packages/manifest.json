@@ -4,8 +4,8 @@
     "com.unity.textmeshpro": "2.0.0",
     "com.unity.xr.legacyinputhelpers": "2.0.2",
     "com.unity.xr.magicleap": "2.0.0-preview.16",
-    "com.xrtk.core": "https://github.com/XRTK/XRTK-Core.git#0.1.8",
-    "com.xrtk.sdk": "https://github.com/XRTK/SDK.git#0.1.5",
+    "com.xrtk.core": "https://github.com/XRTK/XRTK-Core.git#0.1.9",
+    "com.xrtk.sdk": "https://github.com/XRTK/SDK.git#0.1.6",
     "com.xrtk.upm-git-extension": "https://github.com/XRTK/UpmGitExtension.git#0.9.5",
     "com.xrtk.wmr": "https://github.com/XRTK/WindowsMixedReality.git#0.1.2",
     "com.unity.modules.ai": "1.0.0",
@@ -41,12 +41,12 @@
   },
   "lock": {
     "com.xrtk.core": {
-      "hash": "17e7e6673de647050f2c915d143fd042f40ad7c2",
-      "revision": "0.1.8"
+      "hash": "d4be87365d4a56d22bb908f3acc8b409cf10240c",
+      "revision": "0.1.9"
     },
     "com.xrtk.sdk": {
-      "hash": "6d8e92355a74a64f6711643539d9fd5ecf4618b3",
-      "revision": "0.1.5"
+      "hash": "7d6667d90f862676ffafc3283ef1326ae71528c9",
+      "revision": "0.1.6"
     },
     "com.xrtk.upm-git-extension": {
       "hash": "4e5c893cdbb28c82f8d23756696515108fe130ef",
