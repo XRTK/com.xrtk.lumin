@@ -91,7 +91,7 @@ namespace XRTK.Lumin.Controllers
 
             MLInput.OnControllerConnected += OnControllerConnected;
             MLInput.OnControllerDisconnected += OnControllerDisconnected;
-            MLInput.OnControllerButtonUp += MlInputOnControllerButtonUp;
+            MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
         }
 
         /// <inheritdoc />
@@ -108,7 +108,7 @@ namespace XRTK.Lumin.Controllers
         {
             MLInput.OnControllerConnected -= OnControllerConnected;
             MLInput.OnControllerDisconnected -= OnControllerDisconnected;
-            MLInput.OnControllerButtonUp -= MlInputOnControllerButtonUp;
+            MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
             MLInput.Stop();
             MLHands.Stop();
 
@@ -204,7 +204,7 @@ namespace XRTK.Lumin.Controllers
             activeControllers.Remove(controllerId);
         }
 
-        private void MlInputOnControllerButtonUp(byte controllerId, MLInputControllerButton button)
+        private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
         {
             if (activeControllers.TryGetValue(controllerId, out var controller))
             {
