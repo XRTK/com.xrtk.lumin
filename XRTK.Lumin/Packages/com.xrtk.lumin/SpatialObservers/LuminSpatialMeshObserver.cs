@@ -166,7 +166,7 @@ namespace XRTK.Lumin.SpatialObservers
         {
             var flags = LuminApi.MeshingFlags.IndexOrderCCW;
 
-            if (profile.MeshRecalculateNormals)
+            if (MeshRecalculateNormals)
             {
                 flags |= LuminApi.MeshingFlags.ComputeNormals;
             }
@@ -202,7 +202,7 @@ namespace XRTK.Lumin.SpatialObservers
                 var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.MeshId.GetHashCode());
                 spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId.ToString()}";
 
-                var meshAttributes = profile.MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
+                var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
 
                 try
                 {
