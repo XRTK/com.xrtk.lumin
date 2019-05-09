@@ -1,6 +1,9 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Providers.SpatialObservers;
+
+#if PLATFORM_LUMIN
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,8 +11,8 @@ using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
-using XRTK.Providers.SpatialObservers;
 using XRTK.Utilities;
+#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
 {
@@ -26,9 +29,23 @@ namespace XRTK.Lumin.SpatialObservers
         /// <param name="profile"></param>
         public LuminSpatialMeshObserver(string name, uint priority, BaseMixedRealitySpatialMeshObserverProfile profile) : base(name, priority, profile)
         {
-            this.profile = profile;
+        }
 
-            if (!Application.isPlaying) { return; }
+#if PLATFORM_LUMIN
+
+        private readonly List<XRMeshSubsystemDescriptor> descriptors = new List<XRMeshSubsystemDescriptor>();
+
+        private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
+
+        private XRMeshSubsystem meshSubsystem;
+
+        private float lastUpdated = 0;
+
+        #region IMixedRealityService implementation
+
+        public override void Initialize()
+        {
+            if (!Application.isPlaying || meshSubsystem != null) { return; }
 
             descriptors.Clear();
             SubsystemManager.GetSubsystemDescriptors(descriptors);
@@ -54,7 +71,7 @@ namespace XRTK.Lumin.SpatialObservers
             LuminApi.UnityMagicLeap_MeshingSetBatchSize(16);
             var levelOfDetail = MLSpatialMapper.LevelOfDetail.Medium;
 
-            if (profile.MeshLevelOfDetail == SpatialAwarenessMeshLevelOfDetail.Fine)
+            if (MeshLevelOfDetail == SpatialAwarenessMeshLevelOfDetail.Fine)
             {
                 levelOfDetail = MLSpatialMapper.LevelOfDetail.Maximum;
             }
@@ -63,21 +80,6 @@ namespace XRTK.Lumin.SpatialObservers
             var settings = GetMeshingSettings();
             LuminApi.UnityMagicLeap_MeshingUpdateSettings(settings);
         }
-
-        private readonly XRMeshSubsystem meshSubsystem;
-
-        private readonly BaseMixedRealitySpatialMeshObserverProfile profile;
-
-        private readonly List<XRMeshSubsystemDescriptor> descriptors = new List<XRMeshSubsystemDescriptor>();
-
-        private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
-
-        /// <summary>
-        /// The time at which the surface observer was last asked for updated data.
-        /// </summary>
-        private float lastUpdated = 0;
-
-        #region IMixedRealityService implementation
 
         /// <inheritdoc />
         public override void Update()
@@ -174,7 +176,7 @@ namespace XRTK.Lumin.SpatialObservers
             //if (requestVertexConfidence)
             //    flags |= LuminApi.MeshingFlags.ComputeConfidence;
             //if (planarize)
-            //    flags |= LuminApi.MeshingFlags.Planarize;
+            flags |= LuminApi.MeshingFlags.Planarize;
             //if (removeMeshSkirt)
             //    flags |= LuminApi.MeshingFlags.RemoveMeshSkirt;
             //if (meshType == MeshType.PointCloud)
@@ -278,5 +280,6 @@ namespace XRTK.Lumin.SpatialObservers
                 RaiseMeshRemoved(meshObject);
             }
         }
+#endif // PLATFORM_LUMIN
     }
 }

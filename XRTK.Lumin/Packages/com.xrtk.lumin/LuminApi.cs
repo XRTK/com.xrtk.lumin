@@ -1,6 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+#if PLATFORM_LUMIN
+
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -55,3 +57,5 @@ namespace XRTK.Lumin
         }
     }
 }
+
+#endif // PLATFORM_LUMIN
