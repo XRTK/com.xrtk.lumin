@@ -1,6 +1,7 @@
 {
     "name": "XRTK.Lumin",
     "references": [
+        "UnityEngine.XR.MagicLeap",
         "XRTK"
     ],
     "optionalUnityReferences": [],
