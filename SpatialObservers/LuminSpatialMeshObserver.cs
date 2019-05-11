@@ -239,7 +239,9 @@ namespace XRTK.Lumin.SpatialObservers
 
                     if (displayOption != SpatialMeshDisplayOptions.None)
                     {
-                        meshObject.Renderer.enabled = true;
+                        meshObject.Collider.enabled = true;
+                        meshObject.Renderer.enabled = displayOption == SpatialMeshDisplayOptions.Visible ||
+                                                      displayOption == SpatialMeshDisplayOptions.Occlusion;
                         meshObject.Renderer.sharedMaterial = displayOption == SpatialMeshDisplayOptions.Visible
                             ? MeshVisibleMaterial
                             : MeshOcclusionMaterial;
@@ -247,6 +249,7 @@ namespace XRTK.Lumin.SpatialObservers
                     else
                     {
                         meshObject.Renderer.enabled = false;
+                        meshObject.Collider.enabled = false;
                     }
 
                     // Recalculate the mesh normals if requested.
