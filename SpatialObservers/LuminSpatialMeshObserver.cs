@@ -12,6 +12,11 @@ using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Utilities;
+using XRTK.Utilities.Async;
+
+#if UNITY_EDITOR
+using UnityEditor.XR.MagicLeap.Remote;
+#endif // UNITY_EDITOR
 #endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
@@ -43,9 +48,11 @@ namespace XRTK.Lumin.SpatialObservers
 
         #region IMixedRealityService implementation
 
-        public override void Initialize()
+        public override async void Initialize()
         {
             if (!Application.isPlaying || meshSubsystem != null) { return; }
+
+            await MagicLeapRemoteManager.isInitialized.WaitUntil(initialized => initialized);
 
             descriptors.Clear();
             SubsystemManager.GetSubsystemDescriptors(descriptors);
@@ -87,7 +94,12 @@ namespace XRTK.Lumin.SpatialObservers
             base.Update();
 
             // Only update the observer if it is running.
-            if (!Application.isPlaying || !IsRunning) { return; }
+            if (!IsRunning ||
+                meshSubsystem == null ||
+                !Application.isPlaying)
+            {
+                return;
+            }
 
             // and If enough time has passed since the previous observer update
             if (!(Time.time - lastUpdated >= UpdateInterval)) { return; }
@@ -132,19 +144,21 @@ namespace XRTK.Lumin.SpatialObservers
         #region IMixedRealitySpatialMeshObserver implementation
 
         /// <inheritdoc/>
-        public override void StartObserving()
+        public override async void StartObserving()
         {
             if (IsRunning)
             {
                 return;
             }
 
+            base.StartObserving();
+
+            await meshSubsystem.WaitUntil(subsystem => subsystem != null);
+
             meshSubsystem.Start();
 
             // We want the first update immediately.
             lastUpdated = 0;
-
-            base.StartObserving();
         }
 
         public override void StopObserving()
@@ -152,10 +166,9 @@ namespace XRTK.Lumin.SpatialObservers
             if (!IsRunning)
             {
                 return;
-
             }
 
-            meshSubsystem.Stop();
+            meshSubsystem?.Stop();
 
             base.StopObserving();
         }
