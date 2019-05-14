@@ -66,7 +66,6 @@ namespace XRTK.Lumin.Controllers
             if (!Enabled) { return; }
 
             UpdateControllerData();
-            UpdateGestureData();
 
             if (Interactions == null)
             {
@@ -160,11 +159,6 @@ namespace XRTK.Lumin.Controllers
             }
         }
 
-        private void UpdateGestureData()
-        {
-            // TODO Add controller gesture support
-        }
-
         private void UpdateButtonData(MixedRealityInteractionMapping interactionMapping)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.Digital);
@@ -195,7 +189,6 @@ namespace XRTK.Lumin.Controllers
                     MixedRealityToolkit.InputSystem?.RaiseOnInputUp(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction);
                 }
             }
-
 
             if (interactionMapping.Updated)
             {
@@ -265,8 +258,16 @@ namespace XRTK.Lumin.Controllers
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.DualAxis);
 
-            dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
-            dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
+            if (MlControllerReference.Touch1PosAndForce.z > 0f)
+            {
+                dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
+                dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
+            }
+            else
+            {
+                dualAxisPosition.x = 0f;
+                dualAxisPosition.y = 0f;
+            }
 
             // Update the interaction data source
             interactionMapping.Vector2Data = dualAxisPosition;

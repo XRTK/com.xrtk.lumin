@@ -13,10 +13,6 @@ using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Utilities;
 using XRTK.Utilities.Async;
-
-#if UNITY_EDITOR
-using UnityEditor.XR.MagicLeap.Remote;
-#endif // UNITY_EDITOR
 #endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
@@ -48,11 +44,11 @@ namespace XRTK.Lumin.SpatialObservers
 
         #region IMixedRealityService implementation
 
-        public override async void Initialize()
+        public override void Initialize()
         {
-            if (!Application.isPlaying || meshSubsystem != null) { return; }
+            base.Initialize();
 
-            await MagicLeapRemoteManager.isInitialized.WaitUntil(initialized => initialized);
+            if (!Application.isPlaying || Application.isEditor || meshSubsystem != null) { return; }
 
             descriptors.Clear();
             SubsystemManager.GetSubsystemDescriptors(descriptors);
