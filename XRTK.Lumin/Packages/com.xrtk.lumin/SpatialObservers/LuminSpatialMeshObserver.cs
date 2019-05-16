@@ -140,7 +140,7 @@ namespace XRTK.Lumin.SpatialObservers
         #region IMixedRealitySpatialMeshObserver implementation
 
         /// <inheritdoc/>
-        public override async void StartObserving()
+        public override void StartObserving()
         {
             if (IsRunning)
             {
@@ -149,9 +149,7 @@ namespace XRTK.Lumin.SpatialObservers
 
             base.StartObserving();
 
-            await meshSubsystem.WaitUntil(subsystem => subsystem != null);
-
-            meshSubsystem.Start();
+            meshSubsystem?.Start();
 
             // We want the first update immediately.
             lastUpdated = 0;
