@@ -73,8 +73,6 @@ namespace XRTK.Lumin.Controllers
                     Debug.LogError($"Error: failed starting MLHands: {result}");
                     return;
                 }
-
-                // TODO set gesture settings
             }
 
             for (byte i = 0; i < 3; i++)
