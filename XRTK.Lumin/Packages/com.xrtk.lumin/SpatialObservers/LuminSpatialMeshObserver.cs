@@ -43,6 +43,7 @@ namespace XRTK.Lumin.SpatialObservers
 
         #region IMixedRealityService implementation
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             base.Initialize();
@@ -153,6 +154,7 @@ namespace XRTK.Lumin.SpatialObservers
             lastUpdated = 0;
         }
 
+        /// <inheritdoc />
         public override void StopObserving()
         {
             if (!IsRunning)
@@ -205,7 +207,11 @@ namespace XRTK.Lumin.SpatialObservers
             if (meshInfo.ChangeState != MeshChangeState.Removed)
             {
                 var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.MeshId.GetHashCode());
-                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId.ToString()}";
+                var meshId = meshInfo.MeshId.ToString();
+                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshId}";
+
+                // TODO add Lumin spatial anchor?
+                spatialMeshObject.ParentAnchor.name = $"SpatialAnchor_{meshId}";
 
                 var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
 
@@ -271,6 +277,7 @@ namespace XRTK.Lumin.SpatialObservers
                     }
 
                     meshObject.GameObject.SetActive(true);
+                    meshObject.ParentAnchor.SetActive(true);
 
                     switch (meshInfo.ChangeState)
                     {
