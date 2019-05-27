@@ -178,7 +178,7 @@ namespace XRTK.Lumin.SpatialObservers
                 flags |= LuminApi.MeshingFlags.ComputeNormals;
             }
 
-            // TODO Extend the observer profile with these options. 
+            // TODO Extend the observer profile with these options.
 
             //if (requestVertexConfidence)
             //    flags |= LuminApi.MeshingFlags.ComputeConfidence;
@@ -211,7 +211,7 @@ namespace XRTK.Lumin.SpatialObservers
                 spatialMeshObject.GameObject.name = $"SpatialMesh_{meshId}";
 
                 // TODO add Lumin spatial anchor?
-                spatialMeshObject.ParentAnchor.name = $"SpatialAnchor_{meshId}";
+                spatialMeshObject.Anchor.name = $"SpatialAnchor_{meshId}";
 
                 var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
 
@@ -277,7 +277,6 @@ namespace XRTK.Lumin.SpatialObservers
                     }
 
                     meshObject.GameObject.SetActive(true);
-                    meshObject.ParentAnchor.SetActive(true);
 
                     switch (meshInfo.ChangeState)
                     {
