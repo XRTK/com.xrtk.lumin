@@ -1,6 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
@@ -10,6 +11,7 @@ using XRTK.Providers.Controllers;
 #if PLATFORM_LUMIN
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
+using XRTK.Definitions;
 using XRTK.Services;
 #endif
 
@@ -304,6 +306,128 @@ namespace XRTK.Lumin.Controllers
                 // Raise input system Event if it enabled 
                 MixedRealityToolkit.InputSystem?.RaisePoseInputChanged(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.PoseData);
             }
+        }
+
+        /// <inheritdoc />
+        public override void StartHaptics(float intensity, float duration)
+        {
+            MLInputControllerFeedbackPatternVibe pattern;
+            MLInputControllerFeedbackIntensity mlIntensity;
+
+            if (intensity < 3.33f)
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.Low;
+            }
+            else if (intensity < 6.66f)
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.Medium;
+            }
+            else
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.High;
+            }
+
+            if (duration < 1f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.None;
+            }
+            else if (duration < 2f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.Click;
+            }
+            else if (duration < 3f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.Bump;
+            }
+            else if (duration < 4f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.DoubleClick;
+            }
+            else if (duration < 5f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.Buzz;
+            }
+            else if (duration < 6f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.Tick;
+            }
+            else if (duration < 7f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.ForceDown;
+            }
+            else if (duration < 8f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.ForceUp;
+            }
+            else if (duration < 9f)
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.ForceDwell;
+            }
+            else
+            {
+                pattern = MLInputControllerFeedbackPatternVibe.SecondForceDown;
+            }
+
+            MlControllerReference.StartFeedbackPatternVibe(pattern, mlIntensity);
+        }
+
+        /// <inheritdoc />
+        public override void SendHapticFeedback(HapticFeedbackType feedback, float intensity)
+        {
+            MLInputControllerFeedbackIntensity mlIntensity;
+            var pattern = MLInputControllerFeedbackPatternVibe.None;
+
+            if (intensity < 3.33f)
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.Low;
+            }
+            else if (intensity < 6.66f)
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.Medium;
+            }
+            else
+            {
+                mlIntensity = MLInputControllerFeedbackIntensity.High;
+            }
+
+            switch (feedback)
+            {
+                case HapticFeedbackType.Click:
+                    pattern = MLInputControllerFeedbackPatternVibe.Click;
+                    break;
+                case HapticFeedbackType.Bump:
+                    pattern = MLInputControllerFeedbackPatternVibe.Click;
+                    break;
+                case HapticFeedbackType.DoubleClick:
+                    pattern = MLInputControllerFeedbackPatternVibe.DoubleClick;
+                    break;
+                case HapticFeedbackType.Buzz:
+                    pattern = MLInputControllerFeedbackPatternVibe.Buzz;
+                    break;
+                case HapticFeedbackType.Tick:
+                    pattern = MLInputControllerFeedbackPatternVibe.Tick;
+                    break;
+                case HapticFeedbackType.ForceDown:
+                    pattern = MLInputControllerFeedbackPatternVibe.ForceDown;
+                    break;
+                case HapticFeedbackType.ForceUp:
+                    pattern = MLInputControllerFeedbackPatternVibe.ForceUp;
+                    break;
+                case HapticFeedbackType.ForceDwell:
+                    pattern = MLInputControllerFeedbackPatternVibe.ForceDwell;
+                    break;
+                case HapticFeedbackType.SecondForceDown:
+                    pattern = MLInputControllerFeedbackPatternVibe.SecondForceDown;
+                    break;
+            }
+
+            MlControllerReference.StartFeedbackPatternVibe(pattern, mlIntensity);
+        }
+
+        /// <inheritdoc />
+        public override void StopHaptics()
+        {
+            MlControllerReference.StopFeedbackPatternVibe();
         }
 
 #endif // PLATFORM_LUMIN
