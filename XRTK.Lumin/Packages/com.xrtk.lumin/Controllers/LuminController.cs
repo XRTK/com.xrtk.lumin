@@ -17,8 +17,8 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminController : BaseController
     {
-        public LuminController(TrackingState trackingState, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
-            : base(trackingState, controllerHandedness, inputSource, interactions)
+        public LuminController(TrackingState trackingState, SupportedControllerType controllerType, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
+            : base(trackingState, controllerType, controllerHandedness, inputSource, interactions)
         {
         }
 
@@ -61,7 +61,7 @@ namespace XRTK.Lumin.Controllers
         /// <summary>
         /// Updates the controller's interaction mappings and ready the current input values.
         /// </summary>
-        public void UpdateController()
+        public override void UpdateController()
         {
             if (!Enabled) { return; }
 
