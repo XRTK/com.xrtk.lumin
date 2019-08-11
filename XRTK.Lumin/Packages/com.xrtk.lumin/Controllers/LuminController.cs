@@ -5,7 +5,7 @@ using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
-using XRTK.Providers.Controllers;
+using XRTK.Definitions.Controllers;
 
 #if PLATFORM_LUMIN
 using UnityEngine;

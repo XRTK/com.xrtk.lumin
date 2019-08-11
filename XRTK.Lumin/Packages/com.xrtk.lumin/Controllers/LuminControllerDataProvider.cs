@@ -1,7 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Providers.Controllers;
+using XRTK.Definitions.Controllers;
 
 #if PLATFORM_LUMIN
 

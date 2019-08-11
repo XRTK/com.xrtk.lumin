@@ -5,7 +5,7 @@ using UnityEngine;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
 using XRTK.Lumin.Controllers;
-using XRTK.Providers.Controllers;
+using XRTK.Definitions.Controllers;
 
 namespace XRTK.Lumin.Profiles
 {
