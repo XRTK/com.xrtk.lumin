@@ -5,11 +5,12 @@ using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
-using XRTK.Definitions.Controllers;
+using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
+using XRTK.Definitions.Controllers;
 using XRTK.Services;
 #endif
 
