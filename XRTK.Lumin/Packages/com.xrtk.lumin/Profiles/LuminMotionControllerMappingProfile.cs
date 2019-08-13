@@ -6,6 +6,7 @@ using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
 using XRTK.Lumin.Controllers;
 using XRTK.Definitions.Controllers;
+using XRTK.Providers.Controllers;
 
 namespace XRTK.Lumin.Profiles
 {
