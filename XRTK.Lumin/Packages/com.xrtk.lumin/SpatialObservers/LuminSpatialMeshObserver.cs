@@ -12,7 +12,6 @@ using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Utilities;
-using XRTK.Utilities.Async;
 #endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
@@ -118,7 +117,6 @@ namespace XRTK.Lumin.SpatialObservers
                 }
             }
 
-            // observer.Update(SurfaceObserver_OnSurfaceChanged);
             lastUpdated = Time.time;
         }
 

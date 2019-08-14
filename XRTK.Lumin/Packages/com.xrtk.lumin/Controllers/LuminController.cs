@@ -10,6 +10,7 @@ using XRTK.Providers.Controllers;
 #if PLATFORM_LUMIN
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
+using XRTK.Definitions.Controllers;
 using XRTK.Services;
 #endif
 
