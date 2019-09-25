@@ -11,7 +11,7 @@ using XRTK.Providers.Controllers;
 #if PLATFORM_LUMIN
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
-using XRTK.Definitions;
+using XRTK.Definitions.Controllers;
 using XRTK.Services;
 #endif
 
@@ -303,7 +303,7 @@ namespace XRTK.Lumin.Controllers
             // If our value changed raise it.
             if (interactionMapping.Updated)
             {
-                // Raise input system Event if it enabled 
+                // Raise input system Event if it enabled
                 MixedRealityToolkit.InputSystem?.RaisePoseInputChanged(InputSource, ControllerHandedness, interactionMapping.MixedRealityInputAction, interactionMapping.PoseData);
             }
         }
