@@ -101,7 +101,7 @@ namespace XRTK.Lumin.Controllers
 
             foreach (var activeController in activeControllers)
             {
-                RemoveController(activeController.Key);
+                RemoveController(activeController.Key, false);
             }
 
             activeControllers.Clear();
@@ -162,7 +162,7 @@ namespace XRTK.Lumin.Controllers
             return detectedController;
         }
 
-        private void RemoveController(byte controllerId)
+        private void RemoveController(byte controllerId, bool removeFromRegistry = true)
         {
             var controller = GetController(controllerId, false);
 
@@ -172,7 +172,10 @@ namespace XRTK.Lumin.Controllers
                 RemoveController(controller);
             }
 
-            activeControllers.Remove(controllerId);
+            if (removeFromRegistry)
+            {
+                activeControllers.Remove(controllerId);
+            }
         }
 
         #region Controller Events
