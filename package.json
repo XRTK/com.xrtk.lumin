@@ -2,7 +2,7 @@
   "name": "com.xrtk.lumin",
   "displayName": "XRTK.Lumin",
   "description": "The Lumin platform components for the Mixed Reality Toolkit",
-  "tags":[
+  "tags": [
     "xrtk",
     "magic",
     "leap",
@@ -13,13 +13,13 @@
     "reality",
     "lumin"
   ],
-  "version": "0.1.6",
+  "version": "0.1.7",
   "unity": "2019.1",
   "license": "MIT",
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
     "com.unity.xr.magicleap": "2.0.0-preview.19",
-    "com.xrtk.core": "0.1.19"
+    "com.xrtk.core": "0.1.21"
   }
 }
