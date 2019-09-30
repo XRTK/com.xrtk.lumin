@@ -1,8 +1,8 @@
 {
     "name": "XRTK.Lumin.Inspectors",
     "references": [
-        "XRTK.Inspectors",
-        "XRTK.Lumin"
+        "GUID:e67d30660ec243e4836aac191d3f36fb",
+        "GUID:49d8940ef8dc2f044abcf0447091dced"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
