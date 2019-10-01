@@ -11,7 +11,6 @@ using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
-using XRTK.Interfaces.Providers.Controllers;
 using XRTK.Services;
 
 #endif // PLATFORM_LUMIN
@@ -37,19 +36,6 @@ namespace XRTK.Lumin.Controllers
         /// Dictionary to capture all active controllers detected
         /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
-
-        /// <inheritdoc/>
-        public override IMixedRealityController[] GetActiveControllers()
-        {
-            var list = new List<IMixedRealityController>();
-
-            foreach (var controller in activeControllers.Values)
-            {
-                list.Add(controller);
-            }
-
-            return list.ToArray();
-        }
 
         /// <inheritdoc />
         public override void Enable()
@@ -96,6 +82,8 @@ namespace XRTK.Lumin.Controllers
         /// <inheritdoc />
         public override void Update()
         {
+            base.Update();
+
             foreach (var controller in activeControllers)
             {
                 controller.Value?.UpdateController();
@@ -113,12 +101,7 @@ namespace XRTK.Lumin.Controllers
 
             foreach (var activeController in activeControllers)
             {
-                var controller = GetController(activeController.Key, false);
-
-                if (controller != null)
-                {
-                    MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
-                }
+                RemoveController(activeController.Key, false);
             }
 
             activeControllers.Clear();
@@ -175,7 +158,24 @@ namespace XRTK.Lumin.Controllers
 
             detectedController.MlControllerReference = mlController;
             activeControllers.Add(controllerId, detectedController);
+            AddController(detectedController);
             return detectedController;
+        }
+
+        private void RemoveController(byte controllerId, bool removeFromRegistry = true)
+        {
+            var controller = GetController(controllerId, false);
+
+            if (controller != null)
+            {
+                MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
+                RemoveController(controller);
+            }
+
+            if (removeFromRegistry)
+            {
+                activeControllers.Remove(controllerId);
+            }
         }
 
         #region Controller Events
@@ -193,14 +193,7 @@ namespace XRTK.Lumin.Controllers
 
         private void OnControllerDisconnected(byte controllerId)
         {
-            var controller = GetController(controllerId, false);
-
-            if (controller != null)
-            {
-                MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
-            }
-
-            activeControllers.Remove(controllerId);
+            RemoveController(controllerId);
         }
 
         private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
