@@ -13,7 +13,7 @@
     "reality",
     "lumin"
   ],
-  "version": "0.1.7",
+  "version": "0.1.8",
   "unity": "2019.1",
   "license": "MIT",
   "src": "Assets/XRTK.Lumin",
