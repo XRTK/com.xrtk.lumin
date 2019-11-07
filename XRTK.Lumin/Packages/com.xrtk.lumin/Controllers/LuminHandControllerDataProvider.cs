@@ -6,7 +6,7 @@ using XRTK.Providers.Controllers.Hands;
 
 namespace XRTK.Lumin.Controllers
 {
-    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider<LuminHandController>
+    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider
     {
         public LuminHandControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
             : base(name, priority, profile) { }
