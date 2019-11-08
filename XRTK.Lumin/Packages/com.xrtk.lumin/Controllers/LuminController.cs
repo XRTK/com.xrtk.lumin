@@ -4,13 +4,13 @@
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
-using XRTK.Extensions;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
+using XRTK.Extensions;
 using XRTK.Services;
 #endif
 
@@ -202,7 +202,7 @@ namespace XRTK.Lumin.Controllers
                 case DeviceInputType.TriggerTouch:
                 case DeviceInputType.TouchpadTouch:
                 case DeviceInputType.TriggerNearTouch:
-                    interactionMapping.BoolData = interactionMapping.FloatData.Equals(interactionMapping.InvertXAxis ? 1f : 0f);
+                    interactionMapping.BoolData = !interactionMapping.FloatData.Equals(interactionMapping.InvertXAxis ? 1f : 0f);
                     break;
                 default:
                     Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
