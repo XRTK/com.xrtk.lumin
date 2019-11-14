@@ -12,6 +12,8 @@ using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Extensions;
 using XRTK.Services;
+using XRTK.Utilities;
+
 #endif
 
 namespace XRTK.Lumin.Controllers
@@ -235,8 +237,18 @@ namespace XRTK.Lumin.Controllers
 
             if (interactionMapping.InputType == DeviceInputType.SpatialPointer)
             {
-                currentPointerPose.Position = MlControllerReference.Position;
-                currentPointerPose.Rotation = MlControllerReference.Orientation;
+                if (MixedRealityToolkit.CameraSystem != null)
+                {
+                    var newPosition = MlControllerReference.Position;
+                    newPosition.y += MixedRealityToolkit.CameraSystem.HeadHeight;
+                    currentPointerPose.Position = newPosition;
+                    currentPointerPose.Rotation = MlControllerReference.Orientation;
+                }
+                else
+                {
+                    currentPointerPose.Position = MlControllerReference.Position;
+                    currentPointerPose.Rotation = MlControllerReference.Orientation;
+                }
             }
             else
             {
