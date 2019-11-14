@@ -12,7 +12,6 @@ using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Services;
-using XRTK.Utilities;
 #endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
@@ -44,6 +43,7 @@ namespace XRTK.Lumin.SpatialObservers
 
         #region IMixedRealityService implementation
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             base.Initialize();
@@ -153,6 +153,7 @@ namespace XRTK.Lumin.SpatialObservers
             lastUpdated = 0;
         }
 
+        /// <inheritdoc/>
         public override void StopObserving()
         {
             if (!IsRunning)
