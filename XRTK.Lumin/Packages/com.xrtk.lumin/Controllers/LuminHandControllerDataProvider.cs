@@ -3,13 +3,13 @@
 
 using XRTK.Providers.Controllers.Hands;
 using XRTK.Lumin.Profiles;
+
+#if PLATFORM_LUMIN
+using UnityEngine.XR.MagicLeap;
 using UnityEngine;
 using System;
 using System.Linq;
 using XRTK.Definitions.Utilities;
-
-#if PLATFORM_LUMIN
-using UnityEngine.XR.MagicLeap;
 #endif
 
 namespace XRTK.Lumin.Controllers
@@ -20,7 +20,10 @@ namespace XRTK.Lumin.Controllers
     public class LuminHandControllerDataProvider : BaseHandControllerDataProvider
     {
         private readonly LuminHandControllerDataProviderProfile profile;
+
+#if PLATFORM_LUMIN
         private MLHandKeyPose[] keyPoses;
+#endif
 
         /// <summary>
         /// Creates a new instance of the data provider.
