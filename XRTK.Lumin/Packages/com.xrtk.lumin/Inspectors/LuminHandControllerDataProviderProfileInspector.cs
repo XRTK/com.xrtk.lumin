@@ -39,7 +39,6 @@ namespace XRTK.Lumin.Inspectors
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical("Label");
-
             EditorGUILayout.PropertyField(keyPointFilterLevel);
             EditorGUILayout.PropertyField(poseFilterLevel);
 
