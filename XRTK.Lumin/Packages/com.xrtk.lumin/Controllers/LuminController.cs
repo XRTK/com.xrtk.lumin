@@ -174,7 +174,7 @@ namespace XRTK.Lumin.Controllers
 
             if (!isHomeButton)
             {
-                interactionMapping.BoolData = MlControllerReference.State.ButtonState[(int)MLInputControllerButton.Bumper] > 0;
+                interactionMapping.BoolData = MlControllerReference.IsBumperDown;
             }
             else
             {
