@@ -165,6 +165,7 @@ namespace XRTK.Lumin.Controllers
                     }
                 }
 
+                // Update provider base implementation
                 UpdateHandData(handedness, updatedHandData);
             }
             else
@@ -182,6 +183,8 @@ namespace XRTK.Lumin.Controllers
             if (keyPoint.IsValid)
             {
                 jointPose.Position = keyPoint.Position;
+                // Joint rotation tracking is not supported on Lumin,
+                // so we gotta live with Quaternion.identity here
                 jointPose.Rotation = Quaternion.identity;
             }
         }
