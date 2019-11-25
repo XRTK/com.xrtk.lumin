@@ -52,16 +52,6 @@ namespace XRTK.Lumin.Controllers
                 }
             }
 
-            if (!MLHands.IsStarted)
-            {
-                var result = MLHands.Start();
-                if (!result.IsOk)
-                {
-                    Debug.LogError($"Error: failed starting MLHands: {result}");
-                    return;
-                }
-            }
-
             for (byte i = 0; i < 3; i++)
             {
                 // Currently no way to know what controllers are already connected.
@@ -97,7 +87,6 @@ namespace XRTK.Lumin.Controllers
             MLInput.OnControllerDisconnected -= OnControllerDisconnected;
             MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
             MLInput.Stop();
-            MLHands.Stop();
 
             foreach (var activeController in activeControllers)
             {
