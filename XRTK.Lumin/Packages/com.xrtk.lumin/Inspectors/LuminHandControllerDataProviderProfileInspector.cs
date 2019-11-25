@@ -12,6 +12,7 @@ namespace XRTK.Lumin.Inspectors
     [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
     public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityProfileInspector
     {
+        private SerializedProperty handTrackingEnabled;
         private SerializedProperty keyPointFilterLevel;
         private SerializedProperty poseFilterLevel;
 
@@ -19,6 +20,7 @@ namespace XRTK.Lumin.Inspectors
         {
             base.OnEnable();
 
+            handTrackingEnabled = serializedObject.FindProperty("handTrackingEnabled");
             keyPointFilterLevel = serializedObject.FindProperty("keyPointFilterLevel");
             poseFilterLevel = serializedObject.FindProperty("poseFilterLevel");
         }
@@ -39,6 +41,7 @@ namespace XRTK.Lumin.Inspectors
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical("Label");
+            EditorGUILayout.PropertyField(handTrackingEnabled);
             EditorGUILayout.PropertyField(keyPointFilterLevel);
             EditorGUILayout.PropertyField(poseFilterLevel);
 
