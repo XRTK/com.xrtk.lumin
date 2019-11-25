@@ -6,6 +6,7 @@ using XRTK.Lumin.Profiles;
 using UnityEngine;
 using System;
 using System.Linq;
+using XRTK.Definitions.Utilities;
 
 #if PLATFORM_LUMIN
 using UnityEngine.XR.MagicLeap;
@@ -35,14 +36,21 @@ namespace XRTK.Lumin.Controllers
 
 #if PLATFORM_LUMIN
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             base.Initialize();
             keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
         }
 
+        /// <inheritdoc />
         public override void Enable()
         {
+            if (!profile.HandTrackingEnabled)
+            {
+                return;
+            }
+
             if (!MLHands.IsStarted)
             {
                 var result = MLHands.Start();
@@ -64,6 +72,7 @@ namespace XRTK.Lumin.Controllers
             }
         }
 
+        /// <inheritdoc />
         public override void Disable()
         {
             if (MLHands.IsStarted)
@@ -73,6 +82,108 @@ namespace XRTK.Lumin.Controllers
             }
 
             base.Disable();
+        }
+
+        /// <inheritdoc />
+        public override void Update()
+        {
+            if (profile.HandTrackingEnabled && MLHands.IsStarted)
+            {
+                UpdateHandController(Handedness.Left, MLHands.Left);
+                UpdateHandController(Handedness.Right, MLHands.Right);
+            }
+        }
+
+        private void UpdateHandController(Handedness handedness, MLHand hand)
+        {
+            if (hand.IsVisible)
+            {
+                // Hand is being tracked by the device, update controller using
+                // current data, beginning with converting the magic leap hand data
+                // to the XRTK generic hand data model.
+                HandData updatedHandData = new HandData
+                {
+                    IsTracked = true,
+                    TimeStamp = DateTimeOffset.UtcNow.Ticks
+                };
+
+                MLFinger pinky = hand.Pinky;
+                MLFinger ring = hand.Ring;
+                MLFinger middle = hand.Middle;
+                MLFinger index = hand.Index;
+                MLThumb thumb = hand.Thumb;
+                MLWrist wrist = hand.Wrist;
+
+                for (int i = 0; i < updatedHandData.Joints.Length; i++)
+                {
+                    MixedRealityPose jointPose = updatedHandData.Joints[i];
+                    TrackedHandJoint trackedHandJoint = (TrackedHandJoint)i;
+                    switch (trackedHandJoint)
+                    {
+                        case TrackedHandJoint.Wrist:
+                            ConvertKeyPointToJointPose(wrist.Center, jointPose);
+                            break;
+                        case TrackedHandJoint.ThumbProximalJoint:
+                            ConvertKeyPointToJointPose(thumb.MCP, jointPose);
+                            break;
+                        case TrackedHandJoint.ThumbDistalJoint:
+                            ConvertKeyPointToJointPose(thumb.IP, jointPose);
+                            break;
+                        case TrackedHandJoint.ThumbTip:
+                            ConvertKeyPointToJointPose(thumb.Tip, jointPose);
+                            break;
+                        case TrackedHandJoint.IndexKnuckle:
+                            ConvertKeyPointToJointPose(index.MCP, jointPose);
+                            break;
+                        case TrackedHandJoint.IndexMiddleJoint:
+                            ConvertKeyPointToJointPose(index.PIP, jointPose);
+                            break;
+                        case TrackedHandJoint.IndexTip:
+                            ConvertKeyPointToJointPose(index.Tip, jointPose);
+                            break;
+                        case TrackedHandJoint.MiddleKnuckle:
+                            ConvertKeyPointToJointPose(middle.MCP, jointPose);
+                            break;
+                        case TrackedHandJoint.MiddleMiddleJoint:
+                            ConvertKeyPointToJointPose(middle.PIP, jointPose);
+                            break;
+                        case TrackedHandJoint.MiddleTip:
+                            ConvertKeyPointToJointPose(middle.Tip, jointPose);
+                            break;
+                        case TrackedHandJoint.RingKnuckle:
+                            ConvertKeyPointToJointPose(ring.MCP, jointPose);
+                            break;
+                        case TrackedHandJoint.RingTip:
+                            ConvertKeyPointToJointPose(ring.Tip, jointPose);
+                            break;
+                        case TrackedHandJoint.PinkyKnuckle:
+                            ConvertKeyPointToJointPose(pinky.MCP, jointPose);
+                            break;
+                        case TrackedHandJoint.PinkyTip:
+                            ConvertKeyPointToJointPose(pinky.Tip, jointPose);
+                            break;
+                    }
+                }
+
+                UpdateHandData(handedness, updatedHandData);
+            }
+            else
+            {
+                // Hand is currently not being tracked / lost
+                UpdateHandData(handedness, new HandData
+                {
+                    IsTracked = false
+                });
+            }
+        }
+
+        private void ConvertKeyPointToJointPose(MLKeyPoint keyPoint, MixedRealityPose jointPose)
+        {
+            if (keyPoint.IsValid)
+            {
+                jointPose.Position = keyPoint.Position;
+                jointPose.Rotation = Quaternion.identity;
+            }
         }
 
 #endif
