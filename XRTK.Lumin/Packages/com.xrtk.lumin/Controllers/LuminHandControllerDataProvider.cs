@@ -88,8 +88,10 @@ namespace XRTK.Lumin.Controllers
         }
 
         /// <inheritdoc />
-        public override void Update()
+        public override void LateUpdate()
         {
+            base.LateUpdate();
+
             if (profile.HandTrackingEnabled && MLHands.IsStarted)
             {
                 UpdateHandController(Handedness.Left, MLHands.Left);
