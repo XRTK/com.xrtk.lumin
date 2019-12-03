@@ -3,6 +3,7 @@
 
 using UnityEditor;
 using UnityEngine;
+using XRTK.Definitions.Utilities;
 using XRTK.Inspectors.Profiles;
 using XRTK.Inspectors.Utilities;
 using XRTK.Lumin.Profiles;
@@ -38,20 +39,19 @@ namespace XRTK.Lumin.Inspectors
             EditorGUILayout.Space();
             thisProfile.CheckProfileLock();
 
-#if PLATFORM_LUMIN
-            serializedObject.Update();
+            if (thisProfile.CheckProfilePlatform(SupportedPlatforms.Lumin))
+            {
+                serializedObject.Update();
 
-            EditorGUILayout.BeginVertical("Label");
-            EditorGUILayout.PropertyField(handTrackingEnabled);
-            EditorGUILayout.PropertyField(keyPointFilterLevel);
-            EditorGUILayout.PropertyField(poseFilterLevel);
+                EditorGUILayout.BeginVertical("Label");
+                EditorGUILayout.PropertyField(handTrackingEnabled);
+                EditorGUILayout.PropertyField(keyPointFilterLevel);
+                EditorGUILayout.PropertyField(poseFilterLevel);
 
-            EditorGUILayout.EndVertical();
+                EditorGUILayout.EndVertical();
 
-            serializedObject.ApplyModifiedProperties();
-#else
-            EditorGUILayout.HelpBox("Please switch to Lumin build target to edit this profile.", MessageType.Info);
-#endif
+                serializedObject.ApplyModifiedProperties();
+            }
         }
     }
 }
