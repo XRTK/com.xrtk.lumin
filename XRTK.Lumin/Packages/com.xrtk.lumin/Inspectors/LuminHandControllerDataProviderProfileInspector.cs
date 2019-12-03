@@ -39,7 +39,7 @@ namespace XRTK.Lumin.Inspectors
             EditorGUILayout.Space();
             thisProfile.CheckProfileLock();
 
-            if (thisProfile.CheckProfilePlatform(SupportedPlatforms.Lumin))
+            if (MixedRealityInspectorUtility.CheckProfilePlatform(SupportedPlatforms.Lumin))
             {
                 serializedObject.Update();
 
