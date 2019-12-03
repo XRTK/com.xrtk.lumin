@@ -38,6 +38,7 @@ namespace XRTK.Lumin.Inspectors
             EditorGUILayout.Space();
             thisProfile.CheckProfileLock();
 
+#if PLATFORM_LUMIN
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical("Label");
@@ -48,6 +49,9 @@ namespace XRTK.Lumin.Inspectors
             EditorGUILayout.EndVertical();
 
             serializedObject.ApplyModifiedProperties();
+#else
+            EditorGUILayout.HelpBox("Please switch to Lumin build target to edit this profile.", MessageType.Info);
+#endif
         }
     }
 }
