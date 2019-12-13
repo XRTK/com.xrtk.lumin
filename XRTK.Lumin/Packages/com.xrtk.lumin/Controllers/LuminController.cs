@@ -187,10 +187,6 @@ namespace XRTK.Lumin.Controllers
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.SingleAxis || interactionMapping.AxisType == AxisType.Digital);
 
-            interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
-                ? MlControllerReference.Touch1PosAndForce.z
-                : MlControllerReference.TriggerValue;
-
             switch (interactionMapping.InputType)
             {
                 case DeviceInputType.Select:
@@ -208,6 +204,10 @@ namespace XRTK.Lumin.Controllers
                     Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
                     return;
             }
+
+            interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
+                ? MlControllerReference.Touch1PosAndForce.z
+                : MlControllerReference.TriggerValue;
         }
 
         private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping)
