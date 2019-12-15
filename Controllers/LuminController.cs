@@ -197,12 +197,12 @@ namespace XRTK.Lumin.Controllers
                 case DeviceInputType.Trigger:
                 case DeviceInputType.TriggerPress:
                 case DeviceInputType.TouchpadPress:
-                    interactionMapping.BoolData = interactionMapping.FloatData.Equals(interactionMapping.InvertXAxis ? 0f : 1f);
+                    interactionMapping.BoolData = interactionMapping.FloatData.Equals(interactionMapping.InvertXAxis ? -1f : 1f);
                     break;
                 case DeviceInputType.TriggerTouch:
                 case DeviceInputType.TouchpadTouch:
                 case DeviceInputType.TriggerNearTouch:
-                    interactionMapping.BoolData = !interactionMapping.FloatData.Equals(interactionMapping.InvertXAxis ? 1f : 0f);
+                    interactionMapping.BoolData = !interactionMapping.FloatData.Equals(0f);
                     break;
                 default:
                     Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
