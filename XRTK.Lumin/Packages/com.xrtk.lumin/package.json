@@ -20,6 +20,6 @@
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
     "com.unity.xr.magicleap": "2.0.0-preview.19",
-    "com.xrtk.core": "0.1.26"
+    "com.xrtk.core": "0.1.27"
   }
 }
