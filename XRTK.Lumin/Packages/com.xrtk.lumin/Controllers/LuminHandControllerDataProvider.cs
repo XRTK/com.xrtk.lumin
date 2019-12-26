@@ -17,7 +17,7 @@ namespace XRTK.Lumin.Controllers
     /// <summary>
     /// Hand controller data provier for the Lumin platform.
     /// </summary>
-    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider
+    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider<LuminHandController>
     {
         private readonly LuminHandControllerDataProviderProfile profile;
 
