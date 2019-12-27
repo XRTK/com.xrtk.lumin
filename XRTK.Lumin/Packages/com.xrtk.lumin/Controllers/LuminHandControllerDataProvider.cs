@@ -37,6 +37,11 @@ namespace XRTK.Lumin.Controllers
             this.profile = profile;
         }
 
+        protected override void RefreshActiveControllers()
+        {
+
+        }
+
 #if PLATFORM_LUMIN
 
         /// <inheritdoc />
