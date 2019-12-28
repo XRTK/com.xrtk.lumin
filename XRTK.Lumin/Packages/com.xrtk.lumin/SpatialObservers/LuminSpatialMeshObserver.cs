@@ -11,6 +11,7 @@ using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
+using XRTK.Services;
 using XRTK.Utilities;
 #endif // PLATFORM_LUMIN
 
@@ -102,9 +103,8 @@ namespace XRTK.Lumin.SpatialObservers
             // Update the observer location if it is not stationary
             if (!IsStationaryObserver)
             {
-                var cameraTransform = CameraCache.Main.transform;
-                ObserverOrigin = cameraTransform.position;
-                ObserverOrientation = cameraTransform.rotation;
+                ObserverOrigin = MixedRealityToolkit.CameraSystem.CameraRig.CameraTransform.position;
+                ObserverOrientation = MixedRealityToolkit.CameraSystem.CameraRig.CameraTransform.rotation;
             }
 
             ConfigureObserverVolume();
