@@ -1,8 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Providers.Controllers.Hands;
 using XRTK.Lumin.Profiles;
+using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
 using UnityEngine.XR.MagicLeap;
@@ -17,7 +17,7 @@ namespace XRTK.Lumin.Controllers
     /// <summary>
     /// Hand controller data provier for the Lumin platform.
     /// </summary>
-    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider<LuminHandController>
+    public class LuminHandControllerDataProvider : BaseControllerDataProvider
     {
         private readonly LuminHandControllerDataProviderProfile profile;
 
@@ -35,11 +35,6 @@ namespace XRTK.Lumin.Controllers
             : base(name, priority, profile)
         {
             this.profile = profile;
-        }
-
-        protected override void RefreshActiveControllers()
-        {
-
         }
 
 #if PLATFORM_LUMIN
