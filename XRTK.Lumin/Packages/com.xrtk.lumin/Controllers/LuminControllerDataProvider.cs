@@ -1,11 +1,12 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Definitions.Controllers;
 using XRTK.Providers.Controllers;
+using XRTK.Lumin.Profiles;
 
 #if PLATFORM_LUMIN
-
+using System.Linq;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
@@ -19,15 +20,22 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
+        private readonly LuminControllerDataProviderProfile profile;
+
+#if PLATFORM_LUMIN
+        private MLHandKeyPose[] keyPoses;
+#endif
+
         /// <summary>
-        /// Constructor.
+        /// Creates a new instance of the data provider.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="priority"></param>
-        /// <param name="profile"></param>
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
+        /// <param name="name">Name of the data provider as assigned in the configuration profile.</param>
+        /// <param name="priority">Data provider priority controls the order in the service registry.</param>
+        /// <param name="profile">Hand controller data provider profile assigned to the provider instance in the configuration inspector.</param>
+        public LuminControllerDataProvider(string name, uint priority, LuminControllerDataProviderProfile profile)
             : base(name, priority, profile)
         {
+            this.profile = profile;
         }
 
 #if PLATFORM_LUMIN
@@ -36,6 +44,13 @@ namespace XRTK.Lumin.Controllers
         /// Dictionary to capture all active controllers detected
         /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
+
+        /// <inheritdoc />
+        public override void Initialize()
+        {
+            base.Initialize();
+            keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
+        }
 
         /// <inheritdoc />
         public override void Enable()
@@ -50,6 +65,26 @@ namespace XRTK.Lumin.Controllers
                     Debug.LogError($"Error: failed starting MLInput: {result}");
                     return;
                 }
+            }
+
+            if (profile.HandTrackingEnabled && !MLHands.IsStarted)
+            {
+                var result = MLHands.Start();
+                if (!result.IsOk)
+                {
+                    Debug.LogError($"Error: Failed starting MLHands: {result}");
+                    return;
+                }
+
+                bool status = MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true);
+                if (!status)
+                {
+                    Debug.LogError("Error: Failed enabling tracked key poses.");
+                    return;
+                }
+
+                MLHands.KeyPoseManager.SetKeyPointsFilterLevel(profile.KeyPointFilterLevel);
+                MLHands.KeyPoseManager.SetPoseFilterLevel(profile.PoseFilterLevel);
             }
 
             for (byte i = 0; i < 3; i++)
@@ -74,6 +109,8 @@ namespace XRTK.Lumin.Controllers
         {
             base.Update();
 
+            RefreshHandControllers();
+
             foreach (var controller in activeControllers)
             {
                 controller.Value?.UpdateController();
@@ -88,12 +125,34 @@ namespace XRTK.Lumin.Controllers
             MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
             MLInput.Stop();
 
+            if (MLHands.IsStarted)
+            {
+                MLHands.Stop();
+                MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, false, true);
+            }
+
             foreach (var activeController in activeControllers)
             {
                 RemoveController(activeController.Key, false);
             }
 
             activeControllers.Clear();
+        }
+
+        private void RefreshHandControllers()
+        {
+            if (profile.HandTrackingEnabled && MLHands.IsStarted)
+            {
+                if (MLHands.Left.IsVisible)
+                {
+                    //GetController(); // Get left hand controller
+                }
+
+                if (MLHands.Right.IsVisible)
+                {
+                    //GetController(); // Get right hand controller
+                }
+            }
         }
 
         private LuminController GetController(byte controllerId, bool addController = true)
