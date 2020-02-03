@@ -11,8 +11,8 @@ using UnityEngine.XR.MagicLeap;
 
 namespace XRTK.Lumin.Profiles
 {
-    [CreateAssetMenu(menuName = "Mixed Reality Toolkit/Input System/Controller Data Providers/Lumin Controller Data Provider Profile", fileName = "LuminControllerDataProviderProfile", order = (int)CreateProfileMenuItemIndices.Input)]
-    public class LuminControllerDataProviderProfile : BaseMixedRealityControllerDataProviderProfile
+    [CreateAssetMenu(menuName = "Mixed Reality Toolkit/Input System/Controller Data Providers/Lumin Hand Controller Data Provider Profile", fileName = "LuminHandControllerDataProviderProfile", order = (int)CreateProfileMenuItemIndices.Input)]
+    public class LuminHandControllerDataProviderProfile : BaseMixedRealityControllerDataProviderProfile
     {
 #if PLATFORM_LUMIN
         [Header("Hand Tracking")]
