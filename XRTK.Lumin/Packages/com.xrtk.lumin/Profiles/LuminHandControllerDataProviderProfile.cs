@@ -15,16 +15,6 @@ namespace XRTK.Lumin.Profiles
     public class LuminHandControllerDataProviderProfile : BaseMixedRealityControllerDataProviderProfile
     {
 #if PLATFORM_LUMIN
-        [Header("Hand Tracking")]
-        [SerializeField]
-        [Tooltip("Enable hand tracking")]
-        private bool handTrackingEnabled = true;
-
-        /// <summary>
-        /// Is hand tracking enabled?
-        /// </summary>
-        public bool HandTrackingEnabled => handTrackingEnabled;
-
         [Header("Hand Tracking Level Configuration")]
 
         [SerializeField]
