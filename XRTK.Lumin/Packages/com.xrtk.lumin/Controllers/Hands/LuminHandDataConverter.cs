@@ -79,6 +79,7 @@ namespace XRTK.Lumin.Controllers.Hands
                         jointPoses[i] = ComputeJointPose(thumb.MCP);
                         break;
                     case TrackedHandJoint.ThumbProximalJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.ThumbDistalJoint:
@@ -88,6 +89,10 @@ namespace XRTK.Lumin.Controllers.Hands
                         jointPoses[i] = ComputeJointPose(thumb.Tip);
                         break;
                     // Finger: Index
+                    case TrackedHandJoint.IndexMetacarpal:
+                        // TODO: Estimate?
+                        jointPoses[i] = MixedRealityPose.ZeroIdentity;
+                        break;
                     case TrackedHandJoint.IndexKnuckle:
                         jointPoses[i] = ComputeJointPose(index.MCP);
                         break;
@@ -95,12 +100,17 @@ namespace XRTK.Lumin.Controllers.Hands
                         jointPoses[i] = ComputeJointPose(index.PIP);
                         break;
                     case TrackedHandJoint.IndexDistalJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.IndexTip:
                         jointPoses[i] = ComputeJointPose(index.Tip);
                         break;
                     // Finger: Middle
+                    case TrackedHandJoint.MiddleMetacarpal:
+                        // TODO: Estimate?
+                        jointPoses[i] = MixedRealityPose.ZeroIdentity;
+                        break;
                     case TrackedHandJoint.MiddleKnuckle:
                         jointPoses[i] = ComputeJointPose(middle.MCP);
                         break;
@@ -108,32 +118,45 @@ namespace XRTK.Lumin.Controllers.Hands
                         jointPoses[i] = ComputeJointPose(middle.PIP);
                         break;
                     case TrackedHandJoint.MiddleDistalJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.MiddleTip:
                         jointPoses[i] = ComputeJointPose(middle.Tip);
                         break;
                     // Finger: Ring
+                    case TrackedHandJoint.RingMetacarpal:
+                        // TODO: Estimate?
+                        jointPoses[i] = MixedRealityPose.ZeroIdentity;
+                        break;
                     case TrackedHandJoint.RingKnuckle:
                         jointPoses[i] = ComputeJointPose(ring.MCP);
                         break;
                     case TrackedHandJoint.RingMiddleJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.RingDistalJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.RingTip:
                         jointPoses[i] = ComputeJointPose(ring.Tip);
                         break;
                     // Finger: Pinky
+                    case TrackedHandJoint.PinkyMetacarpal:
+                        // TODO: Estimate?
+                        jointPoses[i] = MixedRealityPose.ZeroIdentity;
+                        break;
                     case TrackedHandJoint.PinkyKnuckle:
                         jointPoses[i] = ComputeJointPose(pinky.MCP);
                         break;
                     case TrackedHandJoint.PinkyMiddleJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.PinkyDistalJoint:
+                        // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.PinkyTip:
