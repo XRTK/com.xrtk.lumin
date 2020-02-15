@@ -1,7 +1,6 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Providers.Controllers;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers.Hands;
 
@@ -20,7 +19,7 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Controllers.Hands
 {
-    public class LuminHandControllerDataProvider : BaseControllerDataProvider
+    public class LuminHandControllerDataProvider : BaseHandControllerDataProvider<LuminHandControllerDataProviderProfile>
     {
         /// <summary>
         /// Creates a new instance of the data provider.
@@ -29,12 +28,7 @@ namespace XRTK.Lumin.Controllers.Hands
         /// <param name="priority">Data provider priority controls the order in the service registry.</param>
         /// <param name="profile">Hand controller data provider profile assigned to the provider instance in the configuration inspector.</param>
         public LuminHandControllerDataProvider(string name, uint priority, LuminHandControllerDataProviderProfile profile)
-            : base(name, priority, profile)
-        {
-            this.profile = profile;
-        }
-
-        private readonly LuminHandControllerDataProviderProfile profile;
+            : base(name, priority, profile) { }
 
 #if PLATFORM_LUMIN
 
@@ -62,8 +56,8 @@ namespace XRTK.Lumin.Controllers.Hands
                     return;
                 }
 
-                MLHands.KeyPoseManager.SetKeyPointsFilterLevel(profile.KeyPointFilterLevel);
-                MLHands.KeyPoseManager.SetPoseFilterLevel(profile.PoseFilterLevel);
+                MLHands.KeyPoseManager.SetKeyPointsFilterLevel(Profile.KeyPointFilterLevel);
+                MLHands.KeyPoseManager.SetPoseFilterLevel(Profile.PoseFilterLevel);
             }
         }
 
