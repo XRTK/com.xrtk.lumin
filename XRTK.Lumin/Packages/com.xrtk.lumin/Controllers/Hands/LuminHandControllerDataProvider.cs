@@ -59,6 +59,8 @@ namespace XRTK.Lumin.Controllers.Hands
                 MLHands.KeyPoseManager.SetKeyPointsFilterLevel(Profile.KeyPointFilterLevel);
                 MLHands.KeyPoseManager.SetPoseFilterLevel(Profile.PoseFilterLevel);
             }
+
+            LuminHandDataConverter.HandMeshingEnabled = Profile.HandMeshingEnabled;
         }
 
         /// <inheritdoc />

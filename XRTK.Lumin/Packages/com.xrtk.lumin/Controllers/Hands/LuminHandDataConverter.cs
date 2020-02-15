@@ -32,6 +32,11 @@ namespace XRTK.Lumin.Controllers.Hands
 #if PLATFORM_LUMIN
 
         /// <summary>
+        /// Gets or sets whether hand mesh data should be read and converted.
+        /// </summary>
+        public static bool HandMeshingEnabled { get; set; }
+
+        /// <summary>
         /// Gets updated hand data for the current frame.
         /// </summary>
         /// <returns>Platform agnostics hand data.</returns>
