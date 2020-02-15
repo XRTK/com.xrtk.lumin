@@ -2,16 +2,15 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEditor;
-using UnityEngine;
 using XRTK.Definitions.Utilities;
-using XRTK.Inspectors.Profiles;
+using XRTK.Inspectors.Profiles.InputSystem.Controllers.Hands;
 using XRTK.Inspectors.Utilities;
 using XRTK.Lumin.Profiles;
 
 namespace XRTK.Lumin.Inspectors
 {
     [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
-    public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityProfileInspector
+    public class LuminHandControllerDataProviderProfileInspector : MixedRealityHandControllerDataProviderProfileInspector
     {
         private SerializedProperty keyPointFilterLevel;
         private SerializedProperty poseFilterLevel;
@@ -24,30 +23,14 @@ namespace XRTK.Lumin.Inspectors
             poseFilterLevel = serializedObject.FindProperty("poseFilterLevel");
         }
 
-        public override void OnInspectorGUI()
+        protected override void OnPlatformInspectorGUI()
         {
-            MixedRealityInspectorUtility.RenderMixedRealityToolkitLogo();
-
-            if (thisProfile.ParentProfile != null &&
-                GUILayout.Button("Back to Configuration Profile"))
+            SupportedPlatforms supportedPlatforms = SupportedPlatforms.Lumin | SupportedPlatforms.Editor;
+            if (MixedRealityInspectorUtility.CheckProfilePlatform(supportedPlatforms,
+                $"You can't edit platform specific hand configuration with the current build target. Please switch to {supportedPlatforms}."))
             {
-                Selection.activeObject = thisProfile.ParentProfile;
-            }
-
-            EditorGUILayout.Space();
-            thisProfile.CheckProfileLock();
-
-            if (MixedRealityInspectorUtility.CheckProfilePlatform(SupportedPlatforms.Lumin | SupportedPlatforms.Editor))
-            {
-                serializedObject.Update();
-
-                EditorGUILayout.BeginVertical("Label");
                 EditorGUILayout.PropertyField(keyPointFilterLevel);
                 EditorGUILayout.PropertyField(poseFilterLevel);
-
-                EditorGUILayout.EndVertical();
-
-                serializedObject.ApplyModifiedProperties();
             }
         }
     }
