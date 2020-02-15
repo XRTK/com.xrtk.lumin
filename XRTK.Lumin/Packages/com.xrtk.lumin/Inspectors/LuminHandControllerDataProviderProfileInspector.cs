@@ -25,6 +25,7 @@ namespace XRTK.Lumin.Inspectors
 
         protected override void OnPlatformInspectorGUI()
         {
+            EditorGUILayout.LabelField("Lumin Specific Hand Settings", EditorStyles.boldLabel);
             SupportedPlatforms supportedPlatforms = SupportedPlatforms.Lumin | SupportedPlatforms.Editor;
             if (MixedRealityInspectorUtility.CheckProfilePlatform(supportedPlatforms,
                 $"You can't edit platform specific hand configuration with the current build target. Please switch to {supportedPlatforms}."))
