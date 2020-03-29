@@ -1,6 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Lumin.Profiles;
 using XRTK.Providers.SpatialObservers;
 
 #if PLATFORM_LUMIN
@@ -28,7 +29,7 @@ namespace XRTK.Lumin.SpatialObservers
         /// <param name="name"></param>
         /// <param name="priority"></param>
         /// <param name="profile"></param>
-        public LuminSpatialMeshObserver(string name, uint priority, BaseMixedRealitySpatialMeshObserverProfile profile) : base(name, priority, profile)
+        public LuminSpatialMeshObserver(string name, uint priority, LuminSpatialMeshObserverProfile profile) : base(name, priority, profile)
         {
         }
 
