@@ -4,14 +4,14 @@
 using UnityEditor;
 using UnityEngine;
 using XRTK.Definitions.Utilities;
-using XRTK.Inspectors.Profiles;
+using XRTK.Inspectors.Profiles.InputSystem;
 using XRTK.Inspectors.Utilities;
 using XRTK.Lumin.Profiles;
 
 namespace XRTK.Lumin.Inspectors
 {
     [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
-    public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityProfileInspector
+    public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityHandDataProviderProfileInspector
     {
         private SerializedProperty keyPointFilterLevel;
         private SerializedProperty poseFilterLevel;
@@ -28,13 +28,16 @@ namespace XRTK.Lumin.Inspectors
         {
             MixedRealityInspectorUtility.RenderMixedRealityToolkitLogo();
 
-            if (thisProfile.ParentProfile != null &&
+            if (ThisProfile.ParentProfile != null &&
                 GUILayout.Button("Back To Configuration Profile"))
             {
-                Selection.activeObject = thisProfile.ParentProfile;
+                Selection.activeObject = ThisProfile.ParentProfile;
             }
 
-            thisProfile.CheckProfileLock();
+            ThisProfile.CheckProfileLock();
+
+            base.OnInspectorGUI();
+
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical();
