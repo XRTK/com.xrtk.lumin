@@ -13,12 +13,12 @@
     "reality",
     "lumin"
   ],
-  "version": "0.1.10",
+  "version": "0.1.11",
   "unity": "2019.1",
   "license": "MIT",
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.1.27"
+    "com.xrtk.core": "0.1.32"
   }
 }
