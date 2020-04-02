@@ -11,7 +11,7 @@ using XRTK.Lumin.Extensions;
 using UnityEngine.XR.MagicLeap;
 #endif
 
-namespace XRTK.Lumin.Controllers.Hands
+namespace XRTK.Lumin.Controllers
 {
     /// <summary>
     /// Converts oculus hand data to <see cref="HandData"/>.
