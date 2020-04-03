@@ -39,7 +39,6 @@ namespace XRTK.Lumin.Inspectors
         {
             RenderHeader();
 
-            ThisProfile.CheckProfileLock();
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(handMeshingEnabled);
