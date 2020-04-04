@@ -2,8 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using XRTK.Definitions.Utilities;
-using XRTK.Providers.Controllers.Hands;
-using UnityEngine;
+using XRTK.Definitions.Controllers.Hands;
 
 #if PLATFORM_LUMIN
 using System;
