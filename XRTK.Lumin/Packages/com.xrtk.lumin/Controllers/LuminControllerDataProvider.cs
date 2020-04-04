@@ -6,6 +6,8 @@ using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
 
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
@@ -36,8 +38,10 @@ namespace XRTK.Lumin.Controllers
         /// Dictionary to capture all active controllers detected
         /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
-        private readonly MLPoseFilterLevel poseFilterLevel;
-        private readonly MLKeyPointFilterLevel keyPointFilterLevel;
+
+        private readonly MLPoseFilterLevel poseFilterLevel = MLPoseFilterLevel.Robust;
+        private readonly MLKeyPointFilterLevel keyPointFilterLevel = MLKeyPointFilterLevel.Smoothed;
+
         private readonly LuminHandDataConverter leftHandConverter = new LuminHandDataConverter(Handedness.Left);
         private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
         private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
@@ -94,7 +98,6 @@ namespace XRTK.Lumin.Controllers
             MLInput.OnControllerConnected += OnControllerConnected;
             MLInput.OnControllerDisconnected += OnControllerDisconnected;
             MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
-            LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
         }
 
         ///// <inheritdoc />

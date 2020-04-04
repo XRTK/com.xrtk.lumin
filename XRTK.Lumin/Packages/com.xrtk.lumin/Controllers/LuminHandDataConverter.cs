@@ -6,7 +6,7 @@ using XRTK.Definitions.Controllers.Hands;
 
 #if PLATFORM_LUMIN
 using System;
-using XRTK.Lumin.Extensions;
+using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 #endif
 
@@ -41,7 +41,7 @@ namespace XRTK.Lumin.Controllers
         /// <returns>Platform agnostics hand data.</returns>
         public HandData GetHandData()
         {
-            MLHand hand = handedness.ToMagicLeapHand();
+            MLHand hand = ToMagicLeapHand(handedness);
             HandData updatedHandData = new HandData
             {
                 IsTracked = hand.IsVisible,
@@ -55,6 +55,24 @@ namespace XRTK.Lumin.Controllers
             }
 
             return updatedHandData;
+        }
+
+        /// <summary>
+        /// Gets the magic leap hand reference for the given handedness.
+        /// </summary>
+        /// <param name="handedness">Handedness to convert.</param>
+        /// <returns>Magic Leap hand reference.</returns>
+        private static MLHand ToMagicLeapHand(Handedness handedness)
+        {
+            switch (handedness)
+            {
+                case Handedness.Left:
+                    return MLHands.Left;
+                case Handedness.Right:
+                    return MLHands.Right;
+                default:
+                    return null;
+            }
         }
 
         private void UpdateHandJoints(MLHand hand, MixedRealityPose[] jointPoses)
@@ -177,10 +195,10 @@ namespace XRTK.Lumin.Controllers
 
         private MixedRealityPose EstimatePalmPose(MLKeyPoint wrist, MLKeyPoint middleDistal)
         {
-            MixedRealityPose wristRootPose = ComputeJointPose(wrist);
-            MixedRealityPose middleDistalPose = ComputeJointPose(middleDistal);
-            Vector3 palmPosition = Vector3.Lerp(wristRootPose.Position, middleDistalPose.Position, .5f);
-            Quaternion palmRotation = wristRootPose.Rotation;
+            var wristRootPose = ComputeJointPose(wrist);
+            var middleDistalPose = ComputeJointPose(middleDistal);
+            var palmPosition = Vector3.Lerp(wristRootPose.Position, middleDistalPose.Position, .5f);
+            var palmRotation = wristRootPose.Rotation;
 
             return new MixedRealityPose(palmPosition, palmRotation);
         }
