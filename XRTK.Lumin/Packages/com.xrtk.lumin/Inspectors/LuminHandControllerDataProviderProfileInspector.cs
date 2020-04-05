@@ -7,8 +7,8 @@ using XRTK.Lumin.Profiles;
 
 namespace XRTK.Lumin.Inspectors
 {
-    [CustomEditor(typeof(LuminControllerDataProviderProfile))]
-    public class LuminControllerDataProviderProfileInspector : BaseMixedRealityHandControllerDataProviderProfileInspector
+    [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
+    public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityHandControllerDataProviderProfileInspector
     {
         private SerializedProperty keyPointFilterLevel;
         private SerializedProperty poseFilterLevel;
