@@ -72,7 +72,7 @@ namespace XRTK.Lumin.Utilities
             }
         }
 
-        private void UpdateHandJoints(MLHand hand, MixedRealityPose[] jointPoses)
+        private static void UpdateHandJoints(MLHand hand, MixedRealityPose[] jointPoses)
         {
             var ring = hand.Ring;
             var pinky = hand.Pinky;
@@ -191,7 +191,7 @@ namespace XRTK.Lumin.Utilities
             // TODO: Get hand mesh data and convert.
         }
 
-        private MixedRealityPose EstimatePalmPose(MLKeyPoint wrist, MLKeyPoint middleDistal)
+        private static MixedRealityPose EstimatePalmPose(MLKeyPoint wrist, MLKeyPoint middleDistal)
         {
             var wristRootPose = ComputeJointPose(wrist);
             var middleDistalPose = ComputeJointPose(middleDistal);
@@ -201,7 +201,7 @@ namespace XRTK.Lumin.Utilities
             return new MixedRealityPose(palmPosition, palmRotation);
         }
 
-        private MixedRealityPose ComputeJointPose(MLKeyPoint keyPoint)
+        private static MixedRealityPose ComputeJointPose(MLKeyPoint keyPoint)
         {
             var pose = MixedRealityPose.ZeroIdentity;
 
@@ -215,7 +215,6 @@ namespace XRTK.Lumin.Utilities
 
             return pose;
         }
-
     }
 }
 #endif // PLATFORM_LUMIN

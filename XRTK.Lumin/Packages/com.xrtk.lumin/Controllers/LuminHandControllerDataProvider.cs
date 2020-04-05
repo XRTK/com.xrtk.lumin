@@ -66,6 +66,11 @@ namespace XRTK.Lumin.Controllers
 
                 MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel);
                 MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel);
+
+                if (!MLHands.KeyPoseManager.LastConfigurationApplied())
+                {
+                    Debug.LogError("Error: Failed updating key pose configuration!");
+                }
             }
 
             LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;

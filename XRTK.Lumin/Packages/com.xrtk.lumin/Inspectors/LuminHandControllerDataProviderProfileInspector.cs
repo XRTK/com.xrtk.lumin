@@ -1,7 +1,6 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using UnityEditor;
 using UnityEngine;
 using XRTK.Inspectors.Profiles.InputSystem.Controllers;
@@ -41,6 +40,7 @@ namespace XRTK.Lumin.Inspectors
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Lumin Hand Settings");
+
             keyPointFilterLevel.intValue = (int)(MLKeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLKeyPointFilterLevel)keyPointFilterLevel.intValue);
             poseFilterLevel.intValue = (int)(MLPoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLPoseFilterLevel)poseFilterLevel.intValue);
 
