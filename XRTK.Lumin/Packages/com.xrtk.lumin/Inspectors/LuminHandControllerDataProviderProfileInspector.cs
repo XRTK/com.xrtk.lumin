@@ -1,11 +1,12 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+#if PLATFORM_LUMIN
+
 using UnityEditor;
 using UnityEngine;
 using XRTK.Inspectors.Profiles.InputSystem.Controllers;
 using XRTK.Lumin.Profiles;
-
 using UnityEngine.XR.MagicLeap;
 
 namespace XRTK.Lumin.Inspectors
@@ -48,3 +49,4 @@ namespace XRTK.Lumin.Inspectors
         }
     }
 }
+#endif // PLATFORM_LUMIN
