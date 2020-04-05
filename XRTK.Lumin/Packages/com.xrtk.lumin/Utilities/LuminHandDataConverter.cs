@@ -1,16 +1,15 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Definitions.Utilities;
-using XRTK.Definitions.Controllers.Hands;
-
 #if PLATFORM_LUMIN
+
 using System;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
-#endif
+using XRTK.Definitions.Controllers.Hands;
+using XRTK.Definitions.Utilities;
 
-namespace XRTK.Lumin.Controllers
+namespace XRTK.Lumin.Utilities
 {
     /// <summary>
     /// Converts oculus hand data to <see cref="HandData"/>.
@@ -28,8 +27,6 @@ namespace XRTK.Lumin.Controllers
 
         private readonly Handedness handedness;
 
-#if PLATFORM_LUMIN
-
         /// <summary>
         /// Gets or sets whether hand mesh data should be read and converted.
         /// </summary>
@@ -41,8 +38,8 @@ namespace XRTK.Lumin.Controllers
         /// <returns>Platform agnostics hand data.</returns>
         public HandData GetHandData()
         {
-            MLHand hand = ToMagicLeapHand(handedness);
-            HandData updatedHandData = new HandData
+            var hand = ToMagicLeapHand(handedness);
+            var updatedHandData = new HandData
             {
                 IsTracked = hand.IsVisible,
                 TimeStamp = DateTimeOffset.UtcNow.Ticks
@@ -77,16 +74,17 @@ namespace XRTK.Lumin.Controllers
 
         private void UpdateHandJoints(MLHand hand, MixedRealityPose[] jointPoses)
         {
-            MLFinger pinky = hand.Pinky;
-            MLFinger ring = hand.Ring;
-            MLFinger middle = hand.Middle;
-            MLFinger index = hand.Index;
-            MLThumb thumb = hand.Thumb;
-            MLWrist wrist = hand.Wrist;
+            var ring = hand.Ring;
+            var pinky = hand.Pinky;
+            var index = hand.Index;
+            var thumb = hand.Thumb;
+            var wrist = hand.Wrist;
+            var middle = hand.Middle;
 
             for (int i = 0; i < jointPoses.Length; i++)
             {
-                TrackedHandJoint trackedHandJoint = (TrackedHandJoint)i;
+                var trackedHandJoint = (TrackedHandJoint)i;
+
                 switch (trackedHandJoint)
                 {
                     // Wrist and Palm
@@ -205,7 +203,7 @@ namespace XRTK.Lumin.Controllers
 
         private MixedRealityPose ComputeJointPose(MLKeyPoint keyPoint)
         {
-            MixedRealityPose pose = MixedRealityPose.ZeroIdentity;
+            var pose = MixedRealityPose.ZeroIdentity;
 
             if (keyPoint.IsValid)
             {
@@ -218,6 +216,6 @@ namespace XRTK.Lumin.Controllers
             return pose;
         }
 
-#endif
     }
 }
+#endif // PLATFORM_LUMIN
