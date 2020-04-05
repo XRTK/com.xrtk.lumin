@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using XRTK.Lumin.Profiles;
-using XRTK.Lumin.Utilities;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
@@ -14,6 +13,7 @@ using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
+using XRTK.Lumin.Utilities;
 using XRTK.Services;
 
 #endif // PLATFORM_LUMIN
