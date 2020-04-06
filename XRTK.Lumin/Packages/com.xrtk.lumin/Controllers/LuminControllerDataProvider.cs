@@ -158,11 +158,11 @@ namespace XRTK.Lumin.Controllers
             if (controller != null)
             {
                 MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
-                RemoveController(controller);
             }
 
             if (removeFromRegistry)
             {
+                RemoveController(controller);
                 activeControllers.Remove(controllerId);
             }
         }
