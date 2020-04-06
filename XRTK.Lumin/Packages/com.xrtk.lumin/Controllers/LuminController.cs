@@ -5,6 +5,7 @@ using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
+using XRTK.Interfaces.Providers.Controllers;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
@@ -18,8 +19,8 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminController : BaseController
     {
-        public LuminController(TrackingState trackingState, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
-            : base(trackingState, controllerHandedness, inputSource, interactions)
+        public LuminController(IMixedRealityControllerDataProvider dataProvider, TrackingState trackingState, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
+            : base(dataProvider, trackingState, controllerHandedness, inputSource, interactions)
         {
         }
 

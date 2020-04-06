@@ -43,6 +43,8 @@ namespace XRTK.Lumin.Controllers
         private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
+        private bool isEnabled = false;
+
         /// <inheritdoc />
         public override void Enable()
         {
@@ -56,21 +58,22 @@ namespace XRTK.Lumin.Controllers
                     return;
                 }
 
-                bool status = MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true);
+                isEnabled = true;
+            }
 
-                if (!status)
-                {
-                    Debug.LogError("Error: Failed enabling tracked key poses.");
-                    return;
-                }
+            if (!MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true))
+            {
+                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.EnableKeyPoses)}.");
+            }
 
-                MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel);
-                MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel);
+            if (!MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel))
+            {
+                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetKeyPointsFilterLevel)}.");
+            }
 
-                if (!MLHands.KeyPoseManager.LastConfigurationApplied())
-                {
-                    Debug.LogError("Error: Failed updating key pose configuration!");
-                }
+            if (!MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel))
+            {
+                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
             }
 
             LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
@@ -81,37 +84,20 @@ namespace XRTK.Lumin.Controllers
         {
             base.Update();
 
-            if (MLHands.IsStarted)
+            if (isEnabled)
             {
-                if (MLHands.Left.IsVisible)
-                {
-                    var controller = GetOrAddController(Handedness.Left);
-                    controller?.UpdateController(leftHandConverter.GetHandData());
-                }
-                else
-                {
-                    RemoveController(Handedness.Left);
-                }
-
-                if (MLHands.Right.IsVisible)
-                {
-                    var controller = GetOrAddController(Handedness.Right);
-                    controller?.UpdateController(rightHandConverter.GetHandData());
-                }
-                else
-                {
-                    RemoveController(Handedness.Right);
-                }
+                GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
+                GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
             }
         }
 
         /// <inheritdoc />
         public override void Disable()
         {
-            if (MLHands.IsStarted)
+            if (isEnabled)
             {
-                MLHands.Stop();
                 MLHands.KeyPoseManager.DisableAllKeyPoses();
+                MLHands.Stop();
             }
 
             foreach (var activeController in activeControllers)
@@ -133,7 +119,7 @@ namespace XRTK.Lumin.Controllers
             var controllerType = typeof(MixedRealityHandController);
             var pointers = RequestPointers(controllerType, handedness, true);
             var inputSource = MixedRealityToolkit.InputSystem.RequestNewGenericInputSource($"{handedness} Hand Controller", pointers);
-            var detectedController = new MixedRealityHandController(TrackingState.Tracked, handedness, inputSource);
+            var detectedController = new MixedRealityHandController(this, TrackingState.Tracked, handedness, inputSource);
 
             if (!detectedController.SetupConfiguration(controllerType))
             {
@@ -150,6 +136,7 @@ namespace XRTK.Lumin.Controllers
             detectedController.TryRenderControllerModel(controllerType);
 
             activeControllers.Add(handedness, detectedController);
+            AddController(detectedController);
             MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
 
             return detectedController;
@@ -163,6 +150,7 @@ namespace XRTK.Lumin.Controllers
 
                 if (removeFromRegistry)
                 {
+                    RemoveController(controller);
                     activeControllers.Remove(handedness);
                 }
             }
