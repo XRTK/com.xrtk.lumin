@@ -92,7 +92,7 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = ComputeJointPose(wrist.Center);
                         break;
                     case TrackedHandJoint.Palm:
-                        jointPoses[i] = EstimatePalmPose(wrist.Center, middle.DIP);
+                        jointPoses[i] = EstimatePalmPose(wrist.Center, middle.MCP);
                         break;
                     // Finger: Thumb
                     case TrackedHandJoint.ThumbMetacarpalJoint:

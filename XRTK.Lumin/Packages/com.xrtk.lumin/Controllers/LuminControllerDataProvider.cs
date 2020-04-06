@@ -131,7 +131,7 @@ namespace XRTK.Lumin.Controllers
 
             var pointers = mlController.Type == MLInputControllerType.Control ? RequestPointers(typeof(LuminController), controllingHand) : null;
             var inputSource = MixedRealityToolkit.InputSystem?.RequestNewGenericInputSource($"Lumin Controller {controllingHand}", pointers);
-            var detectedController = new LuminController(TrackingState.NotTracked, controllingHand, inputSource);
+            var detectedController = new LuminController(this, TrackingState.NotTracked, controllingHand, inputSource);
 
             if (!detectedController.SetupConfiguration(typeof(LuminController)))
             {
@@ -158,11 +158,11 @@ namespace XRTK.Lumin.Controllers
             if (controller != null)
             {
                 MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
-                RemoveController(controller);
             }
 
             if (removeFromRegistry)
             {
+                RemoveController(controller);
                 activeControllers.Remove(controllerId);
             }
         }
