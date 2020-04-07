@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
+using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Controllers.Hands;
 using XRTK.Definitions.Utilities;
 
@@ -29,5 +30,10 @@ namespace XRTK.Lumin.Profiles
         /// Configured level of filtering for static poses.
         /// </summary>
         public int PoseFilterLevel => poseFilterLevel;
+
+        public override ControllerDefinition[] GetControllerDefinitions()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
