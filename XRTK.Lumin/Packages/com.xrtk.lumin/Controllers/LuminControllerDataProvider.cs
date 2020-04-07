@@ -1,7 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Definitions.Controllers;
+using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
@@ -25,7 +25,7 @@ namespace XRTK.Lumin.Controllers
         /// <param name="name"></param>
         /// <param name="priority"></param>
         /// <param name="profile"></param>
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
+        public LuminControllerDataProvider(string name, uint priority, LuminControllerDataProviderProfile profile)
             : base(name, priority, profile)
         {
         }

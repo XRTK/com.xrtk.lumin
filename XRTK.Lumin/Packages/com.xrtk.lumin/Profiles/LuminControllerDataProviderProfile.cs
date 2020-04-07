@@ -5,7 +5,7 @@ using XRTK.Definitions.Controllers;
 
 namespace XRTK.Lumin.Profiles
 {
-    public class LuminMotionControllerDataProviderProfile : BaseMixedRealityControllerDataProviderProfile
+    public class LuminControllerDataProviderProfile : BaseMixedRealityControllerDataProviderProfile
     {
         public override ControllerDefinition[] GetControllerDefinitions()
         {
