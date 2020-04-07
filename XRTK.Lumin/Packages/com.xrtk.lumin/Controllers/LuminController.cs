@@ -19,11 +19,13 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminController : BaseController
     {
-        public LuminController(IMixedRealityControllerDataProvider dataProvider, TrackingState trackingState, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
-            : base(dataProvider, trackingState, controllerHandedness, inputSource, interactions)
+        /// <inheritdoc />
+        public LuminController(IMixedRealityControllerDataProvider controllerDataProvider, TrackingState trackingState, Handedness controllerHandedness, IMixedRealityInputSource inputSource = null, MixedRealityInteractionMapping[] interactions = null)
+            : base(controllerDataProvider, trackingState, controllerHandedness, inputSource, interactions)
         {
         }
 
+        /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultInteractions => new[]
         {
             new MixedRealityInteractionMapping(0, "Spatial Pointer", AxisType.SixDof, DeviceInputType.SpatialPointer, MixedRealityInputAction.None),
@@ -43,6 +45,7 @@ namespace XRTK.Lumin.Controllers
         /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultRightHandedInteractions => DefaultInteractions;
 
+        /// <inheritdoc />
         public override void SetupDefaultInteractions(Handedness controllerHandedness)
         {
             AssignControllerMappings(DefaultInteractions);
