@@ -1,18 +1,20 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.InputSystem;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Interfaces.Providers.Controllers;
-using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
+
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Extensions;
 using XRTK.Services;
+
 #endif
 
 namespace XRTK.Lumin.Controllers
