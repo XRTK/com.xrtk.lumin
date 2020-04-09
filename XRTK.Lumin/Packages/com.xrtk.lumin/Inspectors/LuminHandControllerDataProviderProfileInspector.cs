@@ -32,11 +32,8 @@ namespace XRTK.Lumin.Inspectors
 
         public override void OnInspectorGUI()
         {
-            RenderHeader();
-
-            EditorGUILayout.LabelField("Lumin Hand Controller Data Provider Settings", EditorStyles.boldLabel);
-
             base.OnInspectorGUI();
+
             serializedObject.Update();
 
             EditorGUILayout.Space();
