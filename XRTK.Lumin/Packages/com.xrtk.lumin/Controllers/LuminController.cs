@@ -20,6 +20,8 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminController : BaseController
     {
+        public LuminController() : base() { }
+
         /// <inheritdoc />
         public LuminController(IMixedRealityControllerDataProvider controllerDataProvider, TrackingState trackingState, Handedness controllerHandedness, MixedRealityControllerMappingProfile controllerMappingProfile)
             : base(controllerDataProvider, trackingState, controllerHandedness, controllerMappingProfile)
