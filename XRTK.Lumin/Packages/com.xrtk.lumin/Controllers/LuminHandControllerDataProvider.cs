@@ -128,7 +128,7 @@ namespace XRTK.Lumin.Controllers
                 return null;
             }
 
-            detectedController.TryRenderControllerModel(typeof(MixedRealityHandController));
+            detectedController.TryRenderControllerModel();
 
             activeControllers.Add(handedness, detectedController);
             AddController(detectedController);
