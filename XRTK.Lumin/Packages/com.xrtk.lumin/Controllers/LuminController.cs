@@ -198,8 +198,8 @@ namespace XRTK.Lumin.Controllers
                 case DeviceInputType.Trigger:
                 case DeviceInputType.TriggerPress:
                 case DeviceInputType.TouchpadPress:
-                    var processor = interactionMapping.GetInputProcessors<InvertSingleAxisProcessor>();
-                    interactionMapping.BoolData = interactionMapping.FloatData.Equals(processor.Invert ? -1f : 1f);
+                    interactionMapping.BoolData = interactionMapping.FloatData.Approximately(1f, 0.001f) ||
+                                                  interactionMapping.FloatData.Approximately(-1f, 0.001f);
                     break;
                 case DeviceInputType.TriggerTouch:
                 case DeviceInputType.TouchpadTouch:
