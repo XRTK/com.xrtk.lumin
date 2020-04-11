@@ -3,11 +3,9 @@
 
 using UnityEngine;
 using XRTK.Definitions.Controllers.Hands;
-using XRTK.Definitions.Utilities;
 
 namespace XRTK.Lumin.Profiles
 {
-    [CreateAssetMenu(menuName = "Mixed Reality Toolkit/Input System/Controller Data Providers/Lumin Hand", fileName = "LuminHandControllerDataProviderProfile", order = (int)CreateProfileMenuItemIndices.Input)]
     public class LuminHandControllerDataProviderProfile : BaseHandControllerDataProviderProfile
     {
         [Header("Lumin Platform Settings")]
