@@ -48,12 +48,6 @@ namespace XRTK.Lumin.Controllers
         /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultRightHandedInteractions => DefaultInteractions;
 
-        /// <inheritdoc />
-        public override void SetupDefaultInteractions(Handedness controllerHandedness)
-        {
-            AssignControllerMappings(DefaultInteractions);
-        }
-
 #if PLATFORM_LUMIN
 
         internal MLInputController MlControllerReference { get; set; }
