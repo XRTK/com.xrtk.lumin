@@ -14,7 +14,7 @@ namespace XRTK.Definitions.Platforms
             get
             {
 #if PLATFORM_LUMIN
-                return true;
+                return !UnityEngine.Application.isEditor;
 #else
                 return false;
 #endif
