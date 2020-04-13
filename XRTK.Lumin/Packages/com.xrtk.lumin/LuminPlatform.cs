@@ -9,12 +9,25 @@ namespace XRTK.Definitions.Platforms
     public class LuminPlatform : BasePlatform
     {
         /// <inheritdoc />
-        public override bool IsAvailable
+        public override bool IsActive
         {
             get
             {
 #if PLATFORM_LUMIN
                 return !UnityEngine.Application.isEditor;
+#else
+                return false;
+#endif
+            }
+        }
+
+        /// <inheritdoc />
+        public override bool IsBuildTargetAvailable
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return UnityEditor.EditorUserBuildSettings.activeBuildTarget == UnityEditor.BuildTarget.Lumin;
 #else
                 return false;
 #endif
