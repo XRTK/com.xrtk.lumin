@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using XRTK.Lumin.Profiles;
-using XRTK.Definitions.Controllers;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Providers.Controllers;
 
