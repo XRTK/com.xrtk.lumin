@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using XRTK.Definitions.Controllers;
+using XRTK.Interfaces.InputSystem;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
@@ -19,14 +20,9 @@ namespace XRTK.Lumin.Controllers
 {
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="priority"></param>
-        /// <param name="profile"></param>
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile)
-            : base(name, priority, profile)
+        /// <inheritdoc />
+        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile, IMixedRealityInputSystem parentService)
+            : base(name, priority, profile, parentService)
         {
         }
 
