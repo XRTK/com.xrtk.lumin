@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using XRTK.Definitions.CameraSystem;
+using XRTK.Interfaces.CameraSystem;
 using XRTK.Providers.CameraSystem;
 
 namespace XRTK.Lumin.Providers.CameraSystem
@@ -9,8 +10,8 @@ namespace XRTK.Lumin.Providers.CameraSystem
     public class LuminCameraDataProvider : BaseCameraDataProvider
     {
         /// <inheritdoc />
-        public LuminCameraDataProvider(string name, uint priority, BaseMixedRealityCameraDataProviderProfile profile)
-            : base(name, priority, profile)
+        public LuminCameraDataProvider(string name, uint priority, BaseMixedRealityCameraDataProviderProfile profile, IMixedRealityCameraSystem parentService)
+            : base(name, priority, profile, parentService)
         {
         }
 
