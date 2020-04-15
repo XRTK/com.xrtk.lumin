@@ -8,8 +8,6 @@ namespace XRTK.Lumin.Profiles
 {
     public class LuminHandControllerDataProviderProfile : BaseHandControllerDataProviderProfile
     {
-        [Header("Lumin Platform Settings")]
-
         [SerializeField]
         [Tooltip("Configured level for keypoints filtering of keypoints and hand centers.")]
         private int keyPointFilterLevel = 0;

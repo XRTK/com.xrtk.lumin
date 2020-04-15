@@ -1,9 +1,9 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-
 using UnityEditor;
 using UnityEngine;
+using XRTK.Inspectors.Extensions;
 using XRTK.Inspectors.Profiles.InputSystem.Controllers;
 using XRTK.Lumin.Profiles;
 
@@ -19,17 +19,26 @@ namespace XRTK.Lumin.Inspectors
         private SerializedProperty poseFilterLevel;
         private SerializedProperty keyPointFilterLevel;
 
+        private static readonly GUIContent handTrackingFoldoutHeader = new GUIContent("Lumin Hand Tracking Settings");
+
+#if PLATFORM_LUMIN
         private GUIContent keyPointContent;
         private GUIContent poseFilterContent;
+#endif // PLATFORM_LUMIN
+
+        private bool showLuminHandTrackingSettings = true;
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
             keyPointFilterLevel = serializedObject.FindProperty(nameof(keyPointFilterLevel));
-            keyPointContent = new GUIContent(keyPointFilterLevel.displayName, keyPointFilterLevel.tooltip);
             poseFilterLevel = serializedObject.FindProperty(nameof(poseFilterLevel));
+
+#if PLATFORM_LUMIN
+            keyPointContent = new GUIContent(keyPointFilterLevel.displayName, keyPointFilterLevel.tooltip);
             poseFilterContent = new GUIContent(poseFilterLevel.displayName, poseFilterLevel.tooltip);
+#endif // PLATFORM_LUMIN
         }
 
         public override void OnInspectorGUI()
@@ -38,14 +47,19 @@ namespace XRTK.Lumin.Inspectors
 
             serializedObject.Update();
 
-            EditorGUILayout.LabelField("Oculus Hand Settings", EditorStyles.boldLabel);
+            showLuminHandTrackingSettings = EditorGUILayoutExtensions.FoldoutWithBoldLabel(showLuminHandTrackingSettings, handTrackingFoldoutHeader, true);
+            if (showLuminHandTrackingSettings)
+            {
+                EditorGUI.indentLevel++;
 #if PLATFORM_LUMIN
             keyPointFilterLevel.intValue = (int)(MLKeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLKeyPointFilterLevel)keyPointFilterLevel.intValue);
             poseFilterLevel.intValue = (int)(MLPoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLPoseFilterLevel)poseFilterLevel.intValue);
 #else
-            EditorGUILayout.PropertyField(keyPointFilterLevel);
-            EditorGUILayout.PropertyField(poseFilterLevel);
-#endif // PLATFORM_LUMIN
+                EditorGUILayout.PropertyField(keyPointFilterLevel);
+                EditorGUILayout.PropertyField(poseFilterLevel);
+#endif // PLATFORM_LUMIN                
+                EditorGUI.indentLevel--;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
