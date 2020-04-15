@@ -19,7 +19,7 @@ namespace XRTK.Lumin.Inspectors
         private SerializedProperty poseFilterLevel;
         private SerializedProperty keyPointFilterLevel;
 
-        private GUIContent handTrackingFoldoutHeader;
+        private static readonly GUIContent handTrackingFoldoutHeader = new GUIContent("Lumin Hand Tracking Settings");
 
 #if PLATFORM_LUMIN
         private GUIContent keyPointContent;
@@ -32,7 +32,6 @@ namespace XRTK.Lumin.Inspectors
         {
             base.OnEnable();
 
-            handTrackingFoldoutHeader = new GUIContent("Lumin Hand Tracking Settings");
             keyPointFilterLevel = serializedObject.FindProperty(nameof(keyPointFilterLevel));
             poseFilterLevel = serializedObject.FindProperty(nameof(poseFilterLevel));
 
