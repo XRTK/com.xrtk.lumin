@@ -11,10 +11,8 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
-using XRTK.Lumin.Utilities;
 using XRTK.Services;
 
 #endif // PLATFORM_LUMIN
@@ -30,12 +28,15 @@ namespace XRTK.Lumin.Controllers
 #if PLATFORM_LUMIN
             keyPointFilterLevel = (MLKeyPointFilterLevel)profile.KeyPointFilterLevel;
             poseFilterLevel = (MLPoseFilterLevel)profile.PoseFilterLevel;
+
+            leftHandConverter = new LuminHandDataConverter(Handedness.Left, TrackedPoses);
+            rightHandConverter = new LuminHandDataConverter(Handedness.Right, TrackedPoses);
         }
 
         private readonly MLPoseFilterLevel poseFilterLevel;
         private readonly MLKeyPointFilterLevel keyPointFilterLevel;
-        private readonly LuminHandDataConverter leftHandConverter = new LuminHandDataConverter(Handedness.Left);
-        private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
+        private readonly LuminHandDataConverter leftHandConverter;
+        private readonly LuminHandDataConverter rightHandConverter;
         private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
