@@ -40,12 +40,12 @@ namespace XRTK.Lumin.Providers.CameraSystem
         /// <inheritdoc />
         protected override void ResetRigTransforms()
         {
-            CameraRig.CameraTransform.position = Vector3.zero;
-            CameraRig.CameraTransform.rotation = Quaternion.identity;
-            CameraRig.BodyTransform.position = Vector3.zero;
-            CameraRig.BodyTransform.rotation = Quaternion.identity;
             CameraRig.PlayspaceTransform.position = new Vector3(0f, HeadHeight, 0f);
             CameraRig.PlayspaceTransform.rotation = Quaternion.identity;
+            CameraRig.CameraTransform.localPosition = Vector3.zero;
+            CameraRig.CameraTransform.localRotation = Quaternion.identity;
+            CameraRig.BodyTransform.localPosition = Vector3.zero;
+            CameraRig.BodyTransform.localRotation = Quaternion.identity;
         }
     }
 }
