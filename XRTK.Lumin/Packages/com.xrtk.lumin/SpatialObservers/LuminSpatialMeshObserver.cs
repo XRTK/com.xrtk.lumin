@@ -101,8 +101,8 @@ namespace XRTK.Lumin.SpatialObservers
             // Update the observer location if it is not stationary
             if (!IsStationaryObserver)
             {
-                ObserverOrigin = MixedRealityToolkit.CameraSystem.CameraRig.CameraTransform.position;
-                ObserverOrientation = MixedRealityToolkit.CameraSystem.CameraRig.CameraTransform.rotation;
+                ObserverOrigin = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.position;
+                ObserverOrientation = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.rotation;
             }
 
             ConfigureObserverVolume();
