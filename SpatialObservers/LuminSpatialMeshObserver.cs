@@ -42,6 +42,7 @@ namespace XRTK.Lumin.SpatialObservers
 
         #region IMixedRealityService implementation
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             base.Initialize();
@@ -101,8 +102,17 @@ namespace XRTK.Lumin.SpatialObservers
             // Update the observer location if it is not stationary
             if (!IsStationaryObserver)
             {
-                ObserverOrigin = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.position;
-                ObserverOrientation = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.rotation;
+                if (MixedRealityToolkit.CameraSystem != null)
+                {
+                    ObserverOrigin = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.localPosition;
+                    ObserverOrientation = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.localRotation;
+                }
+                else
+                {
+                    var cameraTransform = CameraCache.Main.transform;
+                    ObserverOrigin = cameraTransform.position;
+                    ObserverOrientation = cameraTransform.rotation;
+                }
             }
 
             ConfigureObserverVolume();
@@ -151,6 +161,7 @@ namespace XRTK.Lumin.SpatialObservers
             lastUpdated = 0;
         }
 
+        /// <inheritdoc />
         public override void StopObserving()
         {
             if (!IsRunning)
@@ -174,16 +185,8 @@ namespace XRTK.Lumin.SpatialObservers
                 flags |= LuminApi.MeshingFlags.ComputeNormals;
             }
 
-            // TODO Extend the observer profile with these options. 
-
-            //if (requestVertexConfidence)
-            //    flags |= LuminApi.MeshingFlags.ComputeConfidence;
-            //if (planarize)
             flags |= LuminApi.MeshingFlags.Planarize;
-            //if (removeMeshSkirt)
-            //    flags |= LuminApi.MeshingFlags.RemoveMeshSkirt;
-            //if (meshType == MeshType.PointCloud)
-            //    flags |= LuminApi.MeshingFlags.PointCloud;
+            flags |= LuminApi.MeshingFlags.RemoveMeshSkirt;
 
             var settings = new LuminApi.MeshingSettings
             {
@@ -203,7 +206,7 @@ namespace XRTK.Lumin.SpatialObservers
             if (meshInfo.ChangeState != MeshChangeState.Removed)
             {
                 var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.MeshId.GetHashCode());
-                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId.ToString()}";
+                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId}";
 
                 var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
 
@@ -225,14 +228,14 @@ namespace XRTK.Lumin.SpatialObservers
 
                     if (result.Status != MeshGenerationStatus.Success)
                     {
-                        Debug.LogWarning($"No output for {result.MeshId.ToString()} | {result.Status}");
+                        Debug.LogWarning($"No output for {result.MeshId} | {result.Status}");
                         RaiseMeshRemoved(spatialMeshObject);
                         return;
                     }
 
                     if (!SpatialMeshObjects.TryGetValue(result.MeshId.GetHashCode(), out var meshObject))
                     {
-                        Debug.LogWarning($"Failed to find a spatial mesh object for {result.MeshId.ToString()}!");
+                        Debug.LogWarning($"Failed to find a spatial mesh object for {result.MeshId}!");
                         // Likely it was removed before data could be cooked.
                         return;
                     }
@@ -268,7 +271,10 @@ namespace XRTK.Lumin.SpatialObservers
                         }
                     }
 
-                    meshObject.GameObject.SetActive(true);
+                    if (!meshObject.GameObject.activeInHierarchy)
+                    {
+                        meshObject.GameObject.SetActive(true);
+                    }
 
                     switch (meshInfo.ChangeState)
                     {
