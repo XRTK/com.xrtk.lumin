@@ -1,13 +1,15 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-#if PLATFORM_LUMIN
-
 using UnityEditor;
 using UnityEngine;
+using XRTK.Inspectors.Extensions;
 using XRTK.Inspectors.Profiles.InputSystem.Controllers;
 using XRTK.Lumin.Profiles;
+
+#if PLATFORM_LUMIN
 using UnityEngine.XR.MagicLeap;
+#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Inspectors
 {
@@ -17,36 +19,49 @@ namespace XRTK.Lumin.Inspectors
         private SerializedProperty poseFilterLevel;
         private SerializedProperty keyPointFilterLevel;
 
+        private static readonly GUIContent handTrackingFoldoutHeader = new GUIContent("Lumin Hand Tracking Settings");
+
+#if PLATFORM_LUMIN
         private GUIContent keyPointContent;
         private GUIContent poseFilterContent;
+#endif // PLATFORM_LUMIN
+
+        private bool showLuminHandTrackingSettings = true;
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
             keyPointFilterLevel = serializedObject.FindProperty(nameof(keyPointFilterLevel));
-            keyPointContent = new GUIContent(keyPointFilterLevel.displayName, keyPointFilterLevel.tooltip);
             poseFilterLevel = serializedObject.FindProperty(nameof(poseFilterLevel));
+
+#if PLATFORM_LUMIN
+            keyPointContent = new GUIContent(keyPointFilterLevel.displayName, keyPointFilterLevel.tooltip);
             poseFilterContent = new GUIContent(poseFilterLevel.displayName, poseFilterLevel.tooltip);
+#endif // PLATFORM_LUMIN
         }
 
         public override void OnInspectorGUI()
         {
-            RenderHeader();
-
-            EditorGUILayout.LabelField("Lumin Hand Controller Data Provider Settings", EditorStyles.boldLabel);
-
             base.OnInspectorGUI();
+
             serializedObject.Update();
 
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Lumin Hand Settings");
-
+            showLuminHandTrackingSettings = EditorGUILayoutExtensions.FoldoutWithBoldLabel(showLuminHandTrackingSettings, handTrackingFoldoutHeader, true);
+            if (showLuminHandTrackingSettings)
+            {
+                EditorGUI.indentLevel++;
+#if PLATFORM_LUMIN
             keyPointFilterLevel.intValue = (int)(MLKeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLKeyPointFilterLevel)keyPointFilterLevel.intValue);
             poseFilterLevel.intValue = (int)(MLPoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLPoseFilterLevel)poseFilterLevel.intValue);
+#else
+                EditorGUILayout.PropertyField(keyPointFilterLevel);
+                EditorGUILayout.PropertyField(poseFilterLevel);
+#endif // PLATFORM_LUMIN                
+                EditorGUI.indentLevel--;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
     }
 }
-#endif // PLATFORM_LUMIN

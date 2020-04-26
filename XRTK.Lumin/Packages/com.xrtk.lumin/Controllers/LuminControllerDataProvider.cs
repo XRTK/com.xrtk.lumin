@@ -1,12 +1,13 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Definitions.Controllers;
+using XRTK.Lumin.Profiles;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Providers.Controllers;
 
 #if PLATFORM_LUMIN
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
@@ -21,7 +22,7 @@ namespace XRTK.Lumin.Controllers
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
         /// <inheritdoc />
-        public LuminControllerDataProvider(string name, uint priority, BaseMixedRealityControllerDataProviderProfile profile, IMixedRealityInputSystem parentService)
+        public LuminControllerDataProvider(string name, uint priority, LuminControllerDataProviderProfile profile, IMixedRealityInputSystem parentService)
             : base(name, priority, profile, parentService)
         {
         }
@@ -110,35 +111,31 @@ namespace XRTK.Lumin.Controllers
 
             if (mlController.Type == MLInputControllerType.None) { return null; }
 
-            var controllingHand = Handedness.Any;
+            var handedness = Handedness.Any;
 
             if (mlController.Type == MLInputControllerType.Control)
             {
                 switch (mlController.Hand)
                 {
                     case MLInput.Hand.Left:
-                        controllingHand = Handedness.Left;
+                        handedness = Handedness.Left;
                         break;
                     case MLInput.Hand.Right:
-                        controllingHand = Handedness.Right;
+                        handedness = Handedness.Right;
                         break;
                 }
             }
 
-            var pointers = mlController.Type == MLInputControllerType.Control ? RequestPointers(typeof(LuminController), controllingHand) : null;
-            var inputSource = MixedRealityToolkit.InputSystem?.RequestNewGenericInputSource($"Lumin Controller {controllingHand}", pointers);
-            var detectedController = new LuminController(this, TrackingState.NotTracked, controllingHand, inputSource);
+            LuminController detectedController;
 
-            if (!detectedController.SetupConfiguration(typeof(LuminController)))
+            try
             {
-                // Controller failed to be setup correctly.
-                // Return null so we don't raise the source detected.
-                return null;
+                detectedController = new LuminController(this, TrackingState.NotTracked, handedness, GetControllerMappingProfile(typeof(LuminController), handedness));
             }
-
-            for (int i = 0; i < detectedController.InputSource?.Pointers?.Length; i++)
+            catch (Exception e)
             {
-                detectedController.InputSource.Pointers[i].Controller = detectedController;
+                Debug.LogError($"Failed to create {nameof(LuminController)}!\n{e}");
+                return null;
             }
 
             detectedController.MlControllerReference = mlController;

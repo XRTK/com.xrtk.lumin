@@ -112,24 +112,19 @@ namespace XRTK.Lumin.Controllers
                 return existingController;
             }
 
-            var controllerType = typeof(MixedRealityHandController);
-            var pointers = RequestPointers(controllerType, handedness, true);
-            var inputSource = MixedRealityToolkit.InputSystem.RequestNewGenericInputSource($"{handedness} Hand Controller", pointers);
-            var detectedController = new MixedRealityHandController(this, TrackingState.Tracked, handedness, inputSource);
+            MixedRealityHandController detectedController;
 
-            if (!detectedController.SetupConfiguration(controllerType))
+            try
             {
-                // Controller failed to be setup correctly.
-                // Return null so we don't raise the source detected.
+                detectedController = new MixedRealityHandController(this, TrackingState.Tracked, handedness, GetControllerMappingProfile(typeof(MixedRealityHandController), handedness));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to create {nameof(MixedRealityHandController)}!\n{e}");
                 return null;
             }
 
-            for (int i = 0; i < detectedController.InputSource?.Pointers?.Length; i++)
-            {
-                detectedController.InputSource.Pointers[i].Controller = detectedController;
-            }
-
-            detectedController.TryRenderControllerModel(controllerType);
+            detectedController.TryRenderControllerModel();
 
             activeControllers.Add(handedness, detectedController);
             AddController(detectedController);

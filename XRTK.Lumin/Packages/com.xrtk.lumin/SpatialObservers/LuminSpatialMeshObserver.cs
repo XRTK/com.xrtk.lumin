@@ -14,7 +14,7 @@ using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Services;
-using XRTK.Utilities;
+
 #endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.SpatialObservers
