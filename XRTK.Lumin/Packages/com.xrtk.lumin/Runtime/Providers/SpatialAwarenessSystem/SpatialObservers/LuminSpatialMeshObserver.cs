@@ -17,7 +17,7 @@ using XRTK.Services;
 
 #endif // PLATFORM_LUMIN
 
-namespace XRTK.Lumin.SpatialObservers
+namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
     /// <summary>
     /// Lumin Spatial Mesh Observer
