@@ -13,7 +13,7 @@ using UnityEngine;
 
 #endif // PLATFORM_LUMIN
 
-namespace XRTK.Lumin.Controllers
+namespace XRTK.Lumin.Utilities
 {
     /// <summary>
     /// Converts oculus hand data to <see cref="HandData"/>.
