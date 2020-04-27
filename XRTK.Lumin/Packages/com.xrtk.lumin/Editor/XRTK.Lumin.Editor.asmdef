@@ -1,5 +1,5 @@
 {
-    "name": "XRTK.Lumin.Inspectors",
+    "name": "XRTK.Lumin.Editor",
     "references": [
         "GUID:e67d30660ec243e4836aac191d3f36fb",
         "GUID:49d8940ef8dc2f044abcf0447091dced",

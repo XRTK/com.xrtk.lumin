@@ -17,7 +17,7 @@ using XRTK.Services;
 
 #endif // PLATFORM_LUMIN
 
-namespace XRTK.Lumin.Controllers
+namespace XRTK.Lumin.Providers.Controllers
 {
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
