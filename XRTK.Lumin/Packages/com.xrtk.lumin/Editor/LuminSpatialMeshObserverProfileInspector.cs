@@ -5,7 +5,7 @@ using UnityEditor;
 using XRTK.Inspectors.Profiles.SpatialAwareness;
 using XRTK.Lumin.Profiles;
 
-namespace XRTK.Lumin.Inspectors
+namespace XRTK.Lumin.Editor
 {
     [CustomEditor(typeof(LuminSpatialMeshObserverProfile))]
     public class LuminSpatialMeshObserverProfileInspector : BaseMixedRealitySpatialMeshObserverProfileInspector
