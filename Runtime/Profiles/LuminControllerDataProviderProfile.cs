@@ -3,7 +3,7 @@
 
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Utilities;
-using XRTK.Lumin.Controllers;
+using XRTK.Lumin.Providers.Controllers;
 
 namespace XRTK.Lumin.Profiles
 {

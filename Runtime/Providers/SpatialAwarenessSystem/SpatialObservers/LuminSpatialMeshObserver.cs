@@ -6,6 +6,7 @@ using XRTK.Lumin.Profiles;
 using XRTK.Providers.SpatialObservers;
 
 #if PLATFORM_LUMIN
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,10 +15,11 @@ using UnityEngine.Experimental.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Services;
+using XRTK.Utilities;
 
 #endif // PLATFORM_LUMIN
 
-namespace XRTK.Lumin.SpatialObservers
+namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
     /// <summary>
     /// Lumin Spatial Mesh Observer
