@@ -11,7 +11,7 @@ using XRTK.Lumin.Profiles;
 using UnityEngine.XR.MagicLeap;
 #endif // PLATFORM_LUMIN
 
-namespace XRTK.Lumin.Inspectors
+namespace XRTK.Lumin.Editor
 {
     [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
     public class LuminHandControllerDataProviderProfileInspector : BaseMixedRealityHandControllerDataProviderProfileInspector
