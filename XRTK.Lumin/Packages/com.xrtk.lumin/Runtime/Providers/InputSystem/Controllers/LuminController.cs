@@ -16,7 +16,7 @@ using XRTK.Services;
 
 #endif
 
-namespace XRTK.Lumin.Providers.Controllers
+namespace XRTK.Lumin.Providers.InputSystem.Controllers
 {
     public class LuminController : BaseController
     {
