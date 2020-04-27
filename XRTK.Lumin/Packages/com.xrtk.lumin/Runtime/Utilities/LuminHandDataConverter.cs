@@ -1,31 +1,34 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.Collections.Generic;
+using XRTK.Definitions.Controllers.Hands;
+using XRTK.Definitions.Utilities;
+using XRTK.Providers.Controllers.Hands;
+
 #if PLATFORM_LUMIN
 
 using System;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
-using XRTK.Definitions.Controllers.Hands;
-using XRTK.Definitions.Utilities;
 
-namespace XRTK.Lumin.Utilities
+#endif // PLATFORM_LUMIN
+
+namespace XRTK.Lumin.Controllers
 {
     /// <summary>
     /// Converts oculus hand data to <see cref="HandData"/>.
     /// </summary>
-    public sealed class LuminHandDataConverter
+    public sealed class LuminHandDataConverter : BaseHandDataConverter
     {
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="handedness">Handedness of the hand this converter is created for.</param>
-        public LuminHandDataConverter(Handedness handedness)
-        {
-            this.handedness = handedness;
-        }
+        /// <param name="trackedPoses">The tracked poses collection to use for pose recognition.</param>
+        public LuminHandDataConverter(Handedness handedness, IReadOnlyList<HandControllerPoseDefinition> trackedPoses) : base(handedness, trackedPoses)
+        { }
 
-        private readonly Handedness handedness;
+#if PLATFORM_LUMIN
 
         /// <summary>
         /// Gets or sets whether hand mesh data should be read and converted.
@@ -38,7 +41,7 @@ namespace XRTK.Lumin.Utilities
         /// <returns>Platform agnostics hand data.</returns>
         public HandData GetHandData()
         {
-            var hand = ToMagicLeapHand(handedness);
+            var hand = ToMagicLeapHand(Handedness);
             var updatedHandData = new HandData
             {
                 IsTracked = hand.IsVisible,
@@ -51,6 +54,7 @@ namespace XRTK.Lumin.Utilities
                 UpdateHandMesh(hand, updatedHandData.Mesh);
             }
 
+            PostProcess(updatedHandData);
             return updatedHandData;
         }
 
@@ -215,6 +219,7 @@ namespace XRTK.Lumin.Utilities
 
             return pose;
         }
+
+#endif // PLATFORM_LUMIN
     }
 }
-#endif // PLATFORM_LUMIN
