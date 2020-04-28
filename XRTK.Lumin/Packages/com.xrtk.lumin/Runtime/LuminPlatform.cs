@@ -6,6 +6,7 @@ namespace XRTK.Definitions.Platforms
     /// <summary>
     /// Used by the XRTK to signal that the feature is available on the Lumin platform.
     /// </summary>
+    [System.Runtime.InteropServices.Guid("39EBB366-21A7-4D08-9412-036B32976D0C")]
     public class LuminPlatform : BasePlatform
     {
         /// <inheritdoc />
