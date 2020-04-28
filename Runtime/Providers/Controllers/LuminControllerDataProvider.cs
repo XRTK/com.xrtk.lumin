@@ -19,6 +19,7 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
+    [System.Runtime.InteropServices.Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
         /// <inheritdoc />

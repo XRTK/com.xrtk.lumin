@@ -8,6 +8,7 @@ using XRTK.Providers.CameraSystem;
 
 namespace XRTK.Lumin.Providers.CameraSystem
 {
+    [System.Runtime.InteropServices.Guid("49E17DAC-C786-4B1A-A66A-54DA654923D5")]
     public class LuminCameraDataProvider : BaseCameraDataProvider
     {
 
