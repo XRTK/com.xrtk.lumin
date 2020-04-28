@@ -19,6 +19,7 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.InputSystem.Controllers
 {
+    [System.Runtime.InteropServices.Guid("9511D571-2E24-41EF-AA7E-DF4432617DE1")]
     public class LuminHandControllerDataProvider : BaseHandControllerDataProvider
     {
         /// <inheritdoc />

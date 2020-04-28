@@ -18,9 +18,11 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.InputSystem.Controllers
 {
+    [System.Runtime.InteropServices.Guid("6AC05D69-0E7A-4CFE-91E3-05BC0564458D")]
     public class LuminController : BaseController
     {
-        public LuminController() : base() { }
+        /// <inheritdoc />
+        public LuminController() { }
 
         /// <inheritdoc />
         public LuminController(IMixedRealityControllerDataProvider controllerDataProvider, TrackingState trackingState, Handedness controllerHandedness, MixedRealityControllerMappingProfile controllerMappingProfile)

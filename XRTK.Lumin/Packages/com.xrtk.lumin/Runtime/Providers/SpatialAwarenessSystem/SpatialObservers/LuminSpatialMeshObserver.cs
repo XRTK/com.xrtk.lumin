@@ -24,6 +24,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
     /// <summary>
     /// Lumin Spatial Mesh Observer
     /// </summary>
+    [System.Runtime.InteropServices.Guid("A1E7BFED-F290-43E3-84B6-01C740CC9614")]
     public class LuminSpatialMeshObserver : BaseMixedRealitySpatialMeshObserver
     {
         /// <inheritdoc />
