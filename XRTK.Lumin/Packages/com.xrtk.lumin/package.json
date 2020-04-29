@@ -21,5 +21,11 @@
   "dependencies": {
     "com.xrtk.core": "0.2.0",
     "com.unity.xr.magicleap": "2.0.0-preview.19"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Default Profiles",
+      "path": "Profiles~/"
+    }
+  ]
 }
