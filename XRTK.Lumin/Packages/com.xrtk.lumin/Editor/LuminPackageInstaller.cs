@@ -7,13 +7,12 @@ using XRTK.Editor;
 using XRTK.Extensions;
 using XRTK.Utilities.Editor;
 
-
 namespace XRTK.Lumin.Editor
 {
     [InitializeOnLoad]
     internal static class LuminPackageInstaller
     {
-        private static readonly string DefaultPath = $"{MixedRealityPreferences.ProfileGenerationPath}Lumin\\";
+        private static readonly string DefaultPath = $"{MixedRealityPreferences.ProfileGenerationPath}Lumin";
         private static readonly string HiddenPath = Path.GetFullPath($"{PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder)).ToForwardSlashes()}\\{MixedRealityPreferences.HIDDEN_PROFILES_PATH}");
 
         static LuminPackageInstaller()
