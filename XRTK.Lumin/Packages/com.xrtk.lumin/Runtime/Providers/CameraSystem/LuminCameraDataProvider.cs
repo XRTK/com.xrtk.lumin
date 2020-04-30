@@ -2,12 +2,15 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
+using XRTK.Attributes;
 using XRTK.Definitions.CameraSystem;
+using XRTK.Definitions.Platforms;
 using XRTK.Interfaces.CameraSystem;
 using XRTK.Providers.CameraSystem;
 
 namespace XRTK.Lumin.Providers.CameraSystem
 {
+    [RuntimePlatform(typeof(LuminPlatform))]
     [System.Runtime.InteropServices.Guid("49E17DAC-C786-4B1A-A66A-54DA654923D5")]
     public class LuminCameraDataProvider : BaseCameraDataProvider
     {
