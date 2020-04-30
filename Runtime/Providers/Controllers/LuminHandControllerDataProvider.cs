@@ -1,6 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers.Hands;
@@ -21,6 +23,7 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
+    [RuntimePlatform(typeof(LuminPlatform))]
     [System.Runtime.InteropServices.Guid("9511D571-2E24-41EF-AA7E-DF4432617DE1")]
     public class LuminHandControllerDataProvider : BaseHandControllerDataProvider
     {

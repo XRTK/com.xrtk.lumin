@@ -1,6 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Interfaces.SpatialAwarenessSystem;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.SpatialObservers;
@@ -21,9 +23,7 @@ using XRTK.Utilities;
 
 namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
-    /// <summary>
-    /// Lumin Spatial Mesh Observer
-    /// </summary>
+    [RuntimePlatform(typeof(LuminPlatform))]
     [System.Runtime.InteropServices.Guid("A1E7BFED-F290-43E3-84B6-01C740CC9614")]
     public class LuminSpatialMeshObserver : BaseMixedRealitySpatialMeshObserver
     {
