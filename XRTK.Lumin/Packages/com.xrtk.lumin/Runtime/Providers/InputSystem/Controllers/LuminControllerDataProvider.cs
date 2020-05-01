@@ -1,6 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Lumin.Profiles;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Providers.Controllers;
@@ -19,6 +21,7 @@ using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.InputSystem.Controllers
 {
+    [RuntimePlatform(typeof(LuminPlatform))]
     [System.Runtime.InteropServices.Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
