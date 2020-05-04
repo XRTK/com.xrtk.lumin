@@ -17,6 +17,24 @@ namespace XRTK.Lumin.Editor
 
         static LuminPackageInstaller()
         {
+            EditorApplication.delayCall += CheckPackage;
+        }
+
+        [MenuItem("Mixed Reality Toolkit/Packages/Install Lumin Package Assets...", true)]
+        private static bool ImportLuminPackageAssetsValidation()
+        {
+            return !Directory.Exists($"{DefaultPath}\\Profiles");
+        }
+
+        [MenuItem("Mixed Reality Toolkit/Packages/Install Lumin Package Assets...")]
+        private static void ImportLuminPackageAssets()
+        {
+            EditorPreferences.Set($"{nameof(LuminPackageInstaller)}", false);
+            EditorApplication.delayCall += CheckPackage;
+        }
+
+        private static void CheckPackage()
+        {
             if (!EditorPreferences.Get($"{nameof(LuminPackageInstaller)}", false))
             {
                 EditorPreferences.Set($"{nameof(LuminPackageInstaller)}", PackageInstaller.TryInstallAssets(HiddenPath, $"{DefaultPath}\\Profiles"));
