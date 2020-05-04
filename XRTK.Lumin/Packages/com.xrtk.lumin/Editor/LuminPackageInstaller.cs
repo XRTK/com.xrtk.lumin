@@ -19,7 +19,7 @@ namespace XRTK.Lumin.Editor
         {
             if (!EditorPreferences.Get($"{nameof(LuminPackageInstaller)}", false))
             {
-                EditorPreferences.Set($"{nameof(LuminPackageInstaller)}", PackageInstaller.TryInstallProfiles(HiddenPath, DefaultPath));
+                EditorPreferences.Set($"{nameof(LuminPackageInstaller)}", PackageInstaller.TryInstallAssets(HiddenPath, $"{DefaultPath}\\Profiles"));
             }
         }
     }
