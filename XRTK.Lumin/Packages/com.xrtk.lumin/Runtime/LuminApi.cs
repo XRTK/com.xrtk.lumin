@@ -30,12 +30,6 @@ namespace XRTK.Lumin
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
         public static extern void UnityMagicLeap_MeshingSetBatchSize(int batchSize);
 
-        [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern IntPtr UnityMagicLeap_MeshingAcquireConfidence(TrackableId meshId, out int count);
-
-        [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern void UnityMagicLeap_MeshingReleaseConfidence(TrackableId meshId);
-
         [Flags]
         public enum MeshingFlags
         {
