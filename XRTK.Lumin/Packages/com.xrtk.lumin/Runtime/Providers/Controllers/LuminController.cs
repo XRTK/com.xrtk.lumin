@@ -52,8 +52,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
 #if PLATFORM_LUMIN
 
-        internal MLInputController MlControllerReference { get; set; }
-        //internal LuminControllerGestureSettings ControllerGestureSettings { get; set; }
+        internal MLInput.Controller MlControllerReference { get; set; }
 
         internal bool IsHomePressed;
 
@@ -117,22 +116,22 @@ namespace XRTK.Lumin.Providers.Controllers
 
             lastControllerPose = currentControllerPose;
 
-            if (MlControllerReference.Type == MLInputControllerType.Control)
+            if (MlControllerReference.Type == MLInput.Controller.ControlType.Control)
             {
                 // The source is either a hand or a controller that supports pointing.
                 // We can now check for position and rotation.
-                IsPositionAvailable = MlControllerReference.Dof != MLInputControllerDof.None;
+                IsPositionAvailable = MlControllerReference.Dof != MLInput.Controller.ControlDof.None;
 
                 if (IsPositionAvailable)
                 {
-                    IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLControllerCalibAccuracy.Medium;
+                    IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLInput.Controller.ControlCalibrationAccuracy.Medium;
                 }
                 else
                 {
                     IsPositionApproximate = false;
                 }
 
-                IsRotationAvailable = MlControllerReference.Dof == MLInputControllerDof.Dof6;
+                IsRotationAvailable = MlControllerReference.Dof == MLInput.Controller.ControlDof.Dof6;
 
                 // Devices are considered tracked if we receive position OR rotation data from the sensors.
                 TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;

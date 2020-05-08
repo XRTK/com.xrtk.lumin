@@ -32,15 +32,15 @@ namespace XRTK.Lumin.Providers.Controllers
             : base(name, priority, profile, parentService)
         {
 #if PLATFORM_LUMIN
-            keyPointFilterLevel = (MLKeyPointFilterLevel)profile.KeyPointFilterLevel;
-            poseFilterLevel = (MLPoseFilterLevel)profile.PoseFilterLevel;
+            keyPointFilterLevel = (MLHandTracking.KeyPointFilterLevel)profile.KeyPointFilterLevel;
+            poseFilterLevel = (MLHandTracking.PoseFilterLevel)profile.PoseFilterLevel;
         }
 
-        private readonly MLPoseFilterLevel poseFilterLevel;
-        private readonly MLKeyPointFilterLevel keyPointFilterLevel;
+        private readonly MLHandTracking.PoseFilterLevel poseFilterLevel;
+        private readonly MLHandTracking.KeyPointFilterLevel keyPointFilterLevel;
         private readonly LuminHandDataConverter leftHandConverter = new LuminHandDataConverter(Handedness.Left);
         private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
-        private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
+        private readonly MLHandTracking.HandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandTracking.HandKeyPose)).Cast<MLHandTracking.HandKeyPose>().ToArray();
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
         private bool isEnabled = false;
@@ -48,9 +48,9 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override void Enable()
         {
-            if (!MLHands.IsStarted)
+            if (!MLHandTracking.IsStarted)
             {
-                var result = MLHands.Start();
+                var result = MLHandTracking.Start();
 
                 if (!result.IsOk)
                 {
@@ -61,19 +61,19 @@ namespace XRTK.Lumin.Providers.Controllers
                 isEnabled = true;
             }
 
-            if (!MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true))
+            if (!MLHandTracking.KeyPoseManager.EnableKeyPoses(keyPoses, true, true))
             {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.EnableKeyPoses)}.");
+                Debug.LogError($"Error: Failed {nameof(MLHandTracking.KeyPoseManager.EnableKeyPoses)}.");
             }
 
-            if (!MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel))
+            if (!MLHandTracking.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel))
             {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetKeyPointsFilterLevel)}.");
+                Debug.LogError($"Error: Failed {nameof(MLHandTracking.KeyPoseManager.SetKeyPointsFilterLevel)}.");
             }
 
-            if (!MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel))
+            if (!MLHandTracking.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel))
             {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
+                Debug.LogError($"Error: Failed {nameof(MLHandTracking.KeyPoseManager.SetPoseFilterLevel)}.");
             }
 
             LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
@@ -96,8 +96,8 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             if (isEnabled)
             {
-                MLHands.KeyPoseManager.DisableAllKeyPoses();
-                MLHands.Stop();
+                MLHandTracking.KeyPoseManager.DisableAllKeyPoses();
+                MLHandTracking.Stop();
             }
 
             foreach (var activeController in activeControllers)

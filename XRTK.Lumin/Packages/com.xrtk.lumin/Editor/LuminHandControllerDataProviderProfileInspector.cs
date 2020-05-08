@@ -52,12 +52,12 @@ namespace XRTK.Lumin.Editor
             {
                 EditorGUI.indentLevel++;
 #if PLATFORM_LUMIN
-            keyPointFilterLevel.intValue = (int)(MLKeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLKeyPointFilterLevel)keyPointFilterLevel.intValue);
-            poseFilterLevel.intValue = (int)(MLPoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLPoseFilterLevel)poseFilterLevel.intValue);
+                keyPointFilterLevel.intValue = (int)(MLHandTracking.KeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLHandTracking.KeyPointFilterLevel)keyPointFilterLevel.intValue);
+                poseFilterLevel.intValue = (int)(MLHandTracking.PoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLHandTracking.PoseFilterLevel)poseFilterLevel.intValue);
 #else
                 EditorGUILayout.PropertyField(keyPointFilterLevel);
                 EditorGUILayout.PropertyField(poseFilterLevel);
-#endif // PLATFORM_LUMIN                
+#endif // PLATFORM_LUMIN
                 EditorGUI.indentLevel--;
             }
 

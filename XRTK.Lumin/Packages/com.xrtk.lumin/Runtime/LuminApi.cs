@@ -6,8 +6,7 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.Experimental.XR;
-using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR;
 
 namespace XRTK.Lumin
 {
@@ -19,16 +18,22 @@ namespace XRTK.Lumin
         private const string UNITY_MAGIC_LEAP_DLL = "UnityMagicLeap";
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern void UnityMagicLeap_MeshingUpdateSettings(MeshingSettings newSettings);
+        internal static extern void UnityMagicLeap_MeshingUpdateSettings(ref MeshingSettings newSettings);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern void UnityMagicLeap_MeshingSetLod(MLSpatialMapper.LevelOfDetail lod);
+        internal static extern void UnityMagicLeap_MeshingSetDensity(float density);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern void UnityMagicLeap_MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents);
+        internal static extern void UnityMagicLeap_MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        public static extern void UnityMagicLeap_MeshingSetBatchSize(int batchSize);
+        internal static extern void UnityMagicLeap_MeshingSetBatchSize(int batchSize);
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        internal static extern IntPtr UnityMagicLeap_MeshingAcquireConfidence(MeshId meshId, out int count);
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        internal static extern void UnityMagicLeap_MeshingReleaseConfidence(MeshId meshId);
 
         [Flags]
         public enum MeshingFlags

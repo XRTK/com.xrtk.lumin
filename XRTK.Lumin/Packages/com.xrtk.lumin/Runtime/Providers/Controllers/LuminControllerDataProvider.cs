@@ -43,7 +43,7 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             if (!MLInput.IsStarted)
             {
-                var config = new MLInputConfiguration();
+                var config = new MLInput.Configuration(true);
                 var result = MLInput.Start(config);
 
                 if (!result.IsOk)
@@ -113,11 +113,11 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (mlController == null) { return null; }
 
-            if (mlController.Type == MLInputControllerType.None) { return null; }
+            if (mlController.Type == MLInput.Controller.ControlType.None) { return null; }
 
             var handedness = Handedness.Any;
 
-            if (mlController.Type == MLInputControllerType.Control)
+            if (mlController.Type == MLInput.Controller.ControlType.Control)
             {
                 switch (mlController.Hand)
                 {
@@ -182,13 +182,13 @@ namespace XRTK.Lumin.Providers.Controllers
             RemoveController(controllerId);
         }
 
-        private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
+        private void MlInputOnControllerButtonDown(byte controllerId, MLInput.Controller.Button button)
         {
             if (activeControllers.TryGetValue(controllerId, out var controller))
             {
                 switch (button)
                 {
-                    case MLInputControllerButton.HomeTap:
+                    case MLInput.Controller.Button.HomeTap:
                         controller.IsHomePressed = true;
                         break;
                 }

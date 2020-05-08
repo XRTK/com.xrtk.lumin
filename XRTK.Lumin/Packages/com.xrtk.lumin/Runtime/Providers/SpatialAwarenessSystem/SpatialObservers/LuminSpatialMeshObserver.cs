@@ -73,16 +73,26 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             }
 
             LuminApi.UnityMagicLeap_MeshingSetBatchSize(16);
-            var levelOfDetail = MLSpatialMapper.LevelOfDetail.Medium;
+            float levelOfDetail;
 
-            if (MeshLevelOfDetail == SpatialAwarenessMeshLevelOfDetail.Fine)
+            switch (MeshLevelOfDetail)
             {
-                levelOfDetail = MLSpatialMapper.LevelOfDetail.Maximum;
+                case SpatialAwarenessMeshLevelOfDetail.Custom:
+                    levelOfDetail = Mathf.Clamp01(MeshTrianglesPerCubicMeter);
+                    break;
+                case SpatialAwarenessMeshLevelOfDetail.Coarse:
+                    levelOfDetail = 0f;
+                    break;
+                case SpatialAwarenessMeshLevelOfDetail.Fine:
+                    levelOfDetail = 1f;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            LuminApi.UnityMagicLeap_MeshingSetLod(levelOfDetail);
+            LuminApi.UnityMagicLeap_MeshingSetDensity(levelOfDetail);
             var settings = GetMeshingSettings();
-            LuminApi.UnityMagicLeap_MeshingUpdateSettings(settings);
+            LuminApi.UnityMagicLeap_MeshingUpdateSettings(ref settings);
         }
 
         /// <inheritdoc />
@@ -171,7 +181,14 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 return;
             }
 
-            meshSubsystem?.Stop();
+            try
+            {
+                meshSubsystem?.Stop();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
 
             base.StopObserving();
         }

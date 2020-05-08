@@ -59,20 +59,20 @@ namespace XRTK.Lumin.Utilities
         /// </summary>
         /// <param name="handedness">Handedness to convert.</param>
         /// <returns>Magic Leap hand reference.</returns>
-        private static MLHand ToMagicLeapHand(Handedness handedness)
+        private static MLHandTracking.Hand ToMagicLeapHand(Handedness handedness)
         {
             switch (handedness)
             {
                 case Handedness.Left:
-                    return MLHands.Left;
+                    return MLHandTracking.Left;
                 case Handedness.Right:
-                    return MLHands.Right;
+                    return MLHandTracking.Right;
                 default:
                     return null;
             }
         }
 
-        private static void UpdateHandJoints(MLHand hand, MixedRealityPose[] jointPoses)
+        private static void UpdateHandJoints(MLHandTracking.Hand hand, MixedRealityPose[] jointPoses)
         {
             var ring = hand.Ring;
             var pinky = hand.Pinky;
@@ -186,12 +186,12 @@ namespace XRTK.Lumin.Utilities
             }
         }
 
-        private void UpdateHandMesh(MLHand hand, HandMeshData handMeshData)
+        private void UpdateHandMesh(MLHandTracking.Hand hand, HandMeshData handMeshData)
         {
             // TODO: Get hand mesh data and convert.
         }
 
-        private static MixedRealityPose EstimatePalmPose(MLKeyPoint wrist, MLKeyPoint middleDistal)
+        private static MixedRealityPose EstimatePalmPose(MLHandTracking.KeyPoint wrist, MLHandTracking.KeyPoint middleDistal)
         {
             var wristRootPose = ComputeJointPose(wrist);
             var middleDistalPose = ComputeJointPose(middleDistal);
@@ -201,11 +201,11 @@ namespace XRTK.Lumin.Utilities
             return new MixedRealityPose(palmPosition, palmRotation);
         }
 
-        private static MixedRealityPose ComputeJointPose(MLKeyPoint keyPoint)
+        private static MixedRealityPose ComputeJointPose(MLHandTracking.KeyPoint keyPoint)
         {
             var pose = MixedRealityPose.ZeroIdentity;
 
-            if (keyPoint.IsValid)
+            if (keyPoint.IsSupported)
             {
                 pose.Position = keyPoint.Position;
 
