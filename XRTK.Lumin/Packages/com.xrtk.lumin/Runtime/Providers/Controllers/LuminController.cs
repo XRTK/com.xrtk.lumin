@@ -1,6 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using UnityEngine.XR;
+using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
@@ -10,7 +12,6 @@ using XRTK.Providers.Controllers;
 #if PLATFORM_LUMIN
 
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
 using XRTK.Extensions;
 using XRTK.Services;
 
@@ -38,7 +39,7 @@ namespace XRTK.Lumin.Providers.Controllers
             new MixedRealityInteractionMapping("Trigger Touch", AxisType.Digital, DeviceInputType.TriggerTouch),
             new MixedRealityInteractionMapping("Trigger Press (Select)", AxisType.Digital, DeviceInputType.Select),
             new MixedRealityInteractionMapping("Bumper Press", AxisType.Digital, DeviceInputType.ButtonPress),
-            new MixedRealityInteractionMapping("Home Press", AxisType.Digital, DeviceInputType.ButtonPress),
+            new MixedRealityInteractionMapping("Home Press", AxisType.Digital, DeviceInputType.Menu),
             new MixedRealityInteractionMapping("Touchpad Position", AxisType.DualAxis, DeviceInputType.Touchpad),
             new MixedRealityInteractionMapping("Touchpad Press", AxisType.SingleAxis, DeviceInputType.TouchpadPress),
             new MixedRealityInteractionMapping("Touchpad Touch", AxisType.SingleAxis, DeviceInputType.TouchpadTouch),
@@ -52,25 +53,18 @@ namespace XRTK.Lumin.Providers.Controllers
 
 #if PLATFORM_LUMIN
 
-        internal MLInput.Controller MlControllerReference { get; set; }
-
-        internal bool IsHomePressed;
-
         private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose currentControllerPose = MixedRealityPose.ZeroIdentity;
         private Vector2 dualAxisPosition;
 
-        /// <summary>
-        /// Updates the controller's interaction mappings and ready the current input values.
-        /// </summary>
-        public override void UpdateController()
+        public void UpdateController(InputDevice inputDevice)
         {
             if (!Enabled) { return; }
 
             base.UpdateController();
 
-            UpdateControllerData();
+            UpdateControllerData(inputDevice);
 
             if (Interactions == null)
             {
@@ -87,8 +81,19 @@ namespace XRTK.Lumin.Providers.Controllers
                     case DeviceInputType.SpatialPointer:
                         UpdatePoseData(interactionMapping);
                         break;
+                    case DeviceInputType.Menu:
+                        if (inputDevice.TryGetFeatureValue(CommonUsages.menuButton, out var isHomeDown))
+                        {
+                            interactionMapping.BoolData = isHomeDown;
+                        }
+
+                        break;
                     case DeviceInputType.ButtonPress:
-                        UpdateButtonData(interactionMapping);
+                        if (inputDevice.TryGetFeatureValue(CommonUsages.secondaryButton, out var deviceIsBumperDown))
+                        {
+                            interactionMapping.BoolData = deviceIsBumperDown;
+                        }
+
                         break;
                     case DeviceInputType.Select:
                     case DeviceInputType.Trigger:
@@ -96,10 +101,10 @@ namespace XRTK.Lumin.Providers.Controllers
                     case DeviceInputType.TriggerPress:
                     case DeviceInputType.TouchpadTouch:
                     case DeviceInputType.TouchpadPress:
-                        UpdateSingleAxisData(interactionMapping);
+                        UpdateSingleAxisData(interactionMapping, inputDevice);
                         break;
                     case DeviceInputType.Touchpad:
-                        UpdateDualAxisData(interactionMapping);
+                        UpdateDualAxisData(interactionMapping, inputDevice);
                         break;
                     default:
                         Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
@@ -110,40 +115,47 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateControllerData()
+        private void UpdateControllerData(InputDevice inputDevice)
         {
             var lastState = TrackingState;
 
             lastControllerPose = currentControllerPose;
 
-            if (MlControllerReference.Type == MLInput.Controller.ControlType.Control)
+            // The source is either a hand or a controller that supports pointing.
+            // We can now check for position and rotation.
+            if (inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out var isTracked))
             {
-                // The source is either a hand or a controller that supports pointing.
-                // We can now check for position and rotation.
-                IsPositionAvailable = MlControllerReference.Dof != MLInput.Controller.ControlDof.None;
+                IsPositionAvailable = isTracked;
+            }
 
-                if (IsPositionAvailable)
+            inputDevice.TryGetFeatureValue(MagicLeapControllerUsages.ControllerDOF, out var deviceDof);
+
+            if (IsPositionAvailable && deviceDof >= 1)
+            {
+                if (inputDevice.TryGetFeatureValue(MagicLeapControllerUsages.ControllerCalibrationAccuracy, out var calibrationAccuracy))
                 {
-                    IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLInput.Controller.ControlCalibrationAccuracy.Medium;
+                    IsPositionApproximate = calibrationAccuracy <= 2;
                 }
-                else
-                {
-                    IsPositionApproximate = false;
-                }
-
-                IsRotationAvailable = MlControllerReference.Dof == MLInput.Controller.ControlDof.Dof6;
-
-                // Devices are considered tracked if we receive position OR rotation data from the sensors.
-                TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;
             }
             else
             {
-                // The input source does not support tracking.
-                TrackingState = TrackingState.NotApplicable;
+                IsPositionApproximate = false;
             }
 
-            currentControllerPose.Position = MlControllerReference.Position;
-            currentControllerPose.Rotation = MlControllerReference.Orientation;
+            IsRotationAvailable = deviceDof == 2;
+
+            // Devices are considered tracked if we receive position OR rotation data from the sensors.
+            TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;
+
+            if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out var devicePosition))
+            {
+                currentControllerPose.Position = devicePosition;
+            }
+
+            if (inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out var deviceRotation))
+            {
+                currentControllerPose.Rotation = deviceRotation;
+            }
 
             // Raise input system events if it is enabled.
             if (lastState != TrackingState)
@@ -168,30 +180,16 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateButtonData(MixedRealityInteractionMapping interactionMapping)
-        {
-            Debug.Assert(interactionMapping.AxisType == AxisType.Digital);
-
-            var isHomeButton = interactionMapping.Description.Contains("Home");
-
-            if (!isHomeButton)
-            {
-                interactionMapping.BoolData = MlControllerReference.IsBumperDown;
-            }
-            else
-            {
-                interactionMapping.BoolData = IsHomePressed;
-                IsHomePressed = false;
-            }
-        }
-
-        private void UpdateSingleAxisData(MixedRealityInteractionMapping interactionMapping)
+        private void UpdateSingleAxisData(MixedRealityInteractionMapping interactionMapping, InputDevice inputDevice)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.SingleAxis || interactionMapping.AxisType == AxisType.Digital);
 
-            interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
-                ? MlControllerReference.Touch1PosAndForce.z
-                : MlControllerReference.TriggerValue;
+            inputDevice.TryGetFeatureValue(CommonUsages.trigger, out var deviceTriggerValue);
+            inputDevice.TryGetFeatureValue(MagicLeapControllerUsages.ControllerTouch1Force, out var force);
+
+            interactionMapping.FloatData = interactionMapping.Description.Contains("Trigger")
+                ? deviceTriggerValue
+                : force;
 
             switch (interactionMapping.InputType)
             {
@@ -213,14 +211,17 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping)
+        private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping, InputDevice inputDevice)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.DualAxis);
 
-            if (MlControllerReference.Touch1PosAndForce.z > 0f)
+            inputDevice.TryGetFeatureValue(MagicLeapControllerUsages.ControllerTouch1Force, out var force);
+            inputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out var deviceTouch1PosAndForce);
+
+            if (force > 0f)
             {
-                dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
-                dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
+                dualAxisPosition.x = deviceTouch1PosAndForce.x;
+                dualAxisPosition.y = deviceTouch1PosAndForce.y;
             }
             else
             {
@@ -238,8 +239,8 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (interactionMapping.InputType == DeviceInputType.SpatialPointer)
             {
-                currentPointerPose.Position = MlControllerReference.Position;
-                currentPointerPose.Rotation = MlControllerReference.Orientation;
+                // Pointer and controller pose is the same for this device.
+                currentPointerPose = currentControllerPose;
             }
             else
             {

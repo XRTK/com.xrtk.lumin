@@ -1,28 +1,25 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Lumin.Profiles;
-using XRTK.Interfaces.InputSystem;
-using XRTK.Providers.Controllers;
-
-#if PLATFORM_LUMIN
-
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR;
+using XRTK.Attributes;
 using XRTK.Definitions.Devices;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.Utilities;
+using XRTK.Extensions;
+using XRTK.Interfaces.InputSystem;
+using XRTK.Lumin.Profiles;
+using XRTK.Providers.Controllers;
 using XRTK.Services;
-
-#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Providers.Controllers
 {
     [RuntimePlatform(typeof(LuminPlatform))]
-    [System.Runtime.InteropServices.Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
+    [Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
         /// <inheritdoc />
@@ -31,43 +28,45 @@ namespace XRTK.Lumin.Providers.Controllers
         {
         }
 
-#if PLATFORM_LUMIN
+        private readonly Dictionary<InputDevice, LuminController> activeControllers = new Dictionary<InputDevice, LuminController>();
+        private readonly List<XRInputSubsystemDescriptor> descriptors = new List<XRInputSubsystemDescriptor>();
+        private readonly List<InputDevice> devices = new List<InputDevice>();
 
-        /// <summary>
-        /// Dictionary to capture all active controllers detected
-        /// </summary>
-        private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
+        private XRInputSubsystem inputSubsystem;
 
         /// <inheritdoc />
         public override void Enable()
         {
-            if (!MLInput.IsStarted)
-            {
-                var config = new MLInput.Configuration(true);
-                var result = MLInput.Start(config);
+            if (!Application.isPlaying) { return; }
 
-                if (!result.IsOk)
+            if (inputSubsystem == null)
+            {
+                descriptors.Clear();
+                SubsystemManager.GetSubsystemDescriptors(descriptors);
+
+                if (descriptors.Count > 0)
                 {
-                    Debug.LogError($"Error: failed starting MLInput: {result}");
-                    return;
+                    var descriptorToUse = descriptors[0];
+
+                    if (descriptors.Count > 1)
+                    {
+                        Debug.LogWarning($"Found {descriptors.Count} {nameof(XRInputSubsystemDescriptor)}s. Using \"{descriptorToUse.id}\"");
+                    }
+
+                    inputSubsystem = descriptorToUse.Create();
+                }
+
+                if (inputSubsystem == null)
+                {
+                    throw new Exception($"Failed to start {nameof(XRInputSubsystem)}!");
                 }
             }
 
-            for (byte i = 0; i < 3; i++)
+            if (inputSubsystem != null &&
+                !inputSubsystem.running)
             {
-                // Currently no way to know what controllers are already connected.
-                // Just guessing there could be no more than 3: Two Spatial Controllers and Mobile App Controller.
-                var controller = GetController(i);
-
-                if (controller != null)
-                {
-                    MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
-                }
+                inputSubsystem.Start();
             }
-
-            MLInput.OnControllerConnected += OnControllerConnected;
-            MLInput.OnControllerDisconnected += OnControllerDisconnected;
-            MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
         }
 
         /// <inheritdoc />
@@ -75,19 +74,37 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             base.Update();
 
-            foreach (var controller in activeControllers)
+            if (!Application.isPlaying) { return; }
+            if (inputSubsystem == null || !inputSubsystem.running) { return; }
+
+            if (inputSubsystem.TryGetInputDevices(devices))
             {
-                controller.Value?.UpdateController();
+                // Remove any controllers if they're no longer in the list of devices
+                foreach (var activeController in activeControllers)
+                {
+                    if (!devices.Contains(activeController.Key))
+                    {
+                        RemoveController(activeController.Key);
+                    }
+                }
+
+                // Add any controllers if needed, then update the controllers
+                foreach (var inputDevice in devices)
+                {
+                    if (!activeControllers.TryGetValue(inputDevice, out var controller))
+                    {
+                        controller = GetController(inputDevice);
+                    }
+
+                    controller?.UpdateController(inputDevice);
+                }
             }
         }
 
         /// <inheritdoc />
         public override void Disable()
         {
-            MLInput.OnControllerConnected -= OnControllerConnected;
-            MLInput.OnControllerDisconnected -= OnControllerDisconnected;
-            MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
-            MLInput.Stop();
+            if (!Application.isPlaying) { return; }
 
             foreach (var activeController in activeControllers)
             {
@@ -95,46 +112,49 @@ namespace XRTK.Lumin.Providers.Controllers
             }
 
             activeControllers.Clear();
+
+            if (inputSubsystem != null &&
+                inputSubsystem.running)
+            {
+                inputSubsystem.Stop();
+            }
         }
 
-        private LuminController GetController(byte controllerId, bool addController = true)
+        /// <inheritdoc />
+        public override void Destroy()
+        {
+            if (!Application.isPlaying) { return; }
+
+            if (inputSubsystem != null &&
+                inputSubsystem.running)
+            {
+                inputSubsystem.Stop();
+            }
+
+            inputSubsystem?.Destroy();
+        }
+
+        private LuminController GetController(InputDevice inputDevice, bool addController = true)
         {
             //If a device is already registered with the ID provided, just return it.
-            if (activeControllers.ContainsKey(controllerId))
+            if (activeControllers.ContainsKey(inputDevice))
             {
-                var controller = activeControllers[controllerId];
+                var controller = activeControllers[inputDevice];
                 Debug.Assert(controller != null);
                 return controller;
             }
 
-            if (!addController) { return null; }
-
-            var mlController = MLInput.GetController(controllerId);
-
-            if (mlController == null) { return null; }
-
-            if (mlController.Type == MLInput.Controller.ControlType.None) { return null; }
-
-            var handedness = Handedness.Any;
-
-            if (mlController.Type == MLInput.Controller.ControlType.Control)
+            if (!addController ||
+                !inputDevice.characteristics.HasFlags(InputDeviceCharacteristics.Controller))
             {
-                switch (mlController.Hand)
-                {
-                    case MLInput.Hand.Left:
-                        handedness = Handedness.Left;
-                        break;
-                    case MLInput.Hand.Right:
-                        handedness = Handedness.Right;
-                        break;
-                }
+                return null;
             }
 
             LuminController detectedController;
 
             try
             {
-                detectedController = new LuminController(this, TrackingState.NotTracked, handedness, GetControllerMappingProfile(typeof(LuminController), handedness));
+                detectedController = new LuminController(this, TrackingState.NotTracked, Handedness.Both, GetControllerMappingProfile(typeof(LuminController), Handedness.Both));
             }
             catch (Exception e)
             {
@@ -142,15 +162,16 @@ namespace XRTK.Lumin.Providers.Controllers
                 return null;
             }
 
-            detectedController.MlControllerReference = mlController;
-            activeControllers.Add(controllerId, detectedController);
+            activeControllers.Add(inputDevice, detectedController);
             AddController(detectedController);
+
+            MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
             return detectedController;
         }
 
-        private void RemoveController(byte controllerId, bool removeFromRegistry = true)
+        private void RemoveController(InputDevice inputDevice, bool removeFromRegistry = true)
         {
-            var controller = GetController(controllerId, false);
+            var controller = GetController(inputDevice, false);
 
             if (controller != null)
             {
@@ -160,43 +181,8 @@ namespace XRTK.Lumin.Providers.Controllers
             if (removeFromRegistry)
             {
                 RemoveController(controller);
-                activeControllers.Remove(controllerId);
+                activeControllers.Remove(inputDevice);
             }
         }
-
-        #region Controller Events
-
-        private void OnControllerConnected(byte controllerId)
-        {
-            var controller = GetController(controllerId);
-
-            if (controller != null)
-            {
-                MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
-                controller.UpdateController();
-            }
-        }
-
-        private void OnControllerDisconnected(byte controllerId)
-        {
-            RemoveController(controllerId);
-        }
-
-        private void MlInputOnControllerButtonDown(byte controllerId, MLInput.Controller.Button button)
-        {
-            if (activeControllers.TryGetValue(controllerId, out var controller))
-            {
-                switch (button)
-                {
-                    case MLInput.Controller.Button.HomeTap:
-                        controller.IsHomePressed = true;
-                        break;
-                }
-            }
-        }
-
-        #endregion Controller Events
-
-#endif // PLATFORM_LUMIN
     }
 }

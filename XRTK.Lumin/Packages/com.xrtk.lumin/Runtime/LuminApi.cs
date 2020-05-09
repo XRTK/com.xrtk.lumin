@@ -1,12 +1,13 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-#if PLATFORM_LUMIN
-
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.XR;
+
+[assembly: InternalsVisibleTo("XRTK.Lumin.Editor")]
 
 namespace XRTK.Lumin
 {
@@ -15,6 +16,8 @@ namespace XRTK.Lumin
     /// </summary>
     internal static class LuminApi
     {
+#if PLATFORM_LUMIN
+
         private const string UNITY_MAGIC_LEAP_DLL = "UnityMagicLeap";
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
@@ -35,8 +38,35 @@ namespace XRTK.Lumin
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
         internal static extern void UnityMagicLeap_MeshingReleaseConfidence(MeshId meshId);
 
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        internal static extern void UnityMagicLeap_GesturesUpdateConfiguration(ref GestureConfiguration gestureConfiguration);
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        public static extern void UnityMagicLeap_GesturesCreate();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        public static extern void UnityMagicLeap_GesturesUpdate();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        public static extern void UnityMagicLeap_GesturesStart();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        public static extern void UnityMagicLeap_GesturesStop();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        public static extern void UnityMagicLeap_GesturesDestroy();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        internal static extern bool UnityMagicLeap_GesturesIsHandGesturesEnabled();
+
+        [DllImport(UNITY_MAGIC_LEAP_DLL)]
+        internal static extern void UnityMagicLeap_GesturesSetHandGesturesEnabled([MarshalAs(UnmanagedType.I1)]bool value);
+
+#endif // PLATFORM_LUMIN
+
         [Flags]
-        public enum MeshingFlags
+        internal enum MeshingFlags
         {
             None = 0,
             PointCloud = 1,
@@ -48,13 +78,135 @@ namespace XRTK.Lumin
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct MeshingSettings
+        internal struct MeshingSettings
         {
             public MeshingFlags flags;
             public float fillHoleLength;
             public float disconnectedComponentArea;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct GestureConfiguration
+        {
+            /// <summary>
+            /// Array length excludes [NoHand], since we do not allow it to be disabled.
+            /// </summary>
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)HandKeyPose.NoHand)]
+            public byte[] KeyposeConfig;
+
+            /// <summary>
+            /// Determines if the hand tracking pipeline is currently enabled.
+            /// </summary>
+            [MarshalAs(UnmanagedType.I1)]
+            public bool HandTrackingPipelineEnabled;
+
+            /// <summary>
+            /// The fidelity to track key points with.
+            /// </summary>
+            public KeyPointFilterLevel KeyPointsFilterLevel;
+
+            /// <summary>
+            /// The fidelity to track key poses with.
+            /// </summary>
+            public PoseFilterLevel PoseFilterLevel;
+        }
+
+        /// <summary>
+        /// Configured level for key points filtering of key points and hand centers.
+        /// </summary>
+        internal enum KeyPointFilterLevel
+        {
+            /// <summary>
+            /// Default value, no filtering is done, the points are raw.
+            /// </summary>
+            Raw,
+
+            /// <summary>
+            /// Some smoothing at the cost of latency.
+            /// </summary>
+            Smoothed,
+
+            /// <summary>
+            /// Predictive smoothing, at higher cost of latency.
+            /// </summary>
+            ExtraSmoothed
+        }
+
+        /// <summary>
+        /// Configured level of filtering for static poses.
+        /// </summary>
+        internal enum PoseFilterLevel
+        {
+            /// <summary>
+            /// Default value, no filtering, the poses are raw.
+            /// </summary>
+            Raw,
+
+            /// <summary>
+            /// Some robustness to flicker at some cost of latency.
+            /// </summary>
+            Robust,
+
+            /// <summary>
+            /// More robust to flicker at higher latency cost.
+            /// </summary>
+            ExtraRobust
+        }
+
+        /// <summary>
+        /// Static key pose types which are available when both hands are separated.
+        /// </summary>
+        internal enum HandKeyPose
+        {
+            /// <summary>
+            /// Index finger.
+            /// </summary>
+            Finger,
+
+            /// <summary>A
+            /// A closed fist.
+            /// </summary>
+            Fist,
+
+            /// <summary>
+            /// A pinch.
+            /// </summary>
+            Pinch,
+
+            /// <summary>
+            /// A closed fist with the thumb pointed up.
+            /// </summary>
+            Thumb,
+
+            /// <summary>
+            /// An L shape
+            /// </summary>
+            L,
+
+            /// <summary>
+            /// An open hand.
+            /// </summary>
+            OpenHand = 5,
+
+            /// <summary>
+            /// A pinch with all fingers, except the index finger and the thumb, extended out.
+            /// </summary>
+            Ok,
+
+            /// <summary>
+            /// A rounded 'C' alphabet shape.
+            /// </summary>
+            C,
+
+            /// <summary>
+            /// No pose was recognized.
+            /// </summary>
+            NoPose,
+
+            /// <summary>
+            /// No hand was detected. Should be the last pose.
+            /// </summary>
+            NoHand
+        }
     }
 }
-
-#endif // PLATFORM_LUMIN

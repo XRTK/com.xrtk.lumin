@@ -1,24 +1,18 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Interfaces.SpatialAwarenessSystem;
-using XRTK.Lumin.Profiles;
-using XRTK.Providers.SpatialObservers;
-
-#if PLATFORM_LUMIN
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using UnityEngine.XR.MagicLeap;
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.SpatialAwarenessSystem;
+using XRTK.Interfaces.SpatialAwarenessSystem;
+using XRTK.Lumin.Profiles;
+using XRTK.Providers.SpatialObservers;
 using XRTK.Services;
 using XRTK.Utilities;
-
-#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
@@ -32,14 +26,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         {
         }
 
-#if PLATFORM_LUMIN
-
         private readonly List<XRMeshSubsystemDescriptor> descriptors = new List<XRMeshSubsystemDescriptor>();
-
         private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
 
         private XRMeshSubsystem meshSubsystem;
-
         private float lastUpdated = 0;
 
         #region IMixedRealityService implementation
@@ -167,7 +157,11 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             base.StartObserving();
 
-            meshSubsystem?.Start();
+            if (meshSubsystem != null &&
+                !meshSubsystem.running)
+            {
+                meshSubsystem.Start();
+            }
 
             // We want the first update immediately.
             lastUpdated = 0;
@@ -181,13 +175,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 return;
             }
 
-            try
+            if (meshSubsystem != null &&
+                meshSubsystem.running)
             {
-                meshSubsystem?.Stop();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
+                meshSubsystem.Stop();
             }
 
             base.StopObserving();
@@ -311,6 +302,5 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 RaiseMeshRemoved(meshObject);
             }
         }
-#endif // PLATFORM_LUMIN
     }
 }

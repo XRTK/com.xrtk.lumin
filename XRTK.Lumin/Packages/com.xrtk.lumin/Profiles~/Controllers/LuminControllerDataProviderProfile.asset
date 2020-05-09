@@ -15,4 +15,3 @@ MonoBehaviour:
   hasSetupDefaults: 1
   controllerMappingProfiles:
   - {fileID: 11400000, guid: d2884d50f3bf57d49a201da13fd8e3cf, type: 2}
-  - {fileID: 11400000, guid: 4770ecf0fd5a6744aae3278452aa51a2, type: 2}

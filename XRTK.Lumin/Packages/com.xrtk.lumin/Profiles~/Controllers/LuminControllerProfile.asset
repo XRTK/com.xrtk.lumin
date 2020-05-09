@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d420c170b42dfe0438e2aa2a829775ed, type: 3}
-  m_Name: LeftLuminControllerProfile
+  m_Name: LuminControllerProfile
   m_EditorClassIdentifier: 
   controllerType:
     reference: 6ac05d69-0e7a-4cfe-91e3-05bc0564458d
-  handedness: 1
+  handedness: 3
   visualizationProfile: {fileID: 11400000, guid: fe125eaaf5547684d8506b794c5a6016,
     type: 2}
   useCustomInteractions: 0

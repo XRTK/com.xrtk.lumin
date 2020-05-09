@@ -1,3 +1,0 @@
-[submodule "Submodules/MagicLeapSdk"]
-	path = Submodules/MagicLeapSdk
-	url = https://github.com/magicleap/MagicLeapUnitySDK.git

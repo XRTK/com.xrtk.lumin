@@ -1,10 +1,10 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-#if PLATFORM_LUMIN
-
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Controllers.Hands;
 using XRTK.Definitions.Utilities;
@@ -12,20 +12,22 @@ using XRTK.Definitions.Utilities;
 namespace XRTK.Lumin.Utilities
 {
     /// <summary>
-    /// Converts oculus hand data to <see cref="HandData"/>.
+    /// Converts Lumin hand data to <see cref="HandData"/>.
     /// </summary>
     public sealed class LuminHandDataConverter
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="handedness">Handedness of the hand this converter is created for.</param>
-        public LuminHandDataConverter(Handedness handedness)
+        private enum Joint
         {
-            this.handedness = handedness;
+            Mcp = 2,
+            Pip = 3,
+            Tip = 4
         }
 
-        private readonly Handedness handedness;
+        private static List<Bone> indexBones = new List<Bone>();
+        private static List<Bone> middleBones = new List<Bone>();
+        private static List<Bone> ringBones = new List<Bone>();
+        private static List<Bone> pinkyBones = new List<Bone>();
+        private static List<Bone> thumbBones = new List<Bone>();
 
         /// <summary>
         /// Gets or sets whether hand mesh data should be read and converted.
@@ -36,50 +38,84 @@ namespace XRTK.Lumin.Utilities
         /// Gets updated hand data for the current frame.
         /// </summary>
         /// <returns>Platform agnostics hand data.</returns>
-        public HandData GetHandData()
+        public HandData GetHandData(InputDevice inputDevice)
         {
-            var hand = ToMagicLeapHand(handedness);
+            if (!inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out var wristCenter))
+            {
+                Debug.LogWarning($"Failed to get {nameof(CommonUsages.devicePosition)}");
+            }
+
+            if (!inputDevice.TryGetFeatureValue(MagicLeapHandUsages.NormalizedCenter, out var deviceNormalizedCenter))
+            {
+                Debug.LogWarning($"Failed to get {nameof(MagicLeapHandUsages.NormalizedCenter)}");
+            }
+
+            if (!inputDevice.TryGetFeatureValue(MagicLeapHandUsages.Confidence, out var deviceHandConfidence))
+            {
+                Debug.LogWarning($"Failed to get {nameof(MagicLeapHandUsages.Confidence)}");
+            }
+
             var updatedHandData = new HandData
             {
-                IsTracked = hand.IsVisible,
+                IsTracked = deviceHandConfidence > 0.8f,
                 TimeStamp = DateTimeOffset.UtcNow.Ticks
             };
 
             if (updatedHandData.IsTracked)
             {
-                UpdateHandJoints(hand, updatedHandData.Joints);
-                UpdateHandMesh(hand, updatedHandData.Mesh);
+                UpdateHandJoints(inputDevice, updatedHandData.Joints);
+                //UpdateHandMesh(inputDevice, updatedHandData.Mesh);
             }
 
             return updatedHandData;
         }
 
-        /// <summary>
-        /// Gets the magic leap hand reference for the given handedness.
-        /// </summary>
-        /// <param name="handedness">Handedness to convert.</param>
-        /// <returns>Magic Leap hand reference.</returns>
-        private static MLHandTracking.Hand ToMagicLeapHand(Handedness handedness)
+        private static void UpdateHandJoints(InputDevice inputDevice, MixedRealityPose[] jointPoses)
         {
-            switch (handedness)
+            if (!inputDevice.TryGetFeatureValue(MagicLeapHandUsages.WristCenter, out var deviceWristCenter))
             {
-                case Handedness.Left:
-                    return MLHandTracking.Left;
-                case Handedness.Right:
-                    return MLHandTracking.Right;
-                default:
-                    return null;
+                Debug.LogWarning($"Failed to get {nameof(MagicLeapHandUsages.WristCenter)}");
             }
-        }
 
-        private static void UpdateHandJoints(MLHandTracking.Hand hand, MixedRealityPose[] jointPoses)
-        {
-            var ring = hand.Ring;
-            var pinky = hand.Pinky;
-            var index = hand.Index;
-            var thumb = hand.Thumb;
-            var wrist = hand.Wrist;
-            var middle = hand.Middle;
+            if (!inputDevice.TryGetFeatureValue(MagicLeapHandUsages.WristUlnar, out var deviceWristUlnar))
+            {
+                Debug.LogWarning($"Failed to get {nameof(MagicLeapHandUsages.WristUlnar)}");
+            }
+
+            if (!inputDevice.TryGetFeatureValue(MagicLeapHandUsages.WristRadial, out var deviceWristRadial))
+            {
+                Debug.LogWarning($"Failed to get {nameof(MagicLeapHandUsages.WristRadial)}");
+            }
+
+            if (!inputDevice.TryGetFeatureValue(CommonUsages.handData, out var deviceHand))
+            {
+                Debug.LogWarning($"Failed to get {nameof(CommonUsages.handData)}");
+            }
+
+            if (!deviceHand.TryGetFingerBones(HandFinger.Index, indexBones))
+            {
+                Debug.LogWarning($"Failed to get {nameof(indexBones)}");
+            }
+
+            if (!deviceHand.TryGetFingerBones(HandFinger.Middle, middleBones))
+            {
+                Debug.LogWarning($"Failed to get {nameof(middleBones)}");
+            }
+
+            if (!deviceHand.TryGetFingerBones(HandFinger.Ring, ringBones))
+            {
+                Debug.LogWarning($"Failed to get {nameof(ringBones)}");
+            }
+
+            if (!deviceHand.TryGetFingerBones(HandFinger.Pinky, pinkyBones))
+            {
+                Debug.LogWarning($"Failed to get {nameof(pinkyBones)}");
+            }
+
+            if (!deviceHand.TryGetFingerBones(HandFinger.Thumb, thumbBones))
+            {
+                Debug.LogWarning($"Failed to get {nameof(thumbBones)}");
+            }
 
             for (int i = 0; i < jointPoses.Length; i++)
             {
@@ -89,24 +125,24 @@ namespace XRTK.Lumin.Utilities
                 {
                     // Wrist and Palm
                     case TrackedHandJoint.Wrist:
-                        jointPoses[i] = ComputeJointPose(wrist.Center);
+                        jointPoses[i].Position = deviceWristCenter;
                         break;
                     case TrackedHandJoint.Palm:
-                        jointPoses[i] = EstimatePalmPose(wrist.Center, middle.MCP);
+                        jointPoses[i].Position = Vector3.Lerp(deviceWristCenter, GetPose(ref middleBones, Joint.Mcp).Position, 0.5f);
                         break;
                     // Finger: Thumb
                     case TrackedHandJoint.ThumbMetacarpalJoint:
-                        jointPoses[i] = ComputeJointPose(thumb.MCP);
+                        jointPoses[i] = GetPose(ref thumbBones, Joint.Mcp);
                         break;
                     case TrackedHandJoint.ThumbProximalJoint:
                         // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.ThumbDistalJoint:
-                        jointPoses[i] = ComputeJointPose(thumb.IP);
+                        jointPoses[i] = GetPose(ref thumbBones, Joint.Pip);
                         break;
                     case TrackedHandJoint.ThumbTip:
-                        jointPoses[i] = ComputeJointPose(thumb.Tip);
+                        jointPoses[i] = GetPose(ref thumbBones, Joint.Tip);
                         break;
                     // Finger: Index
                     case TrackedHandJoint.IndexMetacarpal:
@@ -114,17 +150,17 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.IndexKnuckle:
-                        jointPoses[i] = ComputeJointPose(index.MCP);
+                        jointPoses[i] = GetPose(ref indexBones, Joint.Mcp);
                         break;
                     case TrackedHandJoint.IndexMiddleJoint:
-                        jointPoses[i] = ComputeJointPose(index.PIP);
+                        jointPoses[i] = GetPose(ref indexBones, Joint.Pip);
                         break;
                     case TrackedHandJoint.IndexDistalJoint:
                         // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.IndexTip:
-                        jointPoses[i] = ComputeJointPose(index.Tip);
+                        jointPoses[i] = GetPose(ref indexBones, Joint.Tip);
                         break;
                     // Finger: Middle
                     case TrackedHandJoint.MiddleMetacarpal:
@@ -132,17 +168,17 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.MiddleKnuckle:
-                        jointPoses[i] = ComputeJointPose(middle.MCP);
+                        jointPoses[i] = GetPose(ref middleBones, Joint.Mcp);
                         break;
                     case TrackedHandJoint.MiddleMiddleJoint:
-                        jointPoses[i] = ComputeJointPose(middle.PIP);
+                        jointPoses[i] = GetPose(ref middleBones, Joint.Pip);
                         break;
                     case TrackedHandJoint.MiddleDistalJoint:
                         // TODO: Estimate?
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.MiddleTip:
-                        jointPoses[i] = ComputeJointPose(middle.Tip);
+                        jointPoses[i] = GetPose(ref middleBones, Joint.Tip);
                         break;
                     // Finger: Ring
                     case TrackedHandJoint.RingMetacarpal:
@@ -150,7 +186,7 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.RingKnuckle:
-                        jointPoses[i] = ComputeJointPose(ring.MCP);
+                        jointPoses[i] = GetPose(ref ringBones, Joint.Mcp);
                         break;
                     case TrackedHandJoint.RingMiddleJoint:
                         // TODO: Estimate?
@@ -161,7 +197,7 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.RingTip:
-                        jointPoses[i] = ComputeJointPose(ring.Tip);
+                        jointPoses[i] = GetPose(ref ringBones, Joint.Tip);
                         break;
                     // Finger: Pinky
                     case TrackedHandJoint.PinkyMetacarpal:
@@ -169,7 +205,7 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.PinkyKnuckle:
-                        jointPoses[i] = ComputeJointPose(pinky.MCP);
+                        jointPoses[i] = GetPose(ref pinkyBones, Joint.Mcp);
                         break;
                     case TrackedHandJoint.PinkyMiddleJoint:
                         // TODO: Estimate?
@@ -180,41 +216,22 @@ namespace XRTK.Lumin.Utilities
                         jointPoses[i] = MixedRealityPose.ZeroIdentity;
                         break;
                     case TrackedHandJoint.PinkyTip:
-                        jointPoses[i] = ComputeJointPose(pinky.Tip);
+                        jointPoses[i] = GetPose(ref pinkyBones, Joint.Tip);
                         break;
                 }
             }
         }
 
-        private void UpdateHandMesh(MLHandTracking.Hand hand, HandMeshData handMeshData)
+        private static MixedRealityPose GetPose(ref List<Bone> bones, Joint joint)
         {
-            // TODO: Get hand mesh data and convert.
+            bones[(int)joint].TryGetPosition(out var position);
+            bones[(int)joint].TryGetRotation(out var rotation);
+            return new MixedRealityPose(position, rotation);
         }
 
-        private static MixedRealityPose EstimatePalmPose(MLHandTracking.KeyPoint wrist, MLHandTracking.KeyPoint middleDistal)
-        {
-            var wristRootPose = ComputeJointPose(wrist);
-            var middleDistalPose = ComputeJointPose(middleDistal);
-            var palmPosition = Vector3.Lerp(wristRootPose.Position, middleDistalPose.Position, .5f);
-            var palmRotation = wristRootPose.Rotation;
-
-            return new MixedRealityPose(palmPosition, palmRotation);
-        }
-
-        private static MixedRealityPose ComputeJointPose(MLHandTracking.KeyPoint keyPoint)
-        {
-            var pose = MixedRealityPose.ZeroIdentity;
-
-            if (keyPoint.IsSupported)
-            {
-                pose.Position = keyPoint.Position;
-
-                // Joint rotation tracking is not supported on Lumin,
-                // so we gotta live with Quaternion.identity here.
-            }
-
-            return pose;
-        }
+        //private void UpdateHandMesh(MLHandTracking.Hand hand, HandMeshData handMeshData)
+        //{
+        //    // TODO: Get hand mesh data and convert.
+        //}
     }
 }
-#endif // PLATFORM_LUMIN

@@ -7,10 +7,6 @@ using XRTK.Editor.Extensions;
 using XRTK.Editor.Profiles.InputSystem.Controllers;
 using XRTK.Lumin.Profiles;
 
-#if PLATFORM_LUMIN
-using UnityEngine.XR.MagicLeap;
-#endif // PLATFORM_LUMIN
-
 namespace XRTK.Lumin.Editor
 {
     [CustomEditor(typeof(LuminHandControllerDataProviderProfile))]
@@ -21,12 +17,8 @@ namespace XRTK.Lumin.Editor
 
         private static readonly GUIContent handTrackingFoldoutHeader = new GUIContent("Lumin Hand Tracking Settings");
 
-#if PLATFORM_LUMIN
         private GUIContent keyPointContent;
         private GUIContent poseFilterContent;
-#endif // PLATFORM_LUMIN
-
-        private bool showLuminHandTrackingSettings = true;
 
         protected override void OnEnable()
         {
@@ -35,10 +27,8 @@ namespace XRTK.Lumin.Editor
             keyPointFilterLevel = serializedObject.FindProperty(nameof(keyPointFilterLevel));
             poseFilterLevel = serializedObject.FindProperty(nameof(poseFilterLevel));
 
-#if PLATFORM_LUMIN
             keyPointContent = new GUIContent(keyPointFilterLevel.displayName, keyPointFilterLevel.tooltip);
             poseFilterContent = new GUIContent(poseFilterLevel.displayName, poseFilterLevel.tooltip);
-#endif // PLATFORM_LUMIN
         }
 
         public override void OnInspectorGUI()
@@ -47,17 +37,13 @@ namespace XRTK.Lumin.Editor
 
             serializedObject.Update();
 
-            showLuminHandTrackingSettings = EditorGUILayoutExtensions.FoldoutWithBoldLabel(showLuminHandTrackingSettings, handTrackingFoldoutHeader, true);
-            if (showLuminHandTrackingSettings)
+            keyPointFilterLevel.isExpanded = EditorGUILayoutExtensions.FoldoutWithBoldLabel(keyPointFilterLevel.isExpanded, handTrackingFoldoutHeader);
+
+            if (keyPointFilterLevel.isExpanded)
             {
                 EditorGUI.indentLevel++;
-#if PLATFORM_LUMIN
-                keyPointFilterLevel.intValue = (int)(MLHandTracking.KeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (MLHandTracking.KeyPointFilterLevel)keyPointFilterLevel.intValue);
-                poseFilterLevel.intValue = (int)(MLHandTracking.PoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (MLHandTracking.PoseFilterLevel)poseFilterLevel.intValue);
-#else
-                EditorGUILayout.PropertyField(keyPointFilterLevel);
-                EditorGUILayout.PropertyField(poseFilterLevel);
-#endif // PLATFORM_LUMIN
+                keyPointFilterLevel.intValue = (int)(LuminApi.KeyPointFilterLevel)EditorGUILayout.EnumPopup(keyPointContent, (LuminApi.KeyPointFilterLevel)keyPointFilterLevel.intValue);
+                poseFilterLevel.intValue = (int)(LuminApi.PoseFilterLevel)EditorGUILayout.EnumPopup(poseFilterContent, (LuminApi.PoseFilterLevel)poseFilterLevel.intValue);
                 EditorGUI.indentLevel--;
             }
 
