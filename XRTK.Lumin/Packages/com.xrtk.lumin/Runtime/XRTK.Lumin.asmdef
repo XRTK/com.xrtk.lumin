@@ -5,7 +5,10 @@
         "GUID:28d8685fae23c21419ef42894cb9b075",
         "GUID:f3241d040533491e8a1e2714b27c3111"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor",
+        "Lumin"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
