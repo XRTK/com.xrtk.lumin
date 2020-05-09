@@ -1,21 +1,16 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.MagicLeap;
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
+using XRTK.Extensions;
 using XRTK.Interfaces.Providers.Controllers;
 using XRTK.Providers.Controllers;
-
-#if PLATFORM_LUMIN
-
-using UnityEngine;
-using XRTK.Extensions;
 using XRTK.Services;
-
-#endif
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -50,8 +45,6 @@ namespace XRTK.Lumin.Providers.Controllers
 
         /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultRightHandedInteractions => DefaultInteractions;
-
-#if PLATFORM_LUMIN
 
         private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
@@ -251,7 +244,5 @@ namespace XRTK.Lumin.Providers.Controllers
             // Update the interaction data source
             interactionMapping.PoseData = currentPointerPose;
         }
-
-#endif // PLATFORM_LUMIN
     }
 }

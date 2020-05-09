@@ -8,7 +8,6 @@ using UnityEngine;
 using UnityEngine.XR;
 
 [assembly: InternalsVisibleTo("XRTK.Lumin.Editor")]
-
 namespace XRTK.Lumin
 {
     /// <summary>
@@ -16,30 +15,28 @@ namespace XRTK.Lumin
     /// </summary>
     internal static class LuminApi
     {
-#if PLATFORM_LUMIN
-
         private const string UNITY_MAGIC_LEAP_DLL = "UnityMagicLeap";
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_MeshingUpdateSettings(ref MeshingSettings newSettings);
+        public static extern void UnityMagicLeap_MeshingUpdateSettings(ref MeshingSettings newSettings);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_MeshingSetDensity(float density);
+        public static extern void UnityMagicLeap_MeshingSetDensity(float density);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents);
+        public static extern void UnityMagicLeap_MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_MeshingSetBatchSize(int batchSize);
+        public static extern void UnityMagicLeap_MeshingSetBatchSize(int batchSize);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern IntPtr UnityMagicLeap_MeshingAcquireConfidence(MeshId meshId, out int count);
+        public static extern IntPtr UnityMagicLeap_MeshingAcquireConfidence(MeshId meshId, out int count);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_MeshingReleaseConfidence(MeshId meshId);
+        public static extern void UnityMagicLeap_MeshingReleaseConfidence(MeshId meshId);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_GesturesUpdateConfiguration(ref GestureConfiguration gestureConfiguration);
+        public static extern void UnityMagicLeap_GesturesUpdateConfiguration(ref GestureConfiguration gestureConfiguration);
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
         public static extern void UnityMagicLeap_GesturesCreate();
@@ -58,15 +55,13 @@ namespace XRTK.Lumin
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool UnityMagicLeap_GesturesIsHandGesturesEnabled();
+        public static extern bool UnityMagicLeap_GesturesIsHandGesturesEnabled();
 
         [DllImport(UNITY_MAGIC_LEAP_DLL)]
-        internal static extern void UnityMagicLeap_GesturesSetHandGesturesEnabled([MarshalAs(UnmanagedType.I1)]bool value);
-
-#endif // PLATFORM_LUMIN
+        public static extern void UnityMagicLeap_GesturesSetHandGesturesEnabled([MarshalAs(UnmanagedType.I1)]bool value);
 
         [Flags]
-        internal enum MeshingFlags
+        public enum MeshingFlags
         {
             None = 0,
             PointCloud = 1,
@@ -78,7 +73,7 @@ namespace XRTK.Lumin
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct MeshingSettings
+        public struct MeshingSettings
         {
             public MeshingFlags flags;
             public float fillHoleLength;
@@ -86,7 +81,7 @@ namespace XRTK.Lumin
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct GestureConfiguration
+        public struct GestureConfiguration
         {
             /// <summary>
             /// Array length excludes [NoHand], since we do not allow it to be disabled.
@@ -114,7 +109,7 @@ namespace XRTK.Lumin
         /// <summary>
         /// Configured level for key points filtering of key points and hand centers.
         /// </summary>
-        internal enum KeyPointFilterLevel
+        public enum KeyPointFilterLevel
         {
             /// <summary>
             /// Default value, no filtering is done, the points are raw.
@@ -135,7 +130,7 @@ namespace XRTK.Lumin
         /// <summary>
         /// Configured level of filtering for static poses.
         /// </summary>
-        internal enum PoseFilterLevel
+        public enum PoseFilterLevel
         {
             /// <summary>
             /// Default value, no filtering, the poses are raw.
@@ -156,7 +151,7 @@ namespace XRTK.Lumin
         /// <summary>
         /// Static key pose types which are available when both hands are separated.
         /// </summary>
-        internal enum HandKeyPose
+        public enum HandKeyPose
         {
             /// <summary>
             /// Index finger.
