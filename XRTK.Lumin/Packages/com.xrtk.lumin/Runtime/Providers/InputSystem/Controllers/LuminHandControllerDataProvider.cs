@@ -77,14 +77,14 @@ namespace XRTK.Lumin.Providers.InputSystem.Controllers
             {
                 Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
             }
-
-            LuminHandDataConverter.HandMeshingEnabled = RenderingMode == HandRenderingMode.Mesh;
         }
 
         /// <inheritdoc />
         public override void Update()
         {
             base.Update();
+
+            LuminHandDataConverter.HandMeshingEnabled = RenderingMode == HandRenderingMode.Mesh;
 
             if (isEnabled)
             {
