@@ -16,6 +16,7 @@ using UnityEngine;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
 using XRTK.Services;
+using XRTK.Definitions.Controllers.Hands;
 
 #endif // PLATFORM_LUMIN
 
@@ -77,7 +78,7 @@ namespace XRTK.Lumin.Providers.InputSystem.Controllers
                 Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
             }
 
-            LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
+            LuminHandDataConverter.HandMeshingEnabled = RenderingMode == HandRenderingMode.Mesh;
         }
 
         /// <inheritdoc />
