@@ -4,8 +4,9 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Packages/com.xrtk.sdk/StandardAssets/Scenes/BaseScene.unity
-    guid: c71bfba9e4cd8644486e0622ec4da627
-  m_configObjects: {}
+  m_Scenes: []
+  m_configObjects:
+    com.unity.xr.magicleap.magic_leap_settings: {fileID: 11400000, guid: c842817bad0ddc5468e93bb771dc732c,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: d3c3c4ff95c59cd4787c571a0c3d4fc6,
+      type: 2}

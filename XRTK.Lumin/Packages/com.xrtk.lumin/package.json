@@ -14,7 +14,7 @@
     "lumin"
   ],
   "version": "0.2.0",
-  "unity": "2019.1",
+  "unity": "2019.3",
   "license": "MIT",
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
