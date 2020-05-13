@@ -145,5 +145,5 @@ stages:
                 "author": {
                     "name": "$(Discord.WebhookAuthor)"
                 },
-                "url": "https://github.com/XRTK/$(Build.Repository.Name)/releases"
+                "url": "https://github.com/$(Build.Repository.Name)/releases"
             }]
