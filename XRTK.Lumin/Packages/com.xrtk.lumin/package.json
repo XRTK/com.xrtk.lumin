@@ -19,8 +19,8 @@
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.2.0",
     "com.unity.xr.magicleap": "4.0.5"
+    "com.xrtk.core": "0.2.0-preview.34",
   },
   "profiles": [
     {
