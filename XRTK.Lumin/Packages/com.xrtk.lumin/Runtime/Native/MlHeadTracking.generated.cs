@@ -9,7 +9,7 @@
 
 using System;
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -23,22 +23,22 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// No error, tracking is nominal
             /// </summary>
-            MLHeadTrackingError_None,
+            None,
 
             /// <summary>
             /// There are not enough features in the environment
             /// </summary>
-            MLHeadTrackingError_NotEnoughFeatures,
+            NotEnoughFeatures,
 
             /// <summary>
             /// Lighting in the environment is not sufficient to track accurately
             /// </summary>
-            MLHeadTrackingError_LowLight,
+            LowLight,
 
             /// <summary>
             /// Head tracking failed for an unkown reason
             /// </summary>
-            MLHeadTrackingError_Unknown,
+            Unknown,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -54,7 +54,7 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Full 6 degrees of freedom tracking (position and orientation)
             /// </summary>
-            MLHeadTrackingMode_6DOF,
+            SixDOF,
 
             /// <summary>
             /// Limited 3 degrees of freedom tracking (orientation only)
@@ -62,12 +62,12 @@ namespace XRTK.Lumin.Runtime.Native
             /// <remarks>
             /// Use MLHeadTrackingMode_Unavailable instead
             /// </remarks>
-            MLHeadTrackingMode_3DOF,
+            ThreeDOF,
 
             /// <summary>
             /// Head tracking is unavailable
             /// </summary>
-            MLHeadTrackingMode_Unavailable = unchecked((int)MLHeadTrackingMode_3DOF),
+            Unavailable = unchecked((int)ThreeDOF),
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -85,22 +85,22 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Map was lost It could possibly recover
             /// </summary>
-            MLHeadTrackingMapEvent_Lost = unchecked((int)(1 << (int)0)),
+            Lost = unchecked((int)(1 << (int)0)),
 
             /// <summary>
             /// Previous map was recovered
             /// </summary>
-            MLHeadTrackingMapEvent_Recovered = unchecked((int)(1 << (int)1)),
+            Recovered = unchecked((int)(1 << (int)1)),
 
             /// <summary>
             /// Failed to recover previous map
             /// </summary>
-            MLHeadTrackingMapEvent_RecoveryFailed = unchecked((int)(1 << (int)2)),
+            RecoveryFailed = unchecked((int)(1 << (int)2)),
 
             /// <summary>
             /// New map session created
             /// </summary>
-            MLHeadTrackingMapEvent_NewSession = unchecked((int)(1 << (int)3)),
+            NewSession = unchecked((int)(1 << (int)3)),
         }
 
         /// <summary>
@@ -135,6 +135,11 @@ namespace XRTK.Lumin.Runtime.Native
             /// Represents what tracking error (if any) is present
             /// </summary>
             public MlHeadTracking.MLHeadTrackingError error;
+
+            public override string ToString()
+            {
+                return $"{nameof(MLHeadTrackingState)}|{nameof(mode)}:{mode}|{nameof(confidence)}:{confidence}|{nameof(error)}:{error}";
+            }
         }
 
         /// <summary>

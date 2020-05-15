@@ -1,20 +1,14 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using UnityEngine;
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
+using XRTK.Extensions;
 using XRTK.Interfaces.Providers.Controllers;
 using XRTK.Providers.Controllers;
-
-#if PLATFORM_LUMIN
-
-using UnityEngine;
-using UnityEngine.XR.MagicLeap;
-using XRTK.Extensions;
 using XRTK.Services;
-
-#endif
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -50,17 +44,14 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultRightHandedInteractions => DefaultInteractions;
 
-#if PLATFORM_LUMIN
+        //internal MLInputController MlControllerReference { get; set; }
 
-        internal MLInputController MlControllerReference { get; set; }
-        //internal LuminControllerGestureSettings ControllerGestureSettings { get; set; }
-
-        internal bool IsHomePressed;
+        //internal bool IsHomePressed;
 
         private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose currentControllerPose = MixedRealityPose.ZeroIdentity;
-        private Vector2 dualAxisPosition;
+        //private Vector2 dualAxisPosition;
 
         /// <summary>
         /// Updates the controller's interaction mappings and ready the current input values.
@@ -117,34 +108,34 @@ namespace XRTK.Lumin.Providers.Controllers
 
             lastControllerPose = currentControllerPose;
 
-            if (MlControllerReference.Type == MLInputControllerType.Control)
-            {
-                // The source is either a hand or a controller that supports pointing.
-                // We can now check for position and rotation.
-                IsPositionAvailable = MlControllerReference.Dof != MLInputControllerDof.None;
+            //if (MlControllerReference.Type == MLInputControllerType.Control)
+            //{
+            //    // The source is either a hand or a controller that supports pointing.
+            //    // We can now check for position and rotation.
+            //    IsPositionAvailable = MlControllerReference.Dof != MLInputControllerDof.None;
 
-                if (IsPositionAvailable)
-                {
-                    IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLControllerCalibAccuracy.Medium;
-                }
-                else
-                {
-                    IsPositionApproximate = false;
-                }
+            //    if (IsPositionAvailable)
+            //    {
+            //        IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLControllerCalibAccuracy.Medium;
+            //    }
+            //    else
+            //    {
+            //        IsPositionApproximate = false;
+            //    }
 
-                IsRotationAvailable = MlControllerReference.Dof == MLInputControllerDof.Dof6;
+            //    IsRotationAvailable = MlControllerReference.Dof == MLInputControllerDof.Dof6;
 
-                // Devices are considered tracked if we receive position OR rotation data from the sensors.
-                TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;
-            }
-            else
-            {
-                // The input source does not support tracking.
-                TrackingState = TrackingState.NotApplicable;
-            }
+            //    // Devices are considered tracked if we receive position OR rotation data from the sensors.
+            //    TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;
+            //}
+            //else
+            //{
+            //    // The input source does not support tracking.
+            //    TrackingState = TrackingState.NotApplicable;
+            //}
 
-            currentControllerPose.Position = MlControllerReference.Position;
-            currentControllerPose.Rotation = MlControllerReference.Orientation;
+            //currentControllerPose.Position = MlControllerReference.Position;
+            //currentControllerPose.Rotation = MlControllerReference.Orientation;
 
             // Raise input system events if it is enabled.
             if (lastState != TrackingState)
@@ -175,83 +166,81 @@ namespace XRTK.Lumin.Providers.Controllers
 
             var isHomeButton = interactionMapping.Description.Contains("Home");
 
-            if (!isHomeButton)
-            {
-                interactionMapping.BoolData = MlControllerReference.IsBumperDown;
-            }
-            else
-            {
-                interactionMapping.BoolData = IsHomePressed;
-                IsHomePressed = false;
-            }
+            //if (!isHomeButton)
+            //{
+            //    interactionMapping.BoolData = MlControllerReference.IsBumperDown;
+            //}
+            //else
+            //{
+            //    interactionMapping.BoolData = IsHomePressed;
+            //    IsHomePressed = false;
+            //}
         }
 
         private void UpdateSingleAxisData(MixedRealityInteractionMapping interactionMapping)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.SingleAxis || interactionMapping.AxisType == AxisType.Digital);
 
-            interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
-                ? MlControllerReference.Touch1PosAndForce.z
-                : MlControllerReference.TriggerValue;
+            //interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
+            //    ? MlControllerReference.Touch1PosAndForce.z
+            //    : MlControllerReference.TriggerValue;
 
-            switch (interactionMapping.InputType)
-            {
-                case DeviceInputType.Select:
-                case DeviceInputType.Trigger:
-                case DeviceInputType.TriggerPress:
-                case DeviceInputType.TouchpadPress:
-                    interactionMapping.BoolData = interactionMapping.FloatData.Approximately(1f, 0.001f) ||
-                                                  interactionMapping.FloatData.Approximately(-1f, 0.001f);
-                    break;
-                case DeviceInputType.TriggerTouch:
-                case DeviceInputType.TouchpadTouch:
-                case DeviceInputType.TriggerNearTouch:
-                    interactionMapping.BoolData = !interactionMapping.FloatData.Equals(0f);
-                    break;
-                default:
-                    Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
-                    return;
-            }
+            //switch (interactionMapping.InputType)
+            //{
+            //    case DeviceInputType.Select:
+            //    case DeviceInputType.Trigger:
+            //    case DeviceInputType.TriggerPress:
+            //    case DeviceInputType.TouchpadPress:
+            //        interactionMapping.BoolData = interactionMapping.FloatData.Approximately(1f, 0.001f) ||
+            //                                      interactionMapping.FloatData.Approximately(-1f, 0.001f);
+            //        break;
+            //    case DeviceInputType.TriggerTouch:
+            //    case DeviceInputType.TouchpadTouch:
+            //    case DeviceInputType.TriggerNearTouch:
+            //        interactionMapping.BoolData = !interactionMapping.FloatData.Equals(0f);
+            //        break;
+            //    default:
+            //        Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
+            //        return;
+            //}
         }
 
         private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.DualAxis);
 
-            if (MlControllerReference.Touch1PosAndForce.z > 0f)
-            {
-                dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
-                dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
-            }
-            else
-            {
-                dualAxisPosition.x = 0f;
-                dualAxisPosition.y = 0f;
-            }
+            //if (MlControllerReference.Touch1PosAndForce.z > 0f)
+            //{
+            //    dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
+            //    dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
+            //}
+            //else
+            //{
+            //    dualAxisPosition.x = 0f;
+            //    dualAxisPosition.y = 0f;
+            //}
 
             // Update the interaction data source
-            interactionMapping.Vector2Data = dualAxisPosition;
+            //interactionMapping.Vector2Data = dualAxisPosition;
         }
 
         private void UpdatePoseData(MixedRealityInteractionMapping interactionMapping)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.SixDof);
 
-            if (interactionMapping.InputType == DeviceInputType.SpatialPointer)
-            {
-                currentPointerPose.Position = MlControllerReference.Position;
-                currentPointerPose.Rotation = MlControllerReference.Orientation;
-            }
-            else
-            {
-                Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
-                return;
-            }
+            //if (interactionMapping.InputType == DeviceInputType.SpatialPointer)
+            //{
+            //    currentPointerPose.Position = MlControllerReference.Position;
+            //    currentPointerPose.Rotation = MlControllerReference.Orientation;
+            //}
+            //else
+            //{
+            //    Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
+            //    return;
+            //}
 
             // Update the interaction data source
             interactionMapping.PoseData = currentPointerPose;
         }
-
-#endif // PLATFORM_LUMIN
     }
 }

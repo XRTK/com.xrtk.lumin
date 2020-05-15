@@ -9,7 +9,7 @@
 
 using System;
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -1334,6 +1334,11 @@ namespace XRTK.Lumin.Runtime.Native
             /// will be either 0 or 1 If it is MLMA it will be 0xFF
             /// </summary>
             public byte hardware_index;
+
+            public override string ToString()
+            {
+                return $"{nameof(MLInputControllerState)}{hardware_index}|{nameof(is_connected)}?{is_connected}|{nameof(type)}:{type}";
+            }
         }
 
         /// <summary>
@@ -1552,9 +1557,7 @@ namespace XRTK.Lumin.Runtime.Native
         /// Desired configuration of the input system
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct MLInputConfiguration
-        {
-        }
+        public struct MLInputConfiguration { }
 
         /// <summary>
         /// Returns an ASCII string for MLInputsResult and MLResult codes

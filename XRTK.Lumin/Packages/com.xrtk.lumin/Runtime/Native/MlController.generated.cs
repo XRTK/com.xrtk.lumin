@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -103,6 +103,8 @@ namespace XRTK.Lumin.Runtime.Native
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool enable_fused6dof;
+
+            public static MLControllerConfiguration Default => new MLControllerConfiguration { enable_imu3dof = false, enable_em6dof = true, enable_fused6dof = true };
         }
 
         /// <summary>

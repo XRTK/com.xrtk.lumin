@@ -9,7 +9,7 @@
 
 using System;
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 

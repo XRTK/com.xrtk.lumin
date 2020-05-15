@@ -6,6 +6,7 @@ using XRTK.Attributes;
 using XRTK.Definitions.CameraSystem;
 using XRTK.Definitions.Platforms;
 using XRTK.Interfaces.CameraSystem;
+using XRTK.Lumin.Native;
 using XRTK.Providers.CameraSystem;
 
 namespace XRTK.Lumin.Providers.CameraSystem
@@ -20,6 +21,8 @@ namespace XRTK.Lumin.Providers.CameraSystem
             : base(name, priority, profile, parentService)
         {
         }
+
+        #region IMixedRealityCameraDataProvider Implementation
 
         /// <inheritdoc />
         public override bool IsOpaque => false;
@@ -50,6 +53,104 @@ namespace XRTK.Lumin.Providers.CameraSystem
             CameraRig.CameraTransform.localRotation = Quaternion.identity;
             CameraRig.BodyTransform.localPosition = Vector3.zero;
             CameraRig.BodyTransform.localRotation = Quaternion.identity;
+        }
+
+        #endregion IMixedRealityCameraDataProvider Implementation
+
+        private MlApi.MLHandle headTrackerHandle = new MlApi.MLHandle();
+        private MlHeadTracking.MLHeadTrackingStaticData staticHeadData = new MlHeadTracking.MLHeadTrackingStaticData();
+        private ulong rawMapEvents;
+        private MlHeadTracking.MLHeadTrackingState headTrackingState;
+        private MlPerception.MLPerceptionSettings perceptionSettings;
+
+        /// <inheritdoc />
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            if (!Application.isPlaying) { return; }
+
+            if (!MlPerception.MLPerceptionStartup(ref perceptionSettings).IsOk)
+            {
+                Debug.LogError($"Failed to start {nameof(MlPerception)}!");
+            }
+
+            if (!MlPerception.MLPerceptionInitSettings(ref perceptionSettings).IsOk)
+            {
+                Debug.LogError($"Failed to set {nameof(MlPerception)} settings!");
+            }
+
+            if (!headTrackerHandle.IsValid)
+            {
+                if (!MlHeadTracking.MLHeadTrackingCreate(ref headTrackerHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to start {nameof(MlHeadTracking)}!");
+                }
+
+                if (!MlHeadTracking.MLHeadTrackingGetStaticData(headTrackerHandle, ref staticHeadData).IsOk)
+                {
+                    Debug.LogError($"Failed to get {nameof(MlHeadTracking)} static data!");
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override void Update()
+        {
+            if (!Application.isPlaying) { return; }
+
+            if (headTrackerHandle.IsValid)
+            {
+                if (MlHeadTracking.MLHeadTrackingGetMapEvents(headTrackerHandle, ref rawMapEvents).IsOk)
+                {
+                    var mapEvents = (MlHeadTracking.MLHeadTrackingMapEvent)rawMapEvents;
+                    Debug.Log($"Head tracking events: {mapEvents}");
+                }
+                else
+                {
+                    Debug.LogError("Failed to get head tracking map events");
+                }
+
+                if (MlHeadTracking.MLHeadTrackingGetState(headTrackerHandle, ref headTrackingState).IsOk)
+                {
+                    Debug.Log(headTrackingState);
+                }
+                else
+                {
+                    Debug.LogError($"Failed to get head tracking state");
+                }
+
+                if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
+                {
+                    Debug.LogError("Failed to get perception snapshot!");
+                }
+
+                if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
+                {
+                    Debug.LogError("Failed to release perception snapshot!");
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override void Destroy()
+        {
+            base.Destroy();
+
+            if (!Application.isPlaying) { return; }
+
+            if (headTrackerHandle.IsValid)
+            {
+                if (!MlHeadTracking.MLHeadTrackingDestroy(headTrackerHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy {nameof(MlHeadTracking)}!");
+                }
+            }
+
+            if (!MlPerception.MLPerceptionShutdown().IsOk)
+            {
+                Debug.LogError($"Failed to shutdown {nameof(MlPerception)}!");
+            }
         }
     }
 }

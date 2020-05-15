@@ -11,7 +11,7 @@ using System;
 using UnityEngine;
 using System.Globalization;
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -34,6 +34,11 @@ namespace XRTK.Lumin.Runtime.Native
 
             public static explicit operator Vector2(MLVec2f v2) => new Vector2(v2.x, v2.y);
             public static explicit operator MLVec2f(Vector2 v2) => new MLVec2f(v2.x, v2.y);
+
+            public override string ToString()
+            {
+                return ((Vector2)this).ToString();
+            }
         }
 
         /// <summary>
@@ -56,6 +61,11 @@ namespace XRTK.Lumin.Runtime.Native
 
             public static explicit operator Vector3(MLVec3f v3) => new Vector3(v3.x, v3.y, -v3.z);
             public static explicit operator MLVec3f(Vector3 v3) => new MLVec3f(v3.x, v3.y, -v3.z);
+
+            public override string ToString()
+            {
+                return ((Vector3)this).ToString();
+            }
         }
 
         /// <summary>
@@ -93,6 +103,11 @@ namespace XRTK.Lumin.Runtime.Native
 
                 return identity;
             }
+
+            public override string ToString()
+            {
+                return ((Quaternion)this).ToString();
+            }
         }
 
         /// <summary>
@@ -126,6 +141,11 @@ namespace XRTK.Lumin.Runtime.Native
                 MLTransform t = new MLTransform();
                 t.rotation = MLQuaternionf.Identity();
                 return t;
+            }
+
+            public override string ToString()
+            {
+                return ((Matrix4x4)this).ToString();
             }
         }
 
@@ -247,6 +267,11 @@ namespace XRTK.Lumin.Runtime.Native
                 result.Node5 = byte.Parse(guidString.Substring(30, 2), NumberStyles.HexNumber);
 
                 return result;
+            }
+
+            public override string ToString()
+            {
+                return ((Guid)this).ToString();
             }
         }
 

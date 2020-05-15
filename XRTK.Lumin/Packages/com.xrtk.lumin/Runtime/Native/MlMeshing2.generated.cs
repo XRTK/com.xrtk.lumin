@@ -9,7 +9,7 @@
 
 using System;
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -19,38 +19,38 @@ namespace XRTK.Lumin.Runtime.Native
         /// Request flags for the meshing system
         /// </summary>
         [Flags]
-        public enum MLMeshingFlags : int
+        public enum MeshingFlags : int
         {
             /// <summary>
             /// If set, will return a point cloud instead of a triangle mesh
             /// </summary>
-            MLMeshingFlags_PointCloud = unchecked((int)1 << (int)0),
+            PointCloud = unchecked((int)1 << (int)0),
 
             /// <summary>
             /// If set, the system will compute the normals for the triangle vertices
             /// </summary>
-            MLMeshingFlags_ComputeNormals = unchecked((int)1 << (int)1),
+            ComputeNormals = unchecked((int)1 << (int)1),
 
             /// <summary>
             /// If set, the system will compute the confidence values
             /// </summary>
-            MLMeshingFlags_ComputeConfidence = unchecked((int)1 << (int)2),
+            ComputeConfidence = unchecked((int)1 << (int)2),
 
             /// <summary>
             /// If set, the system will planarize the returned mesh (planar regions will be smoothed out)
             /// </summary>
-            MLMeshingFlags_Planarize = unchecked((int)1 << (int)3),
+            Planarize = unchecked((int)1 << (int)3),
 
             /// <summary>
             /// If set, the mesh skirt (overlapping area between two mesh blocks) will be removed
             /// </summary>
-            MLMeshingFlags_RemoveMeshSkirt = unchecked((int)1 << (int)4),
+            RemoveMeshSkirt = unchecked((int)1 << (int)4),
 
             /// <summary>
             /// If set, winding order of indices will be be changed from clockwise to counter clockwise
             /// This could be useful for face culling process in different engines
             /// </summary>
-            MLMeshingFlags_IndexOrderCCW = unchecked((int)1 << (int)5),
+            IndexOrderCCW = unchecked((int)1 << (int)5),
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -66,17 +66,17 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Minimum Level of Detail (LOD) for the mesh
             /// </summary>
-            MLMeshingLOD_Minimum,
+            Minimum,
 
             /// <summary>
             /// Medium Level of Detail (LOD) for the mesh
             /// </summary>
-            MLMeshingLOD_Medium,
+            Medium,
 
             /// <summary>
             /// Maximum Level of Detail (LOD) for the mesh
             /// </summary>
-            MLMeshingLOD_Maximum,
+            Maximum,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -92,22 +92,22 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Mesh request has succeeded
             /// </summary>
-            MLMeshingResult_Success,
+            Success,
 
             /// <summary>
             /// Mesh request has failed
             /// </summary>
-            MLMeshingResult_Failed,
+            Failed,
 
             /// <summary>
             /// Mesh request is pending
             /// </summary>
-            MLMeshingResult_Pending,
+            Pending,
 
             /// <summary>
             /// There are partial updates on the mesh request
             /// </summary>
-            MLMeshingResult_PartialUpdate,
+            PartialUpdate,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -123,22 +123,22 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Mesh has been created
             /// </summary>
-            MLMeshingMeshState_New,
+            New,
 
             /// <summary>
             /// Mesh has been updated
             /// </summary>
-            MLMeshingMeshState_Updated,
+            Updated,
 
             /// <summary>
             /// Mesh has been deleted
             /// </summary>
-            MLMeshingMeshState_Deleted,
+            Deleted,
 
             /// <summary>
             /// Mesh is unchanged
             /// </summary>
-            MLMeshingMeshState_Unchanged,
+            Unchanged,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -155,7 +155,7 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Request flags that are a combination of MLMeshingFlags
             /// </summary>
-            public uint flags;
+            public MeshingFlags flags;
 
             /// <summary>
             /// Perimeter (in meters) of holes you wish to have filled
@@ -167,6 +167,21 @@ namespace XRTK.Lumin.Runtime.Native
             /// which has an area (in meters^2) less than this size will be removed
             /// </summary>
             public float disconnected_component_area;
+
+            public static MLMeshingSettings Default
+            {
+                get
+                {
+                    return new MLMeshingSettings
+                    {
+                        flags = MeshingFlags.Planarize |
+                                MeshingFlags.IndexOrderCCW |
+                                MeshingFlags.RemoveMeshSkirt,
+                        fill_hole_length = 5f,
+                        disconnected_component_area = 0.25f,
+                    };
+                }
+            }
         }
 
         /// <summary>

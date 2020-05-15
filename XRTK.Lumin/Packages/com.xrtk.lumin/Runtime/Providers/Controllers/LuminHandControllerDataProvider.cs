@@ -1,25 +1,19 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Interfaces.InputSystem;
-using XRTK.Lumin.Profiles;
-using XRTK.Providers.Controllers.Hands;
-
-#if PLATFORM_LUMIN
-
-using System.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
+using XRTK.Attributes;
 using XRTK.Definitions.Devices;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.Utilities;
+using XRTK.Interfaces.InputSystem;
+using XRTK.Lumin.Native;
+using XRTK.Lumin.Profiles;
 using XRTK.Lumin.Utilities;
+using XRTK.Providers.Controllers.Hands;
 using XRTK.Services;
-
-#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -31,52 +25,44 @@ namespace XRTK.Lumin.Providers.Controllers
         public LuminHandControllerDataProvider(string name, uint priority, LuminHandControllerDataProviderProfile profile, IMixedRealityInputSystem parentService)
             : base(name, priority, profile, parentService)
         {
-#if PLATFORM_LUMIN
-            keyPointFilterLevel = (MLKeyPointFilterLevel)profile.KeyPointFilterLevel;
-            poseFilterLevel = (MLPoseFilterLevel)profile.PoseFilterLevel;
+            keyPointFilterLevel = profile.KeyPointFilterLevel;
+            poseFilterLevel = profile.PoseFilterLevel;
+            LuminHandDataConverter.HandMeshingEnabled = profile.HandMeshingEnabled;
         }
 
         private readonly MLPoseFilterLevel poseFilterLevel;
         private readonly MLKeyPointFilterLevel keyPointFilterLevel;
         private readonly LuminHandDataConverter leftHandConverter = new LuminHandDataConverter(Handedness.Left);
         private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
-        private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
-        private bool isEnabled = false;
+        private MlApi.MLHandle handTrackingHandle = new MlApi.MLHandle();
+        private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
+        private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx;
 
         /// <inheritdoc />
         public override void Enable()
         {
-            if (!MLHands.IsStarted)
-            {
-                var result = MLHands.Start();
+            if (!Application.isPlaying) { return; }
 
-                if (!result.IsOk)
+            if (!handTrackingHandle.IsValid)
+            {
+                if (!MlHandTracking.MLHandTrackingCreate(ref handTrackingHandle).IsOk)
                 {
-                    Debug.LogError($"Error: Failed starting MLHands: {result}");
+                    Debug.LogError($"Failed to start {nameof(MlHandTracking)}!");
                     return;
                 }
 
-                isEnabled = true;
-            }
+                configuration.key_points_filter_level = keyPointFilterLevel;
+                configuration.pose_filter_level = poseFilterLevel;
+                configuration.handtracking_pipeline_enabled = true;
+                configuration.keypose_config = new bool[(int)MlHandTracking.MLHandTrackingKeyPose.MLHandTrackingKeyPose_NoHand];
 
-            if (!MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.EnableKeyPoses)}.");
+                if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                {
+                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)} {configuration}!");
+                }
             }
-
-            if (!MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetKeyPointsFilterLevel)}.");
-            }
-
-            if (!MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
-            }
-
-            LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
         }
 
         /// <inheritdoc />
@@ -84,7 +70,10 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             base.Update();
 
-            if (isEnabled)
+            if (!Application.isPlaying) { return; }
+
+            if (handTrackingHandle.IsValid &&
+                MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
             {
                 GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
                 GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
@@ -94,10 +83,14 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override void Disable()
         {
-            if (isEnabled)
+            if (!Application.isPlaying) { return; }
+
+            if (handTrackingHandle.IsValid)
             {
-                MLHands.KeyPoseManager.DisableAllKeyPoses();
-                MLHands.Stop();
+                if (!MlHandTracking.MLHandTrackingDestroy(handTrackingHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy {nameof(MlHandTracking)}");
+                }
             }
 
             foreach (var activeController in activeControllers)
@@ -163,7 +156,6 @@ namespace XRTK.Lumin.Providers.Controllers
 
             controller = null;
             return false;
-#endif // PLATFORM_LUMIN
         }
     }
 }

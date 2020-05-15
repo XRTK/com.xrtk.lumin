@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace XRTK.Lumin.Runtime.Native
+namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
 
@@ -179,58 +179,6 @@ namespace XRTK.Lumin.Runtime.Native
             /// Maximum number of key points per gesture
             /// </summary>
             MLHandTrackingKeyPoint_Ensure32Bits = unchecked((int)0x7FFFFFFF),
-        }
-
-        /// <summary>
-        /// Configured level for keypoints filtering of keypoints and hand centers
-        /// </summary>
-        public enum MLKeypointFilterLevel : int
-        {
-            /// <summary>
-            /// Default value, no filtering is done, the points are raw
-            /// </summary>
-            MLKeypointFilterLevel_0,
-
-            /// <summary>
-            /// Some smoothing at the cost of latency
-            /// </summary>
-            MLKeypointFilterLevel_1,
-
-            /// <summary>
-            /// Predictive smoothing, at higher cost of latency
-            /// </summary>
-            MLKeypointFilterLevel_2,
-
-            /// <summary>
-            /// Ensure enum is represented as 32 bits
-            /// </summary>
-            MLKeypointFilterLevel_Ensure32Bits = unchecked((int)0x7FFFFFFF),
-        }
-
-        /// <summary>
-        /// Configured level of filtering for static poses
-        /// </summary>
-        public enum MLPoseFilterLevel : int
-        {
-            /// <summary>
-            /// Default value, No filtering, the poses are raw
-            /// </summary>
-            MLPoseFilterLevel_0,
-
-            /// <summary>
-            /// Some robustness to flicker at some cost of latency
-            /// </summary>
-            MLPoseFilterLevel_1,
-
-            /// <summary>
-            /// More robust to flicker at higher latency cost
-            /// </summary>
-            MLPoseFilterLevel_2,
-
-            /// <summary>
-            /// Ensure enum is represented as 32 bits
-            /// </summary>
-            MLPoseFilterLevel_Ensure32Bits = unchecked((int)0x7FFFFFFF),
         }
 
         /// <summary>
@@ -503,12 +451,18 @@ namespace XRTK.Lumin.Runtime.Native
             /// <summary>
             /// Keypoint filter levels
             /// </summary>
-            public MlHandTracking.MLKeypointFilterLevel keypoints_filter_level;
+            public MLKeyPointFilterLevel key_points_filter_level;
 
             /// <summary>
             /// Pose filter levels
             /// </summary>
-            public MlHandTracking.MLPoseFilterLevel pose_filter_level;
+            public MLPoseFilterLevel pose_filter_level;
+
+            /// <inheritdoc />
+            public override string ToString()
+            {
+                return $"{nameof(MLHandTrackingConfiguration)}|{nameof(handtracking_pipeline_enabled)}?{handtracking_pipeline_enabled}|{nameof(key_points_filter_level)}:{key_points_filter_level}|{nameof(pose_filter_level)}:{pose_filter_level}";
+            }
         }
 
         /// <summary>
@@ -582,7 +536,7 @@ namespace XRTK.Lumin.Runtime.Native
         /// @priv GesturesConfig
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLHandTrackingSetConfiguration(MlApi.MLHandle hand_tracker, in MlHandTracking.MLHandTrackingConfiguration out_config);
+        public static extern MlApi.MLResult MLHandTrackingSetConfiguration(MlApi.MLHandle hand_tracker, ref MlHandTracking.MLHandTrackingConfiguration out_config);
 
         /// <summary>
         /// Gets the current configuration of the hand tracking system
