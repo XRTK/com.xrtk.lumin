@@ -102,45 +102,44 @@ namespace XRTK.Lumin.Providers.CameraSystem
         {
             if (!Application.isPlaying) { return; }
 
-            if (headTrackerHandle.IsValid)
+            if (!headTrackerHandle.IsValid) { return; }
+
+            if (MlHeadTracking.MLHeadTrackingGetMapEvents(headTrackerHandle, ref rawMapEvents).IsOk)
             {
-                if (MlHeadTracking.MLHeadTrackingGetMapEvents(headTrackerHandle, ref rawMapEvents).IsOk)
-                {
-                    var mapEvents = (MlHeadTracking.MLHeadTrackingMapEvent)rawMapEvents;
+                var mapEvents = (MlHeadTracking.MLHeadTrackingMapEvent)rawMapEvents;
 
-                    if (lastMapEvent != mapEvents)
-                    {
-                        Debug.Log($"{mapEvents}");
-                        lastMapEvent = mapEvents;
-                    }
-                }
-                else
+                if (lastMapEvent != mapEvents)
                 {
-                    Debug.LogError("Failed to get head tracking map events");
+                    Debug.Log($"{mapEvents}");
+                    lastMapEvent = mapEvents;
                 }
+            }
+            else
+            {
+                Debug.LogError("Failed to get head tracking map events");
+            }
 
-                if (!MlHeadTracking.MLHeadTrackingGetState(headTrackerHandle, ref headTrackingState).IsOk)
-                {
-                    Debug.LogError($"Failed to get head tracking state");
-                }
+            if (!MlHeadTracking.MLHeadTrackingGetState(headTrackerHandle, ref headTrackingState).IsOk)
+            {
+                Debug.LogError($"Failed to get head tracking state");
+            }
 
-                if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
-                {
-                    Debug.LogError("Failed to get perception snapshot!");
-                }
+            if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
+            {
+                Debug.LogError("Failed to get perception snapshot!");
+            }
 
-                if (MlSnapshot.MLSnapshotGetTransform(snapshot, staticHeadData.coord_frame_head, ref headTransform).IsOk)
-                {
-                    CameraRig.CameraTransform.localPosition = (Vector3)headTransform.position;
-                    CameraRig.CameraTransform.localRotation = (Quaternion)headTransform.rotation;
-                }
+            if (MlSnapshot.MLSnapshotGetTransform(snapshot, staticHeadData.coord_frame_head, ref headTransform).IsOk)
+            {
+                CameraRig.CameraTransform.localPosition = (Vector3)headTransform.position;
+                CameraRig.CameraTransform.localRotation = (Quaternion)headTransform.rotation;
+            }
 
-                OnSnapshotCaptured?.Invoke(snapshot);
+            OnSnapshotCaptured?.Invoke(snapshot);
 
-                if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
-                {
-                    Debug.LogError("Failed to release perception snapshot!");
-                }
+            if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
+            {
+                Debug.LogError("Failed to release perception snapshot!");
             }
         }
 

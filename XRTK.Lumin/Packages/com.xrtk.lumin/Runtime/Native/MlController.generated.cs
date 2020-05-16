@@ -129,6 +129,8 @@ namespace XRTK.Lumin.Native
             /// </summary>
             public MlController.MLControllerMode mode;
 
+            public MlTypes.MLTransform Transform { get; set; }
+
             public override string ToString()
             {
                 return $"{nameof(is_active)}?{is_active}|{nameof(mode)}:{mode}";

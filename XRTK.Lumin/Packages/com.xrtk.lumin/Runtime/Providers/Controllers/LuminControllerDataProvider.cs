@@ -40,8 +40,9 @@ namespace XRTK.Lumin.Providers.Controllers
         private MlApi.MLHandle inputHandle;
         private MlApi.MLHandle controllerHandle;
         private MlInput.MLInputControllerCallbacksEx controllerCallbacksEx;
-        private MlController.MLControllerSystemState controllerSystemState;
         private MlInput.MLInputControllerState[] controllerStates = MlInput.MLInputControllerState.Default;
+        private MlController.MLControllerSystemState controllerSystemState;
+
         private MlTypes.MLTransform tempControllerTransform;
 
         /// <inheritdoc />
@@ -101,15 +102,22 @@ namespace XRTK.Lumin.Providers.Controllers
 
         private void LuminCameraDataProvider_OnSnapshotCaptured(MlSnapshot.MLSnapshot snapshot)
         {
-            foreach (var controllerState in controllerSystemState.controller_state)
+            if (!inputHandle.IsValid) { return; }
+            if (!controllerHandle.IsValid) { return; }
+
+            for (var i = 0; i < controllerSystemState.controller_state.Length; i++)
             {
-                foreach (var controllerStream in controllerState.stream)
+                var controllerState = controllerSystemState.controller_state[i];
+
+                for (var j = 0; j < controllerState.stream.Length; j++)
                 {
+                    var controllerStream = controllerState.stream[j];
+
                     if (controllerStream.is_active)
                     {
                         if (MlSnapshot.MLSnapshotGetTransform(snapshot, controllerStream.coord_frame_controller, ref tempControllerTransform).IsOk)
                         {
-                            // Debug.Log($"{nameof(controllerState.controller_id)}.{controllerState.controller_id}:{tempControllerTransform}");
+                            controllerStream.Transform = tempControllerTransform;
                         }
                     }
                 }
@@ -122,6 +130,7 @@ namespace XRTK.Lumin.Providers.Controllers
             base.Update();
 
             if (!Application.isPlaying) { return; }
+            if (!inputHandle.IsValid) { return; }
             if (!controllerHandle.IsValid) { return; }
 
             if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
@@ -131,12 +140,17 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
             {
-                // Debug.Log(controllerSystemState);
             }
 
             foreach (var controller in activeControllers)
             {
-                controller.Value?.UpdateController();
+                foreach (var controllerState in controllerStates)
+                {
+                    if (controllerState.hardware_index == controller.Key)
+                    {
+                        controller.Value?.UpdateController(controllerState, controllerSystemState.controller_state[controllerState.hardware_index]);
+                    }
+                }
             }
         }
 
@@ -145,8 +159,8 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             if (!Application.isPlaying) { return; }
 
-            LuminCameraDataProvider.OnSnapshotCaptured -= LuminCameraDataProvider_OnSnapshotCaptured
-                ;
+            LuminCameraDataProvider.OnSnapshotCaptured -= LuminCameraDataProvider_OnSnapshotCaptured;
+
             if (controllerHandle.IsValid)
             {
                 controllerCallbacksEx.on_connect = null;
@@ -203,7 +217,6 @@ namespace XRTK.Lumin.Providers.Controllers
             }
 
             if (!addController) { return null; }
-            if (controllerStates[controllerId].type == MlInput.MLInputControllerType.None) { return null; }
 
             LuminController detectedController;
 
