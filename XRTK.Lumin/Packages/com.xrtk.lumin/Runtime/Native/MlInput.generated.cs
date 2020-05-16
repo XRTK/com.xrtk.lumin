@@ -1358,7 +1358,7 @@ namespace XRTK.Lumin.Native
                 for (int i = 0; i < controllerStates.Length; i++)
                 {
                     var newState = Marshal.PtrToStructure<MLInputControllerState>(new IntPtr((pointer.ToInt64() + i * size)));
-                    Debug.Log(newState);
+                    //Debug.Log(newState);
                     controllerStates[i] = newState;
                 }
             }
