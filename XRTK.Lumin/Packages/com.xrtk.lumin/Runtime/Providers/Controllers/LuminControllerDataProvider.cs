@@ -1,13 +1,18 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using XRTK.Attributes;
+using XRTK.Definitions.Devices;
 using XRTK.Definitions.Platforms;
+using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
+using XRTK.Lumin.Providers.CameraSystem;
 using XRTK.Providers.Controllers;
 using XRTK.Services;
 
@@ -23,15 +28,21 @@ namespace XRTK.Lumin.Providers.Controllers
         {
         }
 
+        private readonly IntPtr statePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MlInput.MLInputControllerState)) * 2);
+        private readonly MlInput.MLInputConfiguration inputConfiguration = MlInput.MLInputConfiguration.Default;
+        private readonly MlController.MLControllerConfiguration controllerConfiguration = MlController.MLControllerConfiguration.Default;
+
         /// <summary>
         /// Dictionary to capture all active controllers detected
         /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
 
-        private readonly MlInput.MLInputConfiguration inputConfiguration = new MlInput.MLInputConfiguration();
-
-        private MlApi.MLHandle inputHandle = new MlApi.MLHandle();
-        private MlInput.MLInputControllerState[] controllerStates = new MlInput.MLInputControllerState[2];
+        private MlApi.MLHandle inputHandle;
+        private MlApi.MLHandle controllerHandle;
+        private MlInput.MLInputControllerCallbacksEx controllerCallbacksEx;
+        private MlController.MLControllerSystemState controllerSystemState;
+        private MlInput.MLInputControllerState[] controllerStates = MlInput.MLInputControllerState.Default;
+        private MlTypes.MLTransform tempControllerTransform;
 
         /// <inheritdoc />
         public override void Enable()
@@ -40,48 +51,69 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (!inputHandle.IsValid)
             {
-                if (!MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
+                if (MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
                 {
-                    Debug.LogError($"Failed to create {nameof(MlInput)}!");
-                    return;
-                }
-
-                if (MlInput.MLInputGetControllerState(inputHandle, controllerStates).IsOk)
-                {
-                    foreach (var controllerState in controllerStates)
+                    controllerCallbacksEx.on_connect += (id, data) =>
                     {
-                        Debug.Log(controllerState);
+                        Debug.Log($"controller {id} connected!");
+                        GetController(id);
+                    };
+
+                    controllerCallbacksEx.on_disconnect += (id, data) =>
+                    {
+                        Debug.Log($"controller {id} disconnected!");
+                        RemoveController(id);
+                    };
+
+                    controllerCallbacksEx.on_button_down += (id, button, data) => Debug.Log($"controller {id}:{button}.down");
+                    controllerCallbacksEx.on_button_up += (id, button, data) => Debug.Log($"controller {id}:{button}.up");
+
+                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                    {
+                        Debug.LogError("Failed to set controller callbacks!");
                     }
+
+                    if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
+                    {
+                        MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to create input tracker!");
                 }
             }
 
-            //if (!MLInput.IsStarted)
-            //{
-            //    var config = new MLInputConfiguration();
-            //    var result = MLInput.Start(config);
+            if (!controllerHandle.IsValid)
+            {
+                if (!MlController.MLControllerCreateEx(controllerConfiguration, ref controllerHandle).IsOk)
+                {
+                    Debug.LogError("Failed to create controller tracker!");
+                }
+                else
+                {
+                    MlController.MLControllerGetState(controllerHandle, ref controllerSystemState);
+                }
+            }
 
-            //    if (!result.IsOk)
-            //    {
-            //        Debug.LogError($"Error: failed starting MLInput: {result}");
-            //        return;
-            //    }
-            //}
+            LuminCameraDataProvider.OnSnapshotCaptured += LuminCameraDataProvider_OnSnapshotCaptured;
+        }
 
-            //for (byte i = 0; i < 3; i++)
-            //{
-            //    // Currently no way to know what controllers are already connected.
-            //    // Just guessing there could be no more than 3: Two Spatial Controllers and Mobile App Controller.
-            //    var controller = GetController(i);
-
-            //    if (controller != null)
-            //    {
-            //        MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
-            //    }
-            //}
-
-            //MLInput.OnControllerConnected += OnControllerConnected;
-            //MLInput.OnControllerDisconnected += OnControllerDisconnected;
-            //MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
+        private void LuminCameraDataProvider_OnSnapshotCaptured(MlSnapshot.MLSnapshot snapshot)
+        {
+            foreach (var controllerState in controllerSystemState.controller_state)
+            {
+                foreach (var controllerStream in controllerState.stream)
+                {
+                    if (controllerStream.is_active)
+                    {
+                        if (MlSnapshot.MLSnapshotGetTransform(snapshot, controllerStream.coord_frame_controller, ref tempControllerTransform).IsOk)
+                        {
+                            // Debug.Log($"{nameof(controllerState.controller_id)}.{controllerState.controller_id}:{tempControllerTransform}");
+                        }
+                    }
+                }
+            }
         }
 
         /// <inheritdoc />
@@ -90,7 +122,17 @@ namespace XRTK.Lumin.Providers.Controllers
             base.Update();
 
             if (!Application.isPlaying) { return; }
-            if (!inputHandle.IsValid) { return; }
+            if (!controllerHandle.IsValid) { return; }
+
+            if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
+            {
+                MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
+            }
+
+            if (MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
+            {
+                // Debug.Log(controllerSystemState);
+            }
 
             foreach (var controller in activeControllers)
             {
@@ -103,11 +145,31 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             if (!Application.isPlaying) { return; }
 
+            LuminCameraDataProvider.OnSnapshotCaptured -= LuminCameraDataProvider_OnSnapshotCaptured
+                ;
+            if (controllerHandle.IsValid)
+            {
+                controllerCallbacksEx.on_connect = null;
+                controllerCallbacksEx.on_disconnect = null;
+                controllerCallbacksEx.on_button_down = null;
+                controllerCallbacksEx.on_button_up = null;
+
+                if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                {
+                    Debug.LogError("Failed to clear controller callbacks!");
+                }
+
+                if (!MlController.MLControllerDestroy(controllerHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy {nameof(MlController)} tracker!");
+                }
+            }
+
             if (inputHandle.IsValid)
             {
                 if (!MlInput.MLInputDestroy(inputHandle).IsOk)
                 {
-                    Debug.LogError($"Failed to destroy {nameof(MlInput)}!");
+                    Debug.LogError($"Failed to destroy the input tracker!");
                 }
             }
 
@@ -117,6 +179,17 @@ namespace XRTK.Lumin.Providers.Controllers
             }
 
             activeControllers.Clear();
+        }
+
+        /// <inheritdoc />
+        protected override void OnDispose(bool finalizing)
+        {
+            if (finalizing)
+            {
+                Marshal.FreeHGlobal(statePointer);
+            }
+
+            base.OnDispose(finalizing);
         }
 
         private LuminController GetController(byte controllerId, bool addController = true)
@@ -130,46 +203,23 @@ namespace XRTK.Lumin.Providers.Controllers
             }
 
             if (!addController) { return null; }
+            if (controllerStates[controllerId].type == MlInput.MLInputControllerType.None) { return null; }
 
-            //var mlController = MLInput.GetController(controllerId);
+            LuminController detectedController;
 
-            //if (mlController == null) { return null; }
+            try
+            {
+                detectedController = new LuminController(this, TrackingState.NotTracked, Handedness.Both, GetControllerMappingProfile(typeof(LuminController), Handedness.Both));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to create {nameof(LuminController)}!\n{e}");
+                return null;
+            }
 
-            //if (mlController.Type == MLInputControllerType.None) { return null; }
-
-            //var handedness = Handedness.Any;
-
-            //if (mlController.Type == MLInputControllerType.Control)
-            //{
-            //    switch (mlController.Hand)
-            //    {
-            //        case MLInput.Hand.Left:
-            //            handedness = Handedness.Left;
-            //            break;
-            //        case MLInput.Hand.Right:
-            //            handedness = Handedness.Right;
-            //            break;
-            //    }
-            //}
-
-            //LuminController detectedController;
-
-            //try
-            //{
-            //    detectedController = new LuminController(this, TrackingState.NotTracked, handedness, GetControllerMappingProfile(typeof(LuminController), handedness));
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.LogError($"Failed to create {nameof(LuminController)}!\n{e}");
-            //    return null;
-            //}
-
-            //detectedController.MlControllerReference = mlController;
-            //activeControllers.Add(controllerId, detectedController);
-            //AddController(detectedController);
-            //return detectedController;
-
-            return null;
+            activeControllers.Add(controllerId, detectedController);
+            AddController(detectedController);
+            return detectedController;
         }
 
         private void RemoveController(byte controllerId, bool removeFromRegistry = true)

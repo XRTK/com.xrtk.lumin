@@ -56,11 +56,11 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public readonly struct MLHandle : IEquatable<MLHandle>
         {
-            public MLHandle(ulong value = ulong.MaxValue) => this.Value = value;
+            public MLHandle(ulong value) => this.Value = value;
 
             public readonly ulong Value;
 
-            public bool IsValid => Value != ulong.MaxValue;
+            public bool IsValid => Value != ulong.MaxValue && Value > 0L;
 
             public bool Equals(MLHandle other) => Value.Equals(other.Value);
 
@@ -77,6 +77,8 @@ namespace XRTK.Lumin.Native
             public static bool operator ==(MLHandle left, MLHandle right) => left.Equals(right);
 
             public static bool operator !=(MLHandle left, MLHandle right) => !left.Equals(right);
+
+            public static MLHandle Default = new MLHandle(ulong.MaxValue);
         }
 
         /// <summary>
@@ -1140,23 +1142,29 @@ namespace XRTK.Lumin.Native
             public MLResult(int value)
             {
                 this.Value = (Code)value;
-
-                switch (Value)
-                {
-                    case Code.Ok:
-                        break;
-                    case Code.Pending:
-                        Debug.LogWarning("Result still pending, try again...");
-                        break;
-                    default:
-                        Debug.LogError($"{new System.Diagnostics.StackFrame(1).GetMethod().Name}:{Value}");
-                        break;
-                }
             }
 
             public readonly Code Value;
 
-            public bool IsOk => Value == Code.Ok;
+            public bool IsOk
+            {
+                get
+                {
+                    switch (Value)
+                    {
+                        case Code.Ok:
+                            break;
+                        case Code.Pending:
+                            Debug.LogWarning("Result still pending, try again...");
+                            break;
+                        default:
+                            Debug.LogError(Value);
+                            break;
+                    }
+
+                    return Value == Code.Ok;
+                }
+            }
 
             public bool Equals(MLResult other) => Value.Equals(other.Value);
 

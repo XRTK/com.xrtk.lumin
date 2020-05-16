@@ -21,17 +21,17 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Imu 3 degree of freedom tracking (orientation only)
             /// </summary>
-            MLControllerMode_Imu3Dof = unchecked((int)0),
+            Imu3Dof = unchecked((int)0),
 
             /// <summary>
             /// Em 6 degrees of freedom tracking (position and orientation)
             /// </summary>
-            MLControllerMode_Em6Dof = unchecked((int)1),
+            Em6Dof = unchecked((int)1),
 
             /// <summary>
             /// High quality Em fused with Imu 6 degrees of freedom tracking (position and orientation)
             /// </summary>
-            MLControllerMode_Fused6Dof = unchecked((int)2),
+            Fused6Dof = unchecked((int)2),
 
             /// <summary>
             /// Count of number of modes
@@ -62,22 +62,22 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// CalAccuracy is Bad
             /// </summary>
-            MLControllerCalibAccuracy_Bad = unchecked((int)0),
+            Bad = unchecked((int)0),
 
             /// <summary>
             /// CalAccuracy is Low
             /// </summary>
-            MLControllerCalibAccuracy_Low = unchecked((int)1),
+            Low = unchecked((int)1),
 
             /// <summary>
             /// CalAccuracy is Medium
             /// </summary>
-            MLControllerCalibAccuracy_Medium = unchecked((int)2),
+            Medium = unchecked((int)2),
 
             /// <summary>
             /// CalAccuracy is High
             /// </summary>
-            MLControllerCalibAccuracy_High = unchecked((int)3),
+            High = unchecked((int)3),
         }
 
         /// <summary>
@@ -128,6 +128,11 @@ namespace XRTK.Lumin.Native
             /// Mode of the given controller stream
             /// </summary>
             public MlController.MLControllerMode mode;
+
+            public override string ToString()
+            {
+                return $"{nameof(is_active)}?{is_active}|{nameof(mode)}:{mode}";
+            }
         }
 
         /// <summary>
@@ -144,13 +149,18 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Current controller's tracking streams
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, SizeConst = 3)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
             public MlController.MLControllerStream[] stream;
 
             /// <summary>
             /// Calibration accuracy for the current Controller
             /// </summary>
             public MlController.MLControllerCalibAccuracy accuracy;
+
+            public override string ToString()
+            {
+                return $"{nameof(controller_id)}:{controller_id}|{nameof(accuracy)}:{accuracy}\n{stream[0]}\n{stream[1]}\n{stream[2]}";
+            }
         }
 
         /// <summary>
@@ -162,13 +172,18 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// State objects for each connected and active Controller
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, SizeConst = 2)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public MlController.MLControllerState[] controller_state;
 
             /// <summary>
             /// Calibration accuracy for the Lightwear
             /// </summary>
             public MlController.MLControllerCalibAccuracy lightwear_accuracy;
+
+            public override string ToString()
+            {
+                return $"{nameof(lightwear_accuracy)}:{lightwear_accuracy}\n{controller_state[0]}\n{controller_state[1]}";
+            }
         }
 
         /// <summary>

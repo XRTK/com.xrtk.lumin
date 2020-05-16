@@ -7,6 +7,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+using UnityEngine;
+
 namespace XRTK.Lumin.Native
 {
     using System.Runtime.InteropServices;
@@ -184,6 +187,7 @@ namespace XRTK.Lumin.Native
         /// <summary>
         /// Keypoint data structure
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLKeyPointState
         {
@@ -199,11 +203,17 @@ namespace XRTK.Lumin.Native
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool is_valid;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Thumb data structure
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLThumbState
         {
@@ -226,11 +236,17 @@ namespace XRTK.Lumin.Native
             /// Carpals-Meta-carpal
             /// </summary>
             public MlHandTracking.MLKeyPointState cmc;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Finger data structure
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLFingerState
         {
@@ -253,11 +269,17 @@ namespace XRTK.Lumin.Native
             /// Meta-carpal phalengial
             /// </summary>
             public MlHandTracking.MLKeyPointState mcp;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Wrist data structure
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLWristState
         {
@@ -275,11 +297,17 @@ namespace XRTK.Lumin.Native
             /// Radial-sided wrist
             /// </summary>
             public MlHandTracking.MLKeyPointState radial;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Static information for one hand
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLHandTrackingStaticHandState
         {
@@ -317,19 +345,25 @@ namespace XRTK.Lumin.Native
             /// Hand center
             /// </summary>
             public MlHandTracking.MLKeyPointState hand_center;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Static information about a hand tracker Populate this structure with
         /// MLHandTrackingGetStaticData
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLHandTrackingStaticData
         {
             /// <summary>
             /// Left hand frame
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, SizeConst = 24)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
             public MlHandTracking.MLKeyPointState[] left_frame;
 
             /// <summary>
@@ -340,13 +374,18 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Right hand frame
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, SizeConst = 24)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
             public MlHandTracking.MLKeyPointState[] right_frame;
 
             /// <summary>
             /// Right hand state
             /// </summary>
             public MlHandTracking.MLHandTrackingStaticHandState right;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
@@ -355,6 +394,7 @@ namespace XRTK.Lumin.Native
         /// <remarks>
         /// @apilevel 7
         /// </remarks>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public unsafe struct MLHandTrackingHandStateEx
         {
@@ -384,7 +424,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Mask indicates if a keypoint is present or not
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1, SizeConst = 24)]
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 24)]
             public bool[] keypoints_mask;
 
             /// <summary>
@@ -397,6 +437,11 @@ namespace XRTK.Lumin.Native
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool is_holding_control;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
@@ -406,6 +451,7 @@ namespace XRTK.Lumin.Native
         /// This structure must be initialized by calling MLHandTrackingDataExInit before use
         /// @apilevel 7
         /// </remarks>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLHandTrackingDataEx
         {
@@ -423,12 +469,18 @@ namespace XRTK.Lumin.Native
             /// Hand tracker state of the right hand
             /// </summary>
             public MlHandTracking.MLHandTrackingHandStateEx right_hand_state;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
         /// Configuration of the hand tracking system This is used to activate or
         /// deactivate the poses the system will look for
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLHandTrackingConfiguration
         {
@@ -438,7 +490,7 @@ namespace XRTK.Lumin.Native
             /// is set to MLHandTrackingKeyPose_Count-1 Disabling NoHand is not allowed
             /// If a disabled pose is performed, the most probable enabled pose will be reported
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1, SizeConst = 9)]
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 9)]
             public bool[] keypose_config;
 
             /// <summary>
@@ -458,10 +510,9 @@ namespace XRTK.Lumin.Native
             /// </summary>
             public MLPoseFilterLevel pose_filter_level;
 
-            /// <inheritdoc />
             public override string ToString()
             {
-                return $"{nameof(MLHandTrackingConfiguration)}|{nameof(handtracking_pipeline_enabled)}?{handtracking_pipeline_enabled}|{nameof(key_points_filter_level)}:{key_points_filter_level}|{nameof(pose_filter_level)}:{pose_filter_level}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 

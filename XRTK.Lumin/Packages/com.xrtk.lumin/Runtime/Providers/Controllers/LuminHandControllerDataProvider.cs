@@ -36,12 +36,13 @@ namespace XRTK.Lumin.Providers.Controllers
         private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
-        private MlApi.MLHandle handTrackingHandle = new MlApi.MLHandle();
+        private MlApi.MLHandle handTrackingHandle = MlApi.MLHandle.Default;
         private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
         private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx;
+        private MlHandTracking.MLHandTrackingStaticData staticHandTrackingData;
 
         /// <inheritdoc />
-        public override void Enable()
+        public override void Initialize()
         {
             if (!Application.isPlaying) { return; }
 
@@ -60,7 +61,12 @@ namespace XRTK.Lumin.Providers.Controllers
 
                 if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
                 {
-                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)} {configuration}!");
+                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                }
+
+                if (!MlHandTracking.MLHandTrackingGetStaticData(handTrackingHandle, ref staticHandTrackingData).IsOk)
+                {
+                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
                 }
             }
         }
@@ -72,16 +78,18 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (!Application.isPlaying) { return; }
 
-            if (handTrackingHandle.IsValid &&
-                MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
+            if (handTrackingHandle.IsValid)
             {
-                GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
-                GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
+                if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
+                {
+                    // GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
+                    // GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
+                }
             }
         }
 
         /// <inheritdoc />
-        public override void Disable()
+        public override void Destroy()
         {
             if (!Application.isPlaying) { return; }
 
@@ -89,7 +97,7 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (!MlHandTracking.MLHandTrackingDestroy(handTrackingHandle).IsOk)
                 {
-                    Debug.LogError($"Failed to destroy {nameof(MlHandTracking)}");
+                    Debug.LogError($"Failed to destroy {nameof(MlHandTracking)}!");
                 }
             }
 

@@ -36,7 +36,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
 
         private float lastUpdated = 0;
-        private MlApi.MLHandle meshingHandle;
+        private MlApi.MLHandle meshingHandle = MlApi.MLHandle.Default;
         private MlMeshing2.MLMeshingSettings meshingSettings;
 
         #region IMixedRealityService implementation
@@ -50,7 +50,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             if (!meshingHandle.IsValid)
             {
-
                 if (!MlMeshing2.MLMeshingInitSettings(ref meshingSettings).IsOk)
                 {
                     Debug.LogError($"Failed to initialize meshing settings!");
@@ -106,17 +105,17 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         }
 
         /// <inheritdoc />
-        protected override void OnDispose(bool finalizing)
+        public override void Destroy()
         {
+            if (!Application.isPlaying) { return; }
+
             if (meshingHandle.IsValid)
             {
-                if (MlMeshing2.MLMeshingDestroyClient(ref meshingHandle).IsOk)
+                if (!MlMeshing2.MLMeshingDestroyClient(ref meshingHandle).IsOk)
                 {
                     Debug.LogError($"Failed to destroy meshing client!");
                 }
             }
-
-            base.OnDispose(finalizing);
         }
 
         #endregion IMixedRealityService implementation

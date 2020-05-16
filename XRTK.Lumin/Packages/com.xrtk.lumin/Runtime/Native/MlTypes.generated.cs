@@ -145,7 +145,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return ((Matrix4x4)this).ToString();
+                return $"{nameof(position)}:{position} | {nameof(rotation)}:{rotation}";
             }
         }
 

@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using UnityEngine;
 
 namespace XRTK.Lumin.Native
 {
@@ -647,17 +648,17 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// End(Default)
             /// </summary>
-            MLInputControllerTouchpadGestureState_End,
+            End,
 
             /// <summary>
             /// Continue
             /// </summary>
-            MLInputControllerTouchpadGestureState_Continue,
+            Continue,
 
             /// <summary>
             /// Start
             /// </summary>
-            MLInputControllerTouchpadGestureState_Start,
+            Start,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -673,62 +674,62 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// None
             /// </summary>
-            MLInputControllerTouchpadGestureType_None,
+            None,
 
             /// <summary>
             /// Tap This is a discrete gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_Tap,
+            Tap,
 
             /// <summary>
             /// Force tap down This is a discrete gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_ForceTapDown,
+            ForceTapDown,
 
             /// <summary>
             /// Force tap up This is a discrete gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_ForceTapUp,
+            ForceTapUp,
 
             /// <summary>
             /// Force dwell This is a discrete gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_ForceDwell,
+            ForceDwell,
 
             /// <summary>
             /// Second force down This is a discrete gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_SecondForceDown,
+            SecondForceDown,
 
             /// <summary>
             /// Long hold This is a continuous gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_LongHold,
+            LongHold,
 
             /// <summary>
             /// Radial scroll This is a continuous gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_RadialScroll,
+            RadialScroll,
 
             /// <summary>
             /// Swipe This is a continuous gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_Swipe,
+            Swipe,
 
             /// <summary>
             /// Scroll This is a continuous gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_Scroll,
+            Scroll,
 
             /// <summary>
             /// Pinch This is a continuous gesture
             /// </summary>
-            MLInputControllerTouchpadGestureType_Pinch,
+            Pinch,
 
             /// <summary>
             /// Number of gesture types
             /// </summary>
-            MLInputControllerTouchpadGestureType_Count,
+            Count,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -744,52 +745,52 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// None
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_None,
+            None,
 
             /// <summary>
             /// Up
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Up,
+            Up,
 
             /// <summary>
             /// Down
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Down,
+            Down,
 
             /// <summary>
             /// Left
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Left,
+            Left,
 
             /// <summary>
             /// Right
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Right,
+            Right,
 
             /// <summary>
             /// In
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_In,
+            In,
 
             /// <summary>
             /// Out
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Out,
+            Out,
 
             /// <summary>
             /// Clockwise
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Clockwise,
+            Clockwise,
 
             /// <summary>
             /// Counter clockwise
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_CounterClockwise,
+            CounterClockwise,
 
             /// <summary>
             /// Number of directions
             /// </summary>
-            MLInputControllerTouchpadGestureDirection_Count,
+            Count,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -805,17 +806,17 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// None
             /// </summary>
-            MLInputControllerType_None,
+            None,
 
             /// <summary>
             /// Device
             /// </summary>
-            MLInputControllerType_Device,
+            Device,
 
             /// <summary>
             /// Mobile app
             /// </summary>
-            MLInputControllerType_MobileApp,
+            MobileApp,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -828,7 +829,7 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerButton : int
         {
-            MLInputControllerButton_None,
+            None,
 
             /// <summary>
             /// 
@@ -836,7 +837,7 @@ namespace XRTK.Lumin.Native
             /// <remarks>
             /// Move button is obsolete
             /// </remarks>
-            MLInputControllerButton_Move,
+            Move,
 
             /// <summary>
             /// 
@@ -844,24 +845,24 @@ namespace XRTK.Lumin.Native
             /// <remarks>
             /// App button is obsolete
             /// </remarks>
-            MLInputControllerButton_App,
+            App,
 
             /// <summary>
             /// Bumper
             /// </summary>
-            MLInputControllerButton_Bumper,
+            Bumper,
 
             /// <summary>
             /// Home tap
             /// The controller button cannot be polled, its is only available
             /// via callbacks
             /// </summary>
-            MLInputControllerButton_HomeTap,
+            HomeTap,
 
             /// <summary>
             /// Number of buttons
             /// </summary>
-            MLInputControllerButton_Count,
+            Count,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -874,43 +875,43 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackPatternLED : int
         {
-            MLInputControllerFeedbackPatternLED_None,
+            None,
 
-            MLInputControllerFeedbackPatternLED_Clock1,
+            Clock1,
 
-            MLInputControllerFeedbackPatternLED_Clock2,
+            Clock2,
 
-            MLInputControllerFeedbackPatternLED_Clock3,
+            Clock3,
 
-            MLInputControllerFeedbackPatternLED_Clock4,
+            Clock4,
 
-            MLInputControllerFeedbackPatternLED_Clock5,
+            Clock5,
 
-            MLInputControllerFeedbackPatternLED_Clock6,
+            Clock6,
 
-            MLInputControllerFeedbackPatternLED_Clock7,
+            Clock7,
 
-            MLInputControllerFeedbackPatternLED_Clock8,
+            Clock8,
 
-            MLInputControllerFeedbackPatternLED_Clock9,
+            Clock9,
 
-            MLInputControllerFeedbackPatternLED_Clock10,
+            Clock10,
 
-            MLInputControllerFeedbackPatternLED_Clock11,
+            Clock11,
 
-            MLInputControllerFeedbackPatternLED_Clock12,
+            Clock12,
 
-            MLInputControllerFeedbackPatternLED_Clock1And7,
+            Clock1And7,
 
-            MLInputControllerFeedbackPatternLED_Clock2And8,
+            Clock2And8,
 
-            MLInputControllerFeedbackPatternLED_Clock3And9,
+            Clock3And9,
 
-            MLInputControllerFeedbackPatternLED_Clock4And10,
+            Clock4And10,
 
-            MLInputControllerFeedbackPatternLED_Clock5And11,
+            Clock5And11,
 
-            MLInputControllerFeedbackPatternLED_Clock6And12,
+            Clock6And12,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -923,17 +924,17 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackEffectLED : int
         {
-            MLInputControllerFeedbackEffectLED_RotateCW,
+            RotateCW,
 
-            MLInputControllerFeedbackEffectLED_RotateCCW,
+            RotateCCW,
 
-            MLInputControllerFeedbackEffectLED_Pulse,
+            Pulse,
 
-            MLInputControllerFeedbackEffectLED_PaintCW,
+            PaintCW,
 
-            MLInputControllerFeedbackEffectLED_PaintCCW,
+            PaintCCW,
 
-            MLInputControllerFeedbackEffectLED_Blink,
+            Blink,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -946,37 +947,37 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackColorLED : int
         {
-            MLInputControllerFeedbackColorLED_BrightMissionRed,
+            BrightMissionRed,
 
-            MLInputControllerFeedbackColorLED_PastelMissionRed,
+            PastelMissionRed,
 
-            MLInputControllerFeedbackColorLED_BrightFloridaOrange,
+            BrightFloridaOrange,
 
-            MLInputControllerFeedbackColorLED_PastelFloridaOrange,
+            PastelFloridaOrange,
 
-            MLInputControllerFeedbackColorLED_BrightLunaYellow,
+            BrightLunaYellow,
 
-            MLInputControllerFeedbackColorLED_PastelLunaYellow,
+            PastelLunaYellow,
 
-            MLInputControllerFeedbackColorLED_BrightNebulaPink,
+            BrightNebulaPink,
 
-            MLInputControllerFeedbackColorLED_PastelNebulaPink,
+            PastelNebulaPink,
 
-            MLInputControllerFeedbackColorLED_BrightCosmicPurple,
+            BrightCosmicPurple,
 
-            MLInputControllerFeedbackColorLED_PastelCosmicPurple,
+            PastelCosmicPurple,
 
-            MLInputControllerFeedbackColorLED_BrightMysticBlue,
+            BrightMysticBlue,
 
-            MLInputControllerFeedbackColorLED_PastelMysticBlue,
+            PastelMysticBlue,
 
-            MLInputControllerFeedbackColorLED_BrightCelestialBlue,
+            BrightCelestialBlue,
 
-            MLInputControllerFeedbackColorLED_PastelCelestialBlue,
+            PastelCelestialBlue,
 
-            MLInputControllerFeedbackColorLED_BrightShaggleGreen,
+            BrightShaggleGreen,
 
-            MLInputControllerFeedbackColorLED_PastelShaggleGreen,
+            PastelShaggleGreen,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -989,11 +990,11 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackEffectSpeedLED : int
         {
-            MLInputControllerFeedbackEffectSpeedLED_Slow,
+            Slow,
 
-            MLInputControllerFeedbackEffectSpeedLED_Medium,
+            Medium,
 
-            MLInputControllerFeedbackEffectSpeedLED_Fast,
+            Fast,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -1006,25 +1007,25 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackPatternVibe : int
         {
-            MLInputControllerFeedbackPatternVibe_None,
+            None,
 
-            MLInputControllerFeedbackPatternVibe_Click,
+            Click,
 
-            MLInputControllerFeedbackPatternVibe_Bump,
+            Bump,
 
-            MLInputControllerFeedbackPatternVibe_DoubleClick,
+            DoubleClick,
 
-            MLInputControllerFeedbackPatternVibe_Buzz,
+            Buzz,
 
-            MLInputControllerFeedbackPatternVibe_Tick,
+            Tick,
 
-            MLInputControllerFeedbackPatternVibe_ForceDown,
+            ForceDown,
 
-            MLInputControllerFeedbackPatternVibe_ForceUp,
+            ForceUp,
 
-            MLInputControllerFeedbackPatternVibe_ForceDwell,
+            ForceDwell,
 
-            MLInputControllerFeedbackPatternVibe_SecondForceDown,
+            SecondForceDown,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -1037,11 +1038,11 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputControllerFeedbackIntensity : int
         {
-            MLInputControllerFeedbackIntensity_Low,
+            Low,
 
-            MLInputControllerFeedbackIntensity_Medium,
+            Medium,
 
-            MLInputControllerFeedbackIntensity_High,
+            High,
 
             /// <summary>
             /// Ensure enum is represented as 32 bits
@@ -1055,9 +1056,9 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputTabletDeviceType : int
         {
-            MLInputTabletDeviceType_Unknown = unchecked((int)0),
+            Unknown = unchecked((int)0),
 
-            MLInputTabletDeviceType_Wacom = unchecked((int)1),
+            Wacom = unchecked((int)1),
 
             MLInputTabletDeviceType_Ensure32Bits = unchecked((int)0x7FFFFFFF),
         }
@@ -1068,11 +1069,11 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputTabletDeviceToolType : int
         {
-            MLInputTabletDeviceToolType_Unknown = unchecked((int)0),
+            Unknown = unchecked((int)0),
 
-            MLInputTabletDeviceToolType_Pen = unchecked((int)1),
+            Pen = unchecked((int)1),
 
-            MLInputTabletDeviceToolType_Eraser = unchecked((int)2),
+            Eraser = unchecked((int)2),
 
             MLInputTabletDeviceTootlType_Ensure32Bits = unchecked((int)0x7FFFFFFF),
         }
@@ -1083,31 +1084,31 @@ namespace XRTK.Lumin.Native
         /// </summary>
         public enum MLInputTabletDeviceButton : int
         {
-            MLInputTabletDeviceButton_Unknown,
+            Unknown,
 
-            MLInputTabletDeviceButton_Button1,
+            Button1,
 
-            MLInputTabletDeviceButton_Button2,
+            Button2,
 
-            MLInputTabletDeviceButton_Button3,
+            Button3,
 
-            MLInputTabletDeviceButton_Button4,
+            Button4,
 
-            MLInputTabletDeviceButton_Button5,
+            Button5,
 
-            MLInputTabletDeviceButton_Button6,
+            Button6,
 
-            MLInputTabletDeviceButton_Button7,
+            Button7,
 
-            MLInputTabletDeviceButton_Button8,
+            Button8,
 
-            MLInputTabletDeviceButton_Button9,
+            Button9,
 
-            MLInputTabletDeviceButton_Button10,
+            Button10,
 
-            MLInputTabletDeviceButton_Button11,
+            Button11,
 
-            MLInputTabletDeviceButton_Button12,
+            Button12,
 
             MLInputTabletDeviceButton_Count,
 
@@ -1124,47 +1125,48 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasType = unchecked((int)1 << (int)0),
+            HasType = unchecked((int)1 << (int)0),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasToolType = unchecked((int)1 << (int)1),
+            HasToolType = unchecked((int)1 << (int)1),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasPenTouchPosAndForce = unchecked((int)1 << (int)2),
+            HasPenTouchPosAndForce = unchecked((int)1 << (int)2),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasAdditionalPenTouchData = unchecked((int)1 << (int)3),
+            HasAdditionalPenTouchData = unchecked((int)1 << (int)3),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasPenTouchActive = unchecked((int)1 << (int)4),
+            HasPenTouchActive = unchecked((int)1 << (int)4),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasConnectionState = unchecked((int)1 << (int)5),
+            HasConnectionState = unchecked((int)1 << (int)5),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasPenDistance = unchecked((int)1 << (int)6),
+            HasPenDistance = unchecked((int)1 << (int)6),
 
             /// <summary>
             /// Mask for determinig the validity of the additional pen data
             /// </summary>
-            MLInputTabletDeviceStateMask_HasTimestamp = unchecked((int)1 << (int)7),
+            HasTimestamp = unchecked((int)1 << (int)7),
         }
 
         /// <summary>
         /// Information about a recognized touchpad gesture
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputControllerTouchpadGesture
         {
@@ -1281,6 +1283,7 @@ namespace XRTK.Lumin.Native
         /// <summary>
         /// A structure containing information about the current state of an input controller
         /// </summary>
+        [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputControllerState
         {
@@ -1288,7 +1291,7 @@ namespace XRTK.Lumin.Native
             /// Current touch position (x,y) and force (z)
             /// Position is in the [-10,10] range and force is in the [00,10] range
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, SizeConst = 2)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public MlTypes.MLVec3f[] touch_pos_and_force;
 
             /// <summary>
@@ -1299,13 +1302,13 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Button states
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1, SizeConst = 5)]
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 5)]
             public bool[] button_state;
 
             /// <summary>
             /// Is touch active
             /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1, SizeConst = 2)]
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 2)]
             public bool[] is_touch_active;
 
             /// <summary>
@@ -1337,7 +1340,27 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(MLInputControllerState)}{hardware_index}|{nameof(is_connected)}?{is_connected}|{nameof(type)}:{type}";
+                return JsonUtility.ToJson(this, true); // $"{nameof(MLInputControllerState)}{hardware_index}|{nameof(is_connected)}?{is_connected}|{nameof(type)}:{type}";
+            }
+
+            public static MLInputControllerState[] Default = { @default, @default };
+
+            private static MLInputControllerState @default = new MLInputControllerState
+            {
+                button_state = new bool[5],
+                is_touch_active = new bool[5],
+            };
+
+            private static readonly int size = Marshal.SizeOf<MLInputControllerState>();
+
+            public static void GetControllerStates(IntPtr pointer, ref MLInputControllerState[] controllerStates)
+            {
+                for (int i = 0; i < controllerStates.Length; i++)
+                {
+                    var newState = Marshal.PtrToStructure<MLInputControllerState>(new IntPtr((pointer.ToInt64() + i * size)));
+                    Debug.Log(newState);
+                    controllerStates[i] = newState;
+                }
             }
         }
 
@@ -1503,6 +1526,13 @@ namespace XRTK.Lumin.Native
             /// Pointer to the array of connected tablet device IDs
             /// </summary>
             public IntPtr connected_tablet_device_ids;
+
+            public static MLInputConnectedDevicesList Default => new MLInputConnectedDevicesList { version = 1u };
+
+            public override string ToString()
+            {
+                return $"{nameof(connected_controller_count)}:{connected_controller_count}|{nameof(connected_tablet_device_count)}:{connected_tablet_device_count}";
+            }
         }
 
         /// <summary>
@@ -1557,7 +1587,31 @@ namespace XRTK.Lumin.Native
         /// Desired configuration of the input system
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct MLInputConfiguration { }
+        public struct MLInputConfiguration
+        {
+            /// <summary>
+            /// Desired degrees-of-freedom mode of each controller
+            /// </summary>
+            [MarshalAs(UnmanagedType.ByValArray)]
+            public MLInputControllerDof[] dof;
+
+            public static MLInputConfiguration Default => new MLInputConfiguration
+            {
+                dof = new[]
+                {
+                    MLInputControllerDof.Dof_6,
+                    MLInputControllerDof.Dof_6
+                }
+            };
+        }
+
+        public enum MLInputControllerDof
+        {
+            None = 0,
+            Dof_3,
+            Dof_6,
+            MLInputControllerDof_Ensure32Bits = 0x7FFFFFFF
+        }
 
         /// <summary>
         /// Returns an ASCII string for MLInputsResult and MLResult codes
@@ -1597,8 +1651,7 @@ namespace XRTK.Lumin.Native
         /// </summary>
         /// <param name="handle">Handle to the input tracker</param>
         /// <param name="controller_callbacks">Pointer to MLInputControllerCallbacksEx structure (can be NULL)</param>
-        /// <param name="user_data">Pointer to user payload data; this will be the first argument
-        /// passed to all the callback functions (can be NULL)</param>
+        /// <param name="user_data">Pointer to user payload data; this will be the first argument passed to all the callback functions (can be NULL)</param>
         /// <remarks>
         /// @priv None
         /// @apilevel 8
@@ -1619,7 +1672,7 @@ namespace XRTK.Lumin.Native
         /// @priv None
         /// </remarks>
         [DllImport("ml_input", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLInputGetControllerState(MlApi.MLHandle handle, [MarshalAs(UnmanagedType.LPArray, SizeConst = 2)] MlInput.MLInputControllerState[] out_state);
+        public static extern MlApi.MLResult MLInputGetControllerState(MlApi.MLHandle handle, IntPtr out_state);
 
         /// <summary>
         /// Starts a vibe feedback pattern on the specified controller
