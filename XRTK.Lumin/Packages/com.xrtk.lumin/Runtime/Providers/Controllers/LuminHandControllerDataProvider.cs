@@ -82,6 +82,7 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
                 {
+                    Debug.Log(handTrackingDataEx);
                     // GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
                     // GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
                 }

@@ -206,7 +206,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(is_valid)}:{is_valid}";
             }
         }
 
@@ -239,7 +239,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(tip)}:{tip}|{nameof(ip)}:{ip}|{nameof(mcp)}:{mcp}|{nameof(cmc)}:{cmc}";
             }
         }
 
@@ -272,7 +272,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(tip)}:{tip}|{nameof(dip)}:{dip}|{nameof(mcp)}:{mcp}|{nameof(mcp)}:{mcp}";
             }
         }
 
@@ -300,7 +300,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(center)}:{center}|{nameof(ulnar)}:{ulnar}|{nameof(radial)}:{radial}";
             }
         }
 
@@ -348,7 +348,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(hand_center)}:{hand_center}\n{nameof(wrist)}:{wrist}\n{nameof(thumb)}:{thumb}\n{nameof(index)}:{index}\n{nameof(middle)}:{middle}\n{nameof(ring)}:{ring}\n{nameof(pinky)}:{pinky}";
             }
         }
 
@@ -384,7 +384,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(left)}:{left}\n{nameof(right)}:{right}";
             }
         }
 
@@ -440,7 +440,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(hand_confidence)}:{hand_confidence}|{nameof(is_holding_control)}:{is_holding_control}|{nameof(hand_center_normalized)}:{hand_center_normalized}";
             }
         }
 
@@ -472,7 +472,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true);
+                return $"{nameof(left_hand_state)}:{left_hand_state}\n{nameof(left_hand_state)}:{right_hand_state}";
             }
         }
 
