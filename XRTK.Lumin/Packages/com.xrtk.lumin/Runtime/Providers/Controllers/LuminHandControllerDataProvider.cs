@@ -54,14 +54,20 @@ namespace XRTK.Lumin.Providers.Controllers
                     return;
                 }
 
-                configuration.key_points_filter_level = keyPointFilterLevel;
-                configuration.pose_filter_level = poseFilterLevel;
-                configuration.handtracking_pipeline_enabled = true;
-                configuration.keypose_config = new bool[(int)MlHandTracking.MLHandTrackingKeyPose.MLHandTrackingKeyPose_NoHand];
-
-                if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                if (MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
                 {
-                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                    configuration.key_points_filter_level = keyPointFilterLevel;
+                    configuration.pose_filter_level = poseFilterLevel;
+                    configuration.handtracking_pipeline_enabled = true;
+
+                    if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                    {
+                        Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
                 }
 
                 if (!MlHandTracking.MLHandTrackingGetStaticData(handTrackingHandle, ref staticHandTrackingData).IsOk)
