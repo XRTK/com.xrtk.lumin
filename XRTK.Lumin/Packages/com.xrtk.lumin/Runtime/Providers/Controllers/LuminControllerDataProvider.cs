@@ -14,6 +14,7 @@ using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers;
 using XRTK.Services;
+using XRTK.Utilities.Async;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -51,10 +52,16 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
                 {
-                    controllerCallbacksEx.on_connect += (id, data) => GetController(id);
-                    controllerCallbacksEx.on_disconnect += (id, data) => RemoveController(id);
-                    controllerCallbacksEx.on_button_down += (id, button, data) => Debug.Log($"controller {id}:{button}.down");
-                    controllerCallbacksEx.on_button_up += (id, button, data) => Debug.Log($"controller {id}:{button}.up");
+                    controllerCallbacksEx.on_connect += async (id, data) =>
+                    {
+                        await Awaiters.UnityMainThread;
+                        GetController(id);
+                    };
+                    controllerCallbacksEx.on_disconnect += async (id, data) =>
+                    {
+                        await Awaiters.UnityMainThread;
+                        RemoveController(id);
+                    };
 
                     if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
                     {
