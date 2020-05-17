@@ -6,7 +6,10 @@
         "GUID:434d0461d4867764b8fef8b9893be161"
     ],
     "optionalUnityReferences": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor",
+        "Lumin"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
