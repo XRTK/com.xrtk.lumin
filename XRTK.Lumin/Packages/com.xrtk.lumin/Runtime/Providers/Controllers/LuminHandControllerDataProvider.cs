@@ -40,6 +40,7 @@ namespace XRTK.Lumin.Providers.Controllers
         private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
         private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx;
         private MlHandTracking.MLHandTrackingStaticData staticHandTrackingData;
+        private MlHandTracking.MLHandTrackingData handTrackingData;
 
         /// <inheritdoc />
         public override void Initialize()
@@ -86,11 +87,26 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (handTrackingHandle.IsValid)
             {
+                if (MlHandTracking.MLHandTrackingGetData(handTrackingHandle, ref handTrackingData).IsOk)
+                {
+                    Debug.Log(handTrackingData);
+                    // GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
+                    // GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetDataEx)} Failed!");
+                }
+
                 if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
                 {
                     Debug.Log(handTrackingDataEx);
                     // GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
                     // GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetDataEx)} Failed!");
                 }
             }
         }
