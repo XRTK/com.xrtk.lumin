@@ -12,14 +12,13 @@ using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.InputSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
-using XRTK.Lumin.Providers.CameraSystem;
 using XRTK.Providers.Controllers;
 using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
     [RuntimePlatform(typeof(LuminPlatform))]
-    [System.Runtime.InteropServices.Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
+    [Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
         /// <inheritdoc />
@@ -40,10 +39,8 @@ namespace XRTK.Lumin.Providers.Controllers
         private MlApi.MLHandle inputHandle;
         private MlApi.MLHandle controllerHandle;
         private MlInput.MLInputControllerCallbacksEx controllerCallbacksEx;
-        private MlInput.MLInputControllerState[] controllerStates = MlInput.MLInputControllerState.Default;
+        private MlInput.MLInputControllerState[] controllerStates = new MlInput.MLInputControllerState[2];
         private MlController.MLControllerSystemState controllerSystemState;
-
-        private MlTypes.MLTransform tempControllerTransform;
 
         /// <inheritdoc />
         public override void Enable()
@@ -54,29 +51,23 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
                 {
-                    controllerCallbacksEx.on_connect += (id, data) =>
-                    {
-                        Debug.Log($"controller {id} connected!");
-                        GetController(id);
-                    };
-
-                    controllerCallbacksEx.on_disconnect += (id, data) =>
-                    {
-                        Debug.Log($"controller {id} disconnected!");
-                        RemoveController(id);
-                    };
-
+                    controllerCallbacksEx.on_connect += (id, data) => GetController(id);
+                    controllerCallbacksEx.on_disconnect += (id, data) => RemoveController(id);
                     controllerCallbacksEx.on_button_down += (id, button, data) => Debug.Log($"controller {id}:{button}.down");
                     controllerCallbacksEx.on_button_up += (id, button, data) => Debug.Log($"controller {id}:{button}.up");
-
-                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
-                    {
-                        Debug.LogError("Failed to set controller callbacks!");
-                    }
 
                     if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
                     {
                         MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to update the controller input state!");
+                    }
+
+                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                    {
+                        Debug.LogError("Failed to set controller callbacks!");
                     }
                 }
                 else
@@ -96,32 +87,6 @@ namespace XRTK.Lumin.Providers.Controllers
                     MlController.MLControllerGetState(controllerHandle, ref controllerSystemState);
                 }
             }
-
-            LuminCameraDataProvider.OnSnapshotCaptured += LuminCameraDataProvider_OnSnapshotCaptured;
-        }
-
-        private void LuminCameraDataProvider_OnSnapshotCaptured(MlSnapshot.MLSnapshot snapshot)
-        {
-            if (!inputHandle.IsValid) { return; }
-            if (!controllerHandle.IsValid) { return; }
-
-            for (var i = 0; i < controllerSystemState.controller_state.Length; i++)
-            {
-                var controllerState = controllerSystemState.controller_state[i];
-
-                for (var j = 0; j < controllerState.stream.Length; j++)
-                {
-                    var controllerStream = controllerState.stream[j];
-
-                    if (controllerStream.is_active)
-                    {
-                        if (MlSnapshot.MLSnapshotGetTransform(snapshot, controllerStream.coord_frame_controller, ref tempControllerTransform).IsOk)
-                        {
-                            controllerStream.Transform = tempControllerTransform;
-                        }
-                    }
-                }
-            }
         }
 
         /// <inheritdoc />
@@ -137,20 +102,19 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
             }
-
-            if (MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
+            else
             {
+                Debug.LogError($"Failed to update the controller input state!");
+            }
+
+            if (!MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
+            {
+                Debug.LogError("Failed to get the controller system state!");
             }
 
             foreach (var controller in activeControllers)
             {
-                foreach (var controllerState in controllerStates)
-                {
-                    if (controllerState.hardware_index == controller.Key)
-                    {
-                        controller.Value?.UpdateController(controllerState, controllerSystemState.controller_state[controllerState.hardware_index]);
-                    }
-                }
+                controller.Value?.UpdateController(controllerStates[controller.Key], controllerSystemState.controller_state[controller.Key]);
             }
         }
 
@@ -158,8 +122,6 @@ namespace XRTK.Lumin.Providers.Controllers
         public override void Disable()
         {
             if (!Application.isPlaying) { return; }
-
-            LuminCameraDataProvider.OnSnapshotCaptured -= LuminCameraDataProvider_OnSnapshotCaptured;
 
             if (controllerHandle.IsValid)
             {
@@ -219,10 +181,11 @@ namespace XRTK.Lumin.Providers.Controllers
             if (!addController) { return null; }
 
             LuminController detectedController;
+            var handedness = (Handedness)(controllerId + 1);
 
             try
             {
-                detectedController = new LuminController(this, TrackingState.NotTracked, Handedness.Both, GetControllerMappingProfile(typeof(LuminController), Handedness.Both));
+                detectedController = new LuminController(this, TrackingState.NotTracked, handedness, GetControllerMappingProfile(typeof(LuminController), handedness));
             }
             catch (Exception e)
             {
@@ -232,6 +195,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
             activeControllers.Add(controllerId, detectedController);
             AddController(detectedController);
+            MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
             return detectedController;
         }
 

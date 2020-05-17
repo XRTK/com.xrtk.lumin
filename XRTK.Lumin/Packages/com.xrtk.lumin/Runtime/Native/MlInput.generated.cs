@@ -1223,6 +1223,11 @@ namespace XRTK.Lumin.Native
             /// Angle from the center of the touchpad to the finger in radians
             /// </summary>
             public float angle;
+
+            public override string ToString()
+            {
+                return JsonUtility.ToJson(this, true);
+            }
         }
 
         /// <summary>
@@ -1287,6 +1292,10 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputControllerState
         {
+            public MlTypes.MLQuaternionf rotation;
+
+            public MlTypes.MLVec3f position;
+
             /// <summary>
             /// Current touch position (x,y) and force (z)
             /// Position is in the [-10,10] range and force is in the [00,10] range
@@ -1295,21 +1304,30 @@ namespace XRTK.Lumin.Native
             public MlTypes.MLVec3f[] touch_pos_and_force;
 
             /// <summary>
-            /// Normalized trigger value [00,10]
+            /// Normalized trigger value [0,1]
             /// </summary>
             public float trigger_normalized;
 
-            /// <summary>
-            /// Button states
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 5)]
-            public bool[] button_state;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_none;
 
-            /// <summary>
-            /// Is touch active
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 2)]
-            public bool[] is_touch_active;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_move;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_app;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_bumper;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_home_tap;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_touch_1_active;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool button_state_touch_2_acive;
 
             /// <summary>
             /// If this controller is connected
@@ -1333,6 +1351,11 @@ namespace XRTK.Lumin.Native
             public MlInput.MLInputControllerType type;
 
             /// <summary>
+            /// Current degrees of freedom mode of the controller
+            /// </summary>
+            public MlInput.MLInputControllerDof dof;
+
+            /// <summary>
             /// Hardware index of this controller If it is a physical controller this
             /// will be either 0 or 1 If it is MLMA it will be 0xFF
             /// </summary>
@@ -1340,26 +1363,15 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return JsonUtility.ToJson(this, true); // $"{nameof(MLInputControllerState)}{hardware_index}|{nameof(is_connected)}?{is_connected}|{nameof(type)}:{type}";
+                return JsonUtility.ToJson(this, true);
             }
-
-            public static MLInputControllerState[] Default = { @default, @default };
-
-            private static MLInputControllerState @default = new MLInputControllerState
-            {
-                button_state = new bool[5],
-                is_touch_active = new bool[5],
-            };
-
-            private static readonly int size = Marshal.SizeOf<MLInputControllerState>();
 
             public static void GetControllerStates(IntPtr pointer, ref MLInputControllerState[] controllerStates)
             {
                 for (int i = 0; i < controllerStates.Length; i++)
                 {
-                    var newState = Marshal.PtrToStructure<MLInputControllerState>(new IntPtr((pointer.ToInt64() + i * size)));
-                    //Debug.Log(newState);
-                    controllerStates[i] = newState;
+                    controllerStates[i] = Marshal.PtrToStructure<MLInputControllerState>(pointer);
+                    pointer = IntPtr.Add(pointer, Marshal.SizeOf<MLInputControllerState>());
                 }
             }
         }
@@ -1666,8 +1678,7 @@ namespace XRTK.Lumin.Native
         /// MLResult_UnspecifiedFailure The operation failed with an unspecified error
         /// </summary>
         /// <param name="handle">Handle to the input tracker</param>
-        /// <param name="out_state">Array, of at least size MLInput_MaxControllers, of
-        /// MLInputControllerState structures that will be populated</param>
+        /// <param name="out_state">Array, of at least size MLInput_MaxControllers, of MLInputControllerState structures that will be populated</param>
         /// <remarks>
         /// @priv None
         /// </remarks>

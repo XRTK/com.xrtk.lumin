@@ -1,6 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using UnityEngine;
 using XRTK.Attributes;
 using XRTK.Definitions.CameraSystem;
@@ -65,8 +66,6 @@ namespace XRTK.Lumin.Providers.CameraSystem
         private MlHeadTracking.MLHeadTrackingMapEvent lastMapEvent;
         private MlTypes.MLTransform headTransform;
 
-        internal static event Snapshot OnSnapshotCaptured;
-
         /// <inheritdoc />
         public override void Initialize()
         {
@@ -106,12 +105,15 @@ namespace XRTK.Lumin.Providers.CameraSystem
 
             if (MlHeadTracking.MLHeadTrackingGetMapEvents(headTrackerHandle, ref rawMapEvents).IsOk)
             {
-                var mapEvents = (MlHeadTracking.MLHeadTrackingMapEvent)rawMapEvents;
-
-                if (lastMapEvent != mapEvents)
+                if (rawMapEvents > 0)
                 {
-                    Debug.Log($"{mapEvents}");
-                    lastMapEvent = mapEvents;
+                    var mapEvents = (MlHeadTracking.MLHeadTrackingMapEvent)rawMapEvents;
+
+                    if (lastMapEvent != mapEvents)
+                    {
+                        Debug.Log(mapEvents);
+                        lastMapEvent = mapEvents;
+                    }
                 }
             }
             else
@@ -134,8 +136,6 @@ namespace XRTK.Lumin.Providers.CameraSystem
                 CameraRig.CameraTransform.localPosition = (Vector3)headTransform.position;
                 CameraRig.CameraTransform.localRotation = (Quaternion)headTransform.rotation;
             }
-
-            OnSnapshotCaptured?.Invoke(snapshot);
 
             if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
             {
