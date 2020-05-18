@@ -73,12 +73,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
                 if (MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
                 {
-
-                    if (MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
-                    {
-                        Debug.Log(configuration);
-                    }
-                    else
+                    if (!MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
                     {
                         Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
                     }
