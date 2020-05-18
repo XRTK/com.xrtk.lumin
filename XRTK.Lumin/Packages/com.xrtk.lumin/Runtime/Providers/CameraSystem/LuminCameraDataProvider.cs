@@ -1,14 +1,12 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using UnityEngine;
 using XRTK.Attributes;
 using XRTK.Definitions.CameraSystem;
 using XRTK.Definitions.Platforms;
 using XRTK.Interfaces.CameraSystem;
 using XRTK.Lumin.Native;
-using XRTK.Lumin.Utilities;
 using XRTK.Providers.CameraSystem;
 
 namespace XRTK.Lumin.Providers.CameraSystem

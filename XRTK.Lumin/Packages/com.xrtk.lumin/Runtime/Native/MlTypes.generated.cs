@@ -127,7 +127,7 @@ namespace XRTK.Lumin.Native
             /// </summary>
             public MlTypes.MLVec3f position;
 
-            private MLTransform(MlTypes.MLVec3f position, MlTypes.MLQuaternionf rotation)
+            public MLTransform(MlTypes.MLVec3f position, MlTypes.MLQuaternionf rotation)
             {
                 this.position = position;
                 this.rotation = rotation;
