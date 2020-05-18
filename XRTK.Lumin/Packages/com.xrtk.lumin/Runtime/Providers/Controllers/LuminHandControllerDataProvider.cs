@@ -38,7 +38,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
         private MlApi.MLHandle handTrackingHandle = MlApi.MLHandle.Default;
         private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
-        private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx;
+        private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx = new MlHandTracking.MLHandTrackingDataEx();
         private MlHandTracking.MLHandTrackingStaticData staticHandTrackingData;
         private MlHandTracking.MLHandTrackingData handTrackingData;
 
@@ -75,6 +75,11 @@ namespace XRTK.Lumin.Providers.Controllers
                 {
                     Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
                 }
+
+                //if (!MlHandTracking.MLHandTrackingDataExInit(ref handTrackingDataEx).IsOk)
+                //{
+                //    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingDataExInit)} Failed!");
+                //}
             }
         }
 
@@ -87,17 +92,6 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (handTrackingHandle.IsValid)
             {
-                if (MlHandTracking.MLHandTrackingGetData(handTrackingHandle, ref handTrackingData).IsOk)
-                {
-                    Debug.Log(handTrackingData);
-                    // GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
-                    // GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
-                }
-                else
-                {
-                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetDataEx)} Failed!");
-                }
-
                 if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
                 {
                     Debug.Log(handTrackingDataEx);

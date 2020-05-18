@@ -58,52 +58,52 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Index finger
             /// </summary>
-            MLHandTrackingKeyPose_Finger = unchecked((int)0),
+            Finger = unchecked((int)0),
 
             /// <summary>
             /// A closed fist
             /// </summary>
-            MLHandTrackingKeyPose_Fist = unchecked((int)1),
+            Fist = unchecked((int)1),
 
             /// <summary>
             /// A pinch
             /// </summary>
-            MLHandTrackingKeyPose_Pinch = unchecked((int)2),
+            Pinch = unchecked((int)2),
 
             /// <summary>
             /// A closed fist with the thumb pointed up
             /// </summary>
-            MLHandTrackingKeyPose_Thumb = unchecked((int)3),
+            Thumb = unchecked((int)3),
 
             /// <summary>
             /// An L shape
             /// </summary>
-            MLHandTrackingKeyPose_L = unchecked((int)4),
+            L = unchecked((int)4),
 
             /// <summary>
             /// An open hand with palm facing away or palm facing towards the user
             /// </summary>
-            MLHandTrackingKeyPose_OpenHand = unchecked((int)5),
+            OpenHand = unchecked((int)5),
 
             /// <summary>
             /// A pinch with all fingers, except the index finger and the thumb, extended out
             /// </summary>
-            MLHandTrackingKeyPose_Ok = unchecked((int)6),
+            Ok = unchecked((int)6),
 
             /// <summary>
             /// A rounded 'C' alphabet shape
             /// </summary>
-            MLHandTrackingKeyPose_C = unchecked((int)7),
+            C = unchecked((int)7),
 
             /// <summary>
             /// No pose was recognized
             /// </summary>
-            MLHandTrackingKeyPose_NoPose = unchecked((int)8),
+            NoPose = unchecked((int)8),
 
             /// <summary>
             /// No hand was detected Should be the last pose
             /// </summary>
-            MLHandTrackingKeyPose_NoHand = unchecked((int)9),
+            NoHand = unchecked((int)9),
 
             /// <summary>
             /// Number of static poses
@@ -125,53 +125,53 @@ namespace XRTK.Lumin.Native
         /// </remarks>
         public enum MLHandTrackingKeyPoint : int
         {
-            MLHandTrackingKeyPoint_Thumb_Tip = unchecked((int)0),
+            Thumb_Tip = unchecked((int)0),
 
-            MLHandTrackingKeyPoint_Thumb_IP,
+            Thumb_IP,
 
-            MLHandTrackingKeyPoint_Thumb_MCP,
+            Thumb_MCP,
 
-            MLHandTrackingKeyPoint_Thumb_CMC,
+            Thumb_CMC,
 
-            MLHandTrackingKeyPoint_Index_Tip,
+            Index_Tip,
 
-            MLHandTrackingKeyPoint_Index_DIP,
+            Index_DIP,
 
-            MLHandTrackingKeyPoint_Index_PIP,
+            Index_PIP,
 
-            MLHandTrackingKeyPoint_Index_MCP,
+            Index_MCP,
 
-            MLHandTrackingKeyPoint_Middle_Tip,
+            Middle_Tip,
 
-            MLHandTrackingKeyPoint_Middle_DIP,
+            Middle_DIP,
 
-            MLHandTrackingKeyPoint_Middle_PIP,
+            Middle_PIP,
 
-            MLHandTrackingKeyPoint_Middle_MCP,
+            Middle_MCP,
 
-            MLHandTrackingKeyPoint_Ring_Tip,
+            Ring_Tip,
 
-            MLHandTrackingKeyPoint_Ring_DIP,
+            Ring_DIP,
 
-            MLHandTrackingKeyPoint_Ring_PIP,
+            Ring_PIP,
 
-            MLHandTrackingKeyPoint_Ring_MCP,
+            Ring_MCP,
 
-            MLHandTrackingKeyPoint_Pinky_Tip,
+            Pinky_Tip,
 
-            MLHandTrackingKeyPoint_Pinky_DIP,
+            Pinky_DIP,
 
-            MLHandTrackingKeyPoint_Pinky_PIP,
+            Pinky_PIP,
 
-            MLHandTrackingKeyPoint_Pinky_MCP,
+            Pinky_MCP,
 
-            MLHandTrackingKeyPoint_Wrist_Center,
+            Wrist_Center,
 
-            MLHandTrackingKeyPoint_Wrist_Ulnar,
+            Wrist_Ulnar,
 
-            MLHandTrackingKeyPoint_Wrist_Radial,
+            Wrist_Radial,
 
-            MLHandTrackingKeyPoint_Hand_Center,
+            Hand_Center,
 
             /// <summary>
             /// Maximum number of key points per gesture
@@ -460,7 +460,7 @@ namespace XRTK.Lumin.Native
         /// </remarks>
         [Serializable]
         [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct MLHandTrackingHandStateEx
+        public struct MLHandTrackingHandStateEx
         {
             /// <summary>
             /// The static keypose currently being performed by the single hand
@@ -475,21 +475,117 @@ namespace XRTK.Lumin.Native
             /// </remarks>
             public float hand_confidence;
 
-            /// <summary>
-            /// The confidence for all poses
-            /// </summary>
-            public fixed float keypose_confidence[10];
+            public float keypose_confidence_finger;
 
-            /// <summary>
-            /// The filtered confidence for all poses
-            /// </summary>
-            public fixed float keypose_confidence_filtered[10];
+            public float keypose_confidence_fist;
 
-            /// <summary>
-            /// Mask indicates if a keypoint is present or not
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 24)]
-            public bool[] keypoints_mask;
+            public float keypose_confidence_pinch;
+
+            public float keypose_confidence_thumb;
+
+            public float keypose_confidence_l;
+
+            public float keypose_confidence_open_hand;
+
+            public float keypose_confidence_ok;
+
+            public float keypose_confidence_c;
+
+            public float keypose_confidence_no_pose;
+
+            public float keypose_confidence_no_hand;
+
+            public float keypose_confidence_filtered_finger;
+
+            public float keypose_confidence_filtered_fist;
+
+            public float keypose_confidence_filtered_pinch;
+
+            public float keypose_confidence_filtered_thumb;
+
+            public float keypose_confidence_filtered_l;
+
+            public float keypose_confidence_filtered_open_hand;
+
+            public float keypose_confidence_filtered_ok;
+
+            public float keypose_confidence_filtered_c;
+
+            public float keypose_confidence_filtered_no_pose;
+
+            public float keypose_confidence_filtered_no_hand;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_thumb_tip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_thumb_ip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_thumb_mcp;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_thumb_cmc;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_index_tip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_index_dip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_index_pip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_index_mcp;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_middle_tip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_middle_dip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_middle_pip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_middle_mcp;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_ring_tip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_ring_dip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_ring_pip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_ring_mcp;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_pinky_tip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_pinky_dip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_pinky_pip;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_pinky_mcp;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_wrist_center;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_wrist_ulnar;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_wrist_radial;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypoints_mask_hand_center;
 
             /// <summary>
             /// Normalized position of hand center within depth-sensor view Each dimension is between [-1, 1]
@@ -619,6 +715,13 @@ namespace XRTK.Lumin.Native
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
         public static extern MlApi.MLResult MLHandTrackingGetData(MlApi.MLHandle hand_tracker, ref MLHandTrackingData out_data);
+
+        /// <summary>
+        /// Initializes default values for <see cref="MLHandTrackingDataEx"/>.
+        /// </summary>
+        /// <param name="out_data"></param>
+        [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void MLHandTrackingDataExInit(ref MlHandTracking.MLHandTrackingDataEx out_data);
 
         /// <summary>
         /// Queries the state of the hand tracker
