@@ -244,7 +244,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// The combined graphics flags, as defined by MLGraphicsFlags
             /// </summary>
-            public uint graphics_flags;
+            public MLGraphicsFlags graphics_flags;
 
             /// <summary>
             /// The color surface format, defined in MLSurfaceFormat
