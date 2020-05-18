@@ -36,11 +36,11 @@ namespace XRTK.Lumin.Providers.Controllers
         private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
-        private MlApi.MLHandle handTrackingHandle = MlApi.MLHandle.Default;
+        private MlApi.MLHandle handTrackingHandle;
         private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
         private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx = new MlHandTracking.MLHandTrackingDataEx();
         private MlHandTracking.MLHandTrackingStaticData staticHandTrackingData;
-        private MlHandTracking.MLHandTrackingData handTrackingData;
+        private MlTypes.MLTransform tempTransformData;
 
         /// <inheritdoc />
         public override void Initialize()
@@ -55,25 +55,35 @@ namespace XRTK.Lumin.Providers.Controllers
                     return;
                 }
 
-                if (MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
-                {
-                    configuration.key_points_filter_level = keyPointFilterLevel;
-                    configuration.pose_filter_level = poseFilterLevel;
-                    configuration.handtracking_pipeline_enabled = true;
+                configuration.keypose_enable_finger = true;
+                configuration.keypose_enable_fist = true;
+                configuration.keypose_enable_pinch = true;
+                configuration.keypose_enable_thumb = true;
+                configuration.keypose_enable_l = true;
+                configuration.keypose_enable_open_hand = true;
+                configuration.keypose_enable_ok = true;
+                configuration.keypose_enable_c = true;
+                configuration.keypose_enable_no_pose = true;
+                configuration.keypose_enable_no_hand = true;
+                configuration.handtracking_pipeline_enabled = true;
+                configuration.key_points_filter_level = keyPointFilterLevel;
+                configuration.pose_filter_level = poseFilterLevel;
 
-                    if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                if (MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                {
+
+                    if (MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
                     {
-                        Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                        Debug.Log(configuration);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
                     }
                 }
                 else
                 {
-                    Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
-                }
-
-                if (!MlHandTracking.MLHandTrackingGetStaticData(handTrackingHandle, ref staticHandTrackingData).IsOk)
-                {
-                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
+                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
                 }
             }
         }
@@ -87,6 +97,35 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (handTrackingHandle.IsValid)
             {
+                if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
+                {
+                    Debug.LogError($"{nameof(MlPerception.MLPerceptionGetSnapshot)} Failed!");
+                    return;
+                }
+
+                if (MlHandTracking.MLHandTrackingGetStaticData(handTrackingHandle, ref staticHandTrackingData).IsOk)
+                {
+                    for (var i = 0; i < staticHandTrackingData.left_frame.Length; i++)
+                    {
+                        var frame = staticHandTrackingData.left_frame[i];
+
+                        if (!frame.is_valid) { continue; }
+
+                        if (MlSnapshot.MLSnapshotGetTransform(snapshot, frame.frame_id, ref tempTransformData).IsOk)
+                        {
+                            Debug.Log($"{(MlHandTracking.MLHandTrackingKeyPoint)i}:{tempTransformData}");
+                        }
+                        else
+                        {
+                            Debug.LogError($"{nameof(MlSnapshot.MLSnapshotGetTransform)} Failed!");
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
+                }
+
                 if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
                 {
                     Debug.Log(handTrackingDataEx);
@@ -96,6 +135,11 @@ namespace XRTK.Lumin.Providers.Controllers
                 else
                 {
                     Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetDataEx)} Failed!");
+                }
+
+                if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
+                {
+                    Debug.LogError($"{nameof(MlPerception.MLPerceptionReleaseSnapshot)} Failed!");
                 }
             }
         }

@@ -58,7 +58,7 @@ namespace XRTK.Lumin.Providers.CameraSystem
 
         #endregion IMixedRealityCameraDataProvider Implementation
 
-        private MlApi.MLHandle headTrackerHandle = MlApi.MLHandle.Default;
+        private MlApi.MLHandle headTrackerHandle;
         private MlHeadTracking.MLHeadTrackingStaticData staticHeadData = new MlHeadTracking.MLHeadTrackingStaticData();
         private ulong rawMapEvents;
         private MlHeadTracking.MLHeadTrackingState headTrackingState;

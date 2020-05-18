@@ -36,7 +36,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
 
         private float lastUpdated = 0;
-        private MlApi.MLHandle meshingHandle = MlApi.MLHandle.Default;
+        private MlApi.MLHandle meshingHandle;
         private MlMeshing2.MLMeshingSettings meshingSettings;
 
         #region IMixedRealityService implementation

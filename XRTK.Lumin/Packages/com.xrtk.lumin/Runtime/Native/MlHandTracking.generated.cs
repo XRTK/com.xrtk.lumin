@@ -388,71 +388,6 @@ namespace XRTK.Lumin.Native
         }
 
         /// <summary>
-        /// State of a single hand.
-        /// </summary>
-        [Serializable]
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        public unsafe struct MLHandTrackingHandState
-        {
-            /// <summary>
-            /// The static keypose currently being performed by the single hand.
-            /// </summary>
-            public MLHandTrackingKeyPose keypose;
-
-            /// <summary>
-            /// The confidence level of a hand is present in the scene. Value is between [0, 1], 0 is low, 1 is high degree of confidence.
-            /// </summary>
-            public float hand_confidence;
-
-            /// <summary>
-            /// The confidence for all poses.
-            /// </summary>
-            public fixed float keypose_confidence[10];
-
-            /// <summary>
-            /// The filtered confidence for all poses.
-            /// </summary>
-            public fixed float keypose_confidence_filtered[10];
-
-            /// <summary>
-            /// Mask indicates if a keypoint is present or not.
-            /// </summary>
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1, SizeConst = 24)]
-            public bool[] keypoints_mask;
-
-            /// <summary>
-            /// Normalized position of hand center within depth-sensor view. Each dimension is between [-1, 1].
-            /// </summary>
-            public MlTypes.MLVec3f hand_center_normalized;
-
-            public override string ToString()
-            {
-                return $"{nameof(hand_confidence)}:{hand_confidence}|{nameof(hand_center_normalized)}:{hand_center_normalized}";
-            }
-        }
-
-        /// <summary>
-        ///  Data which is received when querying hand tracker from <see cref="MLHandTrackingGetData"/>
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        public partial struct MLHandTrackingData
-        {
-            /// <summary>
-            /// Hand tracker state of the left hand.
-            /// </summary>
-            public MLHandTrackingHandState left_hand_state;
-
-            /// <summary>
-            /// Hand tracker state of the right hand.
-            /// </summary>
-            public MLHandTrackingHandState right_hand_state;
-            public override string ToString()
-            {
-                return JsonUtility.ToJson(this, true);
-            }
-        }
-
-        /// <summary>
         /// Extended state of a single hand
         /// </summary>
         /// <remarks>
@@ -644,14 +579,35 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLHandTrackingConfiguration
         {
-            /// <summary>
-            /// Configuration for the static poses True will enable the pose to be
-            /// tracked by the system, false will disable it Note that the size of keypose_config
-            /// is set to MLHandTrackingKeyPose_Count-1 Disabling NoHand is not allowed
-            /// If a disabled pose is performed, the most probable enabled pose will be reported
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 9)]
-            public bool[] keypose_config;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_finger;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_fist;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_pinch;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_thumb;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_l;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_open_hand;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_ok;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_c;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_no_pose;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool keypose_enable_no_hand;
 
             /// <summary>
             /// True activates hand tracking False deactivates the handtracking pipeline
@@ -702,19 +658,6 @@ namespace XRTK.Lumin.Native
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
         public static extern MlApi.MLResult MLHandTrackingDestroy(MlApi.MLHandle hand_tracker);
-
-        /// <summary>
-        /// Queries the current state of the hand tracker.@retval MLResult_InvalidParam out_data is null.
-        /// MLResult_Ok The hand information was available and the information in out_data is valid.
-        /// MLResult_UnspecifiedFailure It failed to get the hand information.
-        /// </summary>
-        /// <param name="hand_tracker">A handle to a Hand Tracker created by MLHandTrackingCreate().</param>
-        /// <param name="out_data">Pointer to a variable that receives information about the tracked hands.</param>
-        /// <remarks>
-        /// @priv LowLatencyLightwear
-        /// </remarks>
-        [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLHandTrackingGetData(MlApi.MLHandle hand_tracker, ref MLHandTrackingData out_data);
 
         /// <summary>
         /// Queries the state of the hand tracker

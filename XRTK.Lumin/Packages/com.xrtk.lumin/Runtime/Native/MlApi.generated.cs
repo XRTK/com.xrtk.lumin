@@ -77,8 +77,6 @@ namespace XRTK.Lumin.Native
             public static bool operator ==(MLHandle left, MLHandle right) => left.Equals(right);
 
             public static bool operator !=(MLHandle left, MLHandle right) => !left.Equals(right);
-
-            public static MLHandle Default = new MLHandle(ulong.MaxValue);
         }
 
         /// <summary>
