@@ -24,12 +24,12 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Left hand
             /// </summary>
-            MLHandType_Left,
+            Left,
 
             /// <summary>
             /// Right hand
             /// </summary>
-            MLHandType_Right,
+            Right,
 
             /// <summary>
             /// Number of hands
@@ -206,7 +206,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(is_valid)}:{is_valid}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -239,7 +239,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(tip)}:{tip}|{nameof(ip)}:{ip}|{nameof(mcp)}:{mcp}|{nameof(cmc)}:{cmc}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -272,7 +272,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(tip)}:{tip}|{nameof(dip)}:{dip}|{nameof(mcp)}:{mcp}|{nameof(mcp)}:{mcp}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -300,7 +300,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(center)}:{center}|{nameof(ulnar)}:{ulnar}|{nameof(radial)}:{radial}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -348,7 +348,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(hand_center)}:{hand_center}\n{nameof(wrist)}:{wrist}\n{nameof(thumb)}:{thumb}\n{nameof(index)}:{index}\n{nameof(middle)}:{middle}\n{nameof(ring)}:{ring}\n{nameof(pinky)}:{pinky}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -383,7 +383,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(left)}:{left}\n{nameof(right)}:{right}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -448,7 +448,7 @@ namespace XRTK.Lumin.Native
             public MLHandTrackingHandState right_hand_state;
             public override string ToString()
             {
-                return $"{nameof(left_hand_state)}:{left_hand_state}\n{nameof(left_hand_state)}:{right_hand_state}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -600,7 +600,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(hand_confidence)}:{hand_confidence}|{nameof(is_holding_control)}:{is_holding_control}|{nameof(hand_center_normalized)}:{hand_center_normalized}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -632,7 +632,7 @@ namespace XRTK.Lumin.Native
 
             public override string ToString()
             {
-                return $"{nameof(left_hand_state)}:{left_hand_state}\n{nameof(left_hand_state)}:{right_hand_state}";
+                return JsonUtility.ToJson(this, true);
             }
         }
 
@@ -715,13 +715,6 @@ namespace XRTK.Lumin.Native
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
         public static extern MlApi.MLResult MLHandTrackingGetData(MlApi.MLHandle hand_tracker, ref MLHandTrackingData out_data);
-
-        /// <summary>
-        /// Initializes default values for <see cref="MLHandTrackingDataEx"/>.
-        /// </summary>
-        /// <param name="out_data"></param>
-        [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MLHandTrackingDataExInit(ref MlHandTracking.MLHandTrackingDataEx out_data);
 
         /// <summary>
         /// Queries the state of the hand tracker

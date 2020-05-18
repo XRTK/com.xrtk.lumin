@@ -75,11 +75,6 @@ namespace XRTK.Lumin.Providers.Controllers
                 {
                     Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
                 }
-
-                //if (!MlHandTracking.MLHandTrackingDataExInit(ref handTrackingDataEx).IsOk)
-                //{
-                //    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingDataExInit)} Failed!");
-                //}
             }
         }
 
