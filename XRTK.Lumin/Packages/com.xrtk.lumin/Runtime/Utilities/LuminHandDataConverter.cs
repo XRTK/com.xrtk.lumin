@@ -28,6 +28,18 @@ namespace XRTK.Lumin.Utilities
         public LuminHandDataConverter(Handedness handedness, IReadOnlyList<HandControllerPoseDefinition> trackedPoses) : base(handedness, trackedPoses)
         { }
 
+        /// <inheritdoc />
+        protected override bool PlatformProvidesPointerPose => false;
+
+        /// <inheritdoc />
+        protected override bool PlatformProvidesIsPinching => false;
+
+        /// <inheritdoc />
+        protected override bool PlatformProvidesPinchStrength => false;
+
+        /// <inheritdoc />
+        protected override bool PlatformProvidesIsPointing => false;
+
 #if PLATFORM_LUMIN
 
         /// <summary>
