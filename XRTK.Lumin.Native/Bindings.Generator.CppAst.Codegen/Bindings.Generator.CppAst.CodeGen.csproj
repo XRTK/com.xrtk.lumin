@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Submodules\CppAst.CodeGen\src\CppAst.CodeGen\CppAst.CodeGen.csproj" />
+    <PackageReference Include="CppAst.CodeGen" Version="0.5.0-alpha-001" />
   </ItemGroup>
 
 </Project>
