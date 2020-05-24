@@ -203,7 +203,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// The size of the bounding box
             /// When a mesh request is complete all mesh blocks that intersect with the
-            /// extents provided here will be returned in MLMeshingMeshInfo
+            /// extents provided here will be returned in <see cref="MLMeshingMeshInfo"/>
             /// </summary>
             public MlTypes.MLVec3f extents;
         }
@@ -254,7 +254,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// The meshinfo returned by the system
             /// </summary>
-            public IntPtr data;
+            public MLMeshingBlockInfo data;
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Per block request
             /// </summary>
-            public IntPtr data;
+            public MLMeshingBlockRequest data;
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Pointer to the vertex buffer
             /// </summary>
-            public IntPtr vertex;
+            public MlTypes.MLVec3f vertex;
 
             /// <summary>
             /// Pointer to index buffer
@@ -339,21 +339,21 @@ namespace XRTK.Lumin.Native
             /// will have the vertices: vertex[index[0]], vertex[index[1]], vertex[index[2]]
             /// Index order is defined by the MLMeshingFlags_IndexOrderCCW flag
             /// </summary>
-            public IntPtr index;
+            public ushort index;
 
             /// <summary>
             /// Pointer to normals buffer
             /// </summary>
-            public IntPtr normal;
+            public MlTypes.MLVec3f normal;
 
             /// <summary>
             /// Pointer to confidence buffer
             /// </summary>
-            public IntPtr confidence;
+            public float confidence;
         }
 
         /// <summary>
-        /// Result of a Mesh request See MLMeshingGetMeshResult
+        /// Result of a Mesh request <see cref="MLMeshingGetMeshResult"/>
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct MLMeshingMesh
@@ -376,7 +376,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// The mesh data
             /// </summary>
-            public IntPtr data;
+            public MLMeshingBlockMesh data;
         }
 
         /// <summary>
