@@ -330,7 +330,7 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// Pointer to the vertex buffer
             /// </summary>
-            public MlTypes.MLVec3f vertex;
+            public MlTypes.MLVec3f[] vertex;
 
             /// <summary>
             /// Pointer to index buffer
@@ -339,17 +339,17 @@ namespace XRTK.Lumin.Native
             /// will have the vertices: vertex[index[0]], vertex[index[1]], vertex[index[2]]
             /// Index order is defined by the MLMeshingFlags_IndexOrderCCW flag
             /// </summary>
-            public ushort index;
+            public ushort[] index;
 
             /// <summary>
             /// Pointer to normals buffer
             /// </summary>
-            public MlTypes.MLVec3f normal;
+            public MlTypes.MLVec3f[] normal;
 
             /// <summary>
             /// Pointer to confidence buffer
             /// </summary>
-            public float confidence;
+            public float[] confidence;
         }
 
         /// <summary>
