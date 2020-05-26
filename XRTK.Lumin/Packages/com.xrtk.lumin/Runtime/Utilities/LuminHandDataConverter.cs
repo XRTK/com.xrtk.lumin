@@ -18,27 +18,15 @@ namespace XRTK.Lumin.Utilities
     /// <summary>
     /// Converts oculus hand data to <see cref="HandData"/>.
     /// </summary>
-    public sealed class LuminHandDataConverter : BaseHandDataConverter
+    public sealed class LuminHandDataConverter
     {
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="handedness">Handedness of the hand this converter is created for.</param>
         /// <param name="trackedPoses">The tracked poses collection to use for pose recognition.</param>
-        public LuminHandDataConverter(Handedness handedness, IReadOnlyList<HandControllerPoseDefinition> trackedPoses) : base(handedness, trackedPoses)
+        public LuminHandDataConverter(Handedness handedness, IReadOnlyList<HandControllerPoseDefinition> trackedPoses)
         { }
-
-        /// <inheritdoc />
-        protected override bool PlatformProvidesPointerPose => false;
-
-        /// <inheritdoc />
-        protected override bool PlatformProvidesIsPinching => false;
-
-        /// <inheritdoc />
-        protected override bool PlatformProvidesPinchStrength => false;
-
-        /// <inheritdoc />
-        protected override bool PlatformProvidesIsPointing => false;
 
 #if PLATFORM_LUMIN
 
