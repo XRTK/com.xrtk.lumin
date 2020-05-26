@@ -1,10 +1,8 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using XRTK.Definitions.Controllers.Hands;
 using XRTK.Definitions.Utilities;
-using XRTK.Providers.Controllers.Hands;
 
 #if PLATFORM_LUMIN
 
@@ -24,9 +22,12 @@ namespace XRTK.Lumin.Utilities
         /// Constructor.
         /// </summary>
         /// <param name="handedness">Handedness of the hand this converter is created for.</param>
-        /// <param name="trackedPoses">The tracked poses collection to use for pose recognition.</param>
-        public LuminHandDataConverter(Handedness handedness, IReadOnlyList<HandControllerPoseDefinition> trackedPoses)
-        { }
+        public LuminHandDataConverter(Handedness handedness)
+        {
+            this.handedness = handedness;
+        }
+
+        private readonly Handedness handedness;
 
 #if PLATFORM_LUMIN
 
@@ -41,7 +42,7 @@ namespace XRTK.Lumin.Utilities
         /// <returns>Platform agnostics hand data.</returns>
         public HandData GetHandData()
         {
-            var hand = ToMagicLeapHand(Handedness);
+            var hand = ToMagicLeapHand(handedness);
             var updatedHandData = new HandData
             {
                 IsTracked = hand.IsVisible,
