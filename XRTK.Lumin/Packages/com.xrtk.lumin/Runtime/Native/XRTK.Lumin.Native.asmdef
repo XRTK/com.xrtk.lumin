@@ -1,0 +1,16 @@
+{
+    "name": "XRTK.Lumin.Native",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor",
+        "Lumin"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

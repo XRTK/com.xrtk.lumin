@@ -1,25 +1,19 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Interfaces.InputSystem;
-using XRTK.Lumin.Profiles;
-using XRTK.Providers.Controllers.Hands;
-
-#if PLATFORM_LUMIN
-
-using System.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
+using XRTK.Attributes;
+using XRTK.Definitions.Controllers.Hands;
 using XRTK.Definitions.Devices;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.Utilities;
-using XRTK.Lumin.Utilities;
+using XRTK.Interfaces.InputSystem;
+using XRTK.Lumin.Native;
+using XRTK.Lumin.Profiles;
+using XRTK.Providers.Controllers.Hands;
 using XRTK.Services;
-
-#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -31,52 +25,64 @@ namespace XRTK.Lumin.Providers.Controllers
         public LuminHandControllerDataProvider(string name, uint priority, LuminHandControllerDataProviderProfile profile, IMixedRealityInputSystem parentService)
             : base(name, priority, profile, parentService)
         {
-#if PLATFORM_LUMIN
-            keyPointFilterLevel = (MLKeyPointFilterLevel)profile.KeyPointFilterLevel;
-            poseFilterLevel = (MLPoseFilterLevel)profile.PoseFilterLevel;
+            keyPointFilterLevel = profile.KeyPointFilterLevel;
+            poseFilterLevel = profile.PoseFilterLevel;
         }
 
         private readonly MLPoseFilterLevel poseFilterLevel;
         private readonly MLKeyPointFilterLevel keyPointFilterLevel;
-        private readonly LuminHandDataConverter leftHandConverter = new LuminHandDataConverter(Handedness.Left);
-        private readonly LuminHandDataConverter rightHandConverter = new LuminHandDataConverter(Handedness.Right);
-        private readonly MLHandKeyPose[] keyPoses = Enum.GetValues(typeof(MLHandKeyPose)).Cast<MLHandKeyPose>().ToArray();
+        private readonly HandData leftHandData = new HandData();
+        private readonly HandData rightHandData = new HandData();
+        private readonly MixedRealityPose[] tempLeftKeyPoses = new MixedRealityPose[24];
+        private readonly MixedRealityPose[] tempRightKeyPoses = new MixedRealityPose[24];
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
-        private bool isEnabled = false;
+        private MlApi.MLHandle handTrackingHandle;
+        private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
+        private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx = new MlHandTracking.MLHandTrackingDataEx();
+        private MlHandTracking.MLHandTrackingStaticData staticHandTrackingData;
+        private MlTypes.MLTransform tempTransform = new MlTypes.MLTransform(new MlTypes.MLVec3f(), MlTypes.MLQuaternionf.Identity());
+        private readonly MixedRealityPose poseIdentity = new MixedRealityPose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f));
 
         /// <inheritdoc />
-        public override void Enable()
+        public override void Initialize()
         {
-            if (!MLHands.IsStarted)
-            {
-                var result = MLHands.Start();
+            if (!Application.isPlaying) { return; }
 
-                if (!result.IsOk)
+            if (!handTrackingHandle.IsValid)
+            {
+                if (!MlHandTracking.MLHandTrackingCreate(ref handTrackingHandle).IsOk)
                 {
-                    Debug.LogError($"Error: Failed starting MLHands: {result}");
+                    Debug.LogError($"Failed to start {nameof(MlHandTracking)}!");
                     return;
                 }
 
-                isEnabled = true;
-            }
+                configuration.keypose_enable_finger = false;
+                configuration.keypose_enable_fist = false;
+                configuration.keypose_enable_pinch = false;
+                configuration.keypose_enable_thumb = false;
+                configuration.keypose_enable_l = false;
+                configuration.keypose_enable_open_hand = false;
+                configuration.keypose_enable_ok = false;
+                configuration.keypose_enable_c = false;
+                configuration.keypose_enable_no_pose = true;
+                configuration.keypose_enable_no_hand = true;
+                configuration.handtracking_pipeline_enabled = true;
+                configuration.key_points_filter_level = keyPointFilterLevel;
+                configuration.pose_filter_level = poseFilterLevel;
 
-            if (!MLHands.KeyPoseManager.EnableKeyPoses(keyPoses, true, true))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.EnableKeyPoses)}.");
+                if (MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                {
+                    if (!MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                    {
+                        Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                }
             }
-
-            if (!MLHands.KeyPoseManager.SetKeyPointsFilterLevel(keyPointFilterLevel))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetKeyPointsFilterLevel)}.");
-            }
-
-            if (!MLHands.KeyPoseManager.SetPoseFilterLevel(poseFilterLevel))
-            {
-                Debug.LogError($"Error: Failed {nameof(MLHands.KeyPoseManager.SetPoseFilterLevel)}.");
-            }
-
-            LuminHandDataConverter.HandMeshingEnabled = HandMeshingEnabled;
         }
 
         /// <inheritdoc />
@@ -84,20 +90,137 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             base.Update();
 
-            if (isEnabled)
+            if (!Application.isPlaying) { return; }
+
+            if (handTrackingHandle.IsValid)
             {
-                GetOrAddController(Handedness.Left).UpdateController(leftHandConverter.GetHandData());
-                GetOrAddController(Handedness.Right).UpdateController(rightHandConverter.GetHandData());
+                if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
+                {
+                    leftHandData.IsTracked = handTrackingDataEx.left_hand_state.keypose < MlHandTracking.MLHandTrackingKeyPose.NoHand && !handTrackingDataEx.left_hand_state.is_holding_control;
+                    rightHandData.IsTracked = handTrackingDataEx.right_hand_state.keypose < MlHandTracking.MLHandTrackingKeyPose.NoHand && !handTrackingDataEx.right_hand_state.is_holding_control;
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetDataEx)} Failed!");
+                }
+
+                if (leftHandData.IsTracked || rightHandData.IsTracked)
+                {
+                    if (MlHandTracking.MLHandTrackingGetStaticData(handTrackingHandle, ref staticHandTrackingData).IsOk)
+                    {
+                        var now = DateTimeOffset.UtcNow.Ticks;
+
+                        if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
+                        {
+                            Debug.LogError($"{nameof(MlPerception.MLPerceptionGetSnapshot)} Failed!");
+                            return;
+                        }
+
+                        if (leftHandData.IsTracked)
+                        {
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Hand_Center] = GetPoseData(ref staticHandTrackingData.left.hand_center, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Center] = GetPoseData(ref staticHandTrackingData.left.wrist.center, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Radial] = GetPoseData(ref staticHandTrackingData.left.wrist.radial, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Ulnar] = GetPoseData(ref staticHandTrackingData.left.wrist.ulnar, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_Tip] = GetPoseData(ref staticHandTrackingData.left.index.tip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_DIP] = GetPoseData(ref staticHandTrackingData.left.index.dip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_PIP] = GetPoseData(ref staticHandTrackingData.left.index.pip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_MCP] = GetPoseData(ref staticHandTrackingData.left.index.mcp, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_Tip] = GetPoseData(ref staticHandTrackingData.left.middle.tip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_DIP] = GetPoseData(ref staticHandTrackingData.left.middle.dip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_PIP] = GetPoseData(ref staticHandTrackingData.left.middle.pip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_MCP] = GetPoseData(ref staticHandTrackingData.left.middle.mcp, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_Tip] = GetPoseData(ref staticHandTrackingData.left.ring.tip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_DIP] = GetPoseData(ref staticHandTrackingData.left.ring.dip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_PIP] = GetPoseData(ref staticHandTrackingData.left.ring.pip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_MCP] = GetPoseData(ref staticHandTrackingData.left.ring.mcp, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_Tip] = GetPoseData(ref staticHandTrackingData.left.pinky.tip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_DIP] = GetPoseData(ref staticHandTrackingData.left.pinky.dip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_PIP] = GetPoseData(ref staticHandTrackingData.left.pinky.pip, ref snapshot);
+                            tempLeftKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_MCP] = GetPoseData(ref staticHandTrackingData.left.pinky.mcp, ref snapshot);
+
+                            SyncHandPoseData(leftHandData, Handedness.Left);
+                            rightHandData.TimeStamp = now;
+                        }
+
+                        if (rightHandData.IsTracked)
+                        {
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Hand_Center] = GetPoseData(ref staticHandTrackingData.right.hand_center, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Center] = GetPoseData(ref staticHandTrackingData.right.wrist.center, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Radial] = GetPoseData(ref staticHandTrackingData.right.wrist.radial, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Ulnar] = GetPoseData(ref staticHandTrackingData.right.wrist.ulnar, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_Tip] = GetPoseData(ref staticHandTrackingData.right.index.tip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_DIP] = GetPoseData(ref staticHandTrackingData.right.index.dip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_PIP] = GetPoseData(ref staticHandTrackingData.right.index.pip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_MCP] = GetPoseData(ref staticHandTrackingData.right.index.mcp, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_Tip] = GetPoseData(ref staticHandTrackingData.right.middle.tip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_DIP] = GetPoseData(ref staticHandTrackingData.right.middle.dip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_PIP] = GetPoseData(ref staticHandTrackingData.right.middle.pip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_MCP] = GetPoseData(ref staticHandTrackingData.right.middle.mcp, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_Tip] = GetPoseData(ref staticHandTrackingData.right.ring.tip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_DIP] = GetPoseData(ref staticHandTrackingData.right.ring.dip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_PIP] = GetPoseData(ref staticHandTrackingData.right.ring.pip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_MCP] = GetPoseData(ref staticHandTrackingData.right.ring.mcp, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_Tip] = GetPoseData(ref staticHandTrackingData.right.pinky.tip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_DIP] = GetPoseData(ref staticHandTrackingData.right.pinky.dip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_PIP] = GetPoseData(ref staticHandTrackingData.right.pinky.pip, ref snapshot);
+                            tempRightKeyPoses[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_MCP] = GetPoseData(ref staticHandTrackingData.right.pinky.mcp, ref snapshot);
+
+                            SyncHandPoseData(rightHandData, Handedness.Right);
+                            leftHandData.TimeStamp = now;
+                        }
+
+                        if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
+                        {
+                            Debug.LogError($"{nameof(MlPerception.MLPerceptionReleaseSnapshot)} Failed!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError($"{nameof(MlHandTracking.MLHandTrackingGetStaticData)} Failed!");
+                    }
+                }
+
+                GetOrAddController(Handedness.Left).UpdateController(leftHandData);
+                GetOrAddController(Handedness.Right).UpdateController(rightHandData);
             }
         }
 
-        /// <inheritdoc />
-        public override void Disable()
+        private MixedRealityPose GetPoseData(ref MlHandTracking.MLKeyPointState keyPoint, ref MlSnapshot.MLSnapshot snapshot)
         {
-            if (isEnabled)
+            var pose = poseIdentity;
+
+            if (keyPoint.is_valid)
             {
-                MLHands.KeyPoseManager.DisableAllKeyPoses();
-                MLHands.Stop();
+                if (MlSnapshot.MLSnapshotGetTransform(snapshot, keyPoint.frame_id, ref tempTransform).IsOk)
+                {
+                    pose.Position = (Vector3)tempTransform.position;
+                }
+                else
+                {
+                    pose = poseIdentity;
+                    Debug.LogError($"{nameof(MlSnapshot.MLSnapshotGetTransform)} Failed!");
+                }
+            }
+            else
+            {
+                pose = poseIdentity;
+            }
+
+            return pose;
+        }
+
+        /// <inheritdoc />
+        public override void Destroy()
+        {
+            if (!Application.isPlaying) { return; }
+
+            if (handTrackingHandle.IsValid)
+            {
+                if (!MlHandTracking.MLHandTrackingDestroy(handTrackingHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy {nameof(MlHandTracking)}!");
+                }
             }
 
             foreach (var activeController in activeControllers)
@@ -163,7 +286,107 @@ namespace XRTK.Lumin.Providers.Controllers
 
             controller = null;
             return false;
-#endif // PLATFORM_LUMIN
+        }
+
+        private void SyncHandPoseData(HandData handData, Handedness handedness)
+        {
+            var jointData = handedness == Handedness.Left ? tempLeftKeyPoses : tempRightKeyPoses;
+
+            for (int i = 0; i < handData.Joints.Length; i++)
+            {
+                var trackedHandJoint = (TrackedHandJoint)i;
+
+                switch (trackedHandJoint)
+                {
+                    // Wrist and Palm
+                    case TrackedHandJoint.Wrist:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Wrist_Center];
+                        break;
+                    case TrackedHandJoint.Palm:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Hand_Center];
+                        break;
+                    // Finger: Thumb
+                    case TrackedHandJoint.ThumbMetacarpalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Thumb_MCP];
+                        break;
+                    case TrackedHandJoint.ThumbProximalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Thumb_CMC];
+                        break;
+                    case TrackedHandJoint.ThumbDistalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Thumb_IP];
+                        break;
+                    case TrackedHandJoint.ThumbTip:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Thumb_Tip];
+                        break;
+                    // Finger: Index
+                    case TrackedHandJoint.IndexMetacarpal:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_MCP];
+                        break;
+                    case TrackedHandJoint.IndexKnuckle:
+                        handData.Joints[i] = MixedRealityPose.ZeroIdentity;
+                        break;
+                    case TrackedHandJoint.IndexMiddleJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_PIP];
+                        break;
+                    case TrackedHandJoint.IndexDistalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_DIP];
+                        break;
+                    case TrackedHandJoint.IndexTip:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Index_Tip];
+                        break;
+                    // Finger: Middle
+                    case TrackedHandJoint.MiddleMetacarpal:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_MCP];
+                        break;
+                    case TrackedHandJoint.MiddleKnuckle:
+                        // TODO: Estimate?
+                        handData.Joints[i] = MixedRealityPose.ZeroIdentity;
+                        break;
+                    case TrackedHandJoint.MiddleMiddleJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_PIP];
+                        break;
+                    case TrackedHandJoint.MiddleDistalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_DIP];
+                        break;
+                    case TrackedHandJoint.MiddleTip:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_Tip];
+                        break;
+                    // Finger: Ring
+                    case TrackedHandJoint.RingMetacarpal:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_MCP];
+                        break;
+                    case TrackedHandJoint.RingKnuckle:
+                        // TODO: Estimate?
+                        handData.Joints[i] = MixedRealityPose.ZeroIdentity;
+                        break;
+                    case TrackedHandJoint.RingMiddleJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_PIP];
+                        break;
+                    case TrackedHandJoint.RingDistalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Ring_DIP];
+                        break;
+                    case TrackedHandJoint.RingTip:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Middle_Tip];
+                        break;
+                    // Finger: Pinky
+                    case TrackedHandJoint.PinkyMetacarpal:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_MCP];
+                        break;
+                    case TrackedHandJoint.PinkyKnuckle:
+                        // TODO: Estimate?
+                        handData.Joints[i] = MixedRealityPose.ZeroIdentity;
+                        break;
+                    case TrackedHandJoint.PinkyMiddleJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_PIP];
+                        break;
+                    case TrackedHandJoint.PinkyDistalJoint:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_DIP];
+                        break;
+                    case TrackedHandJoint.PinkyTip:
+                        handData.Joints[i] = jointData[(int)MlHandTracking.MLHandTrackingKeyPoint.Pinky_Tip];
+                        break;
+                }
+            }
         }
     }
 }
