@@ -1,17 +1,13 @@
 {
-    "name": "XRTK.Lumin",
-    "references": [
-        "GUID:28d8685fae23c21419ef42894cb9b075",
-        "GUID:f3241d040533491e8a1e2714b27c3111",
-        "GUID:434d0461d4867764b8fef8b9893be161"
-    ],
+    "name": "XRTK.Lumin.Native",
+    "references": [],
     "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor",
         "Lumin"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

@@ -1,20 +1,16 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
+using UnityEngine;
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
 using XRTK.Definitions.Utilities;
-using XRTK.Interfaces.Providers.Controllers;
-using XRTK.Providers.Controllers;
-
-#if PLATFORM_LUMIN
-
-using UnityEngine;
-using UnityEngine.XR.MagicLeap;
 using XRTK.Extensions;
+using XRTK.Interfaces.Providers.Controllers;
+using XRTK.Lumin.Native;
+using XRTK.Providers.Controllers;
 using XRTK.Services;
-
-#endif
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -38,7 +34,7 @@ namespace XRTK.Lumin.Providers.Controllers
             new MixedRealityInteractionMapping("Trigger Touch", AxisType.Digital, DeviceInputType.TriggerTouch),
             new MixedRealityInteractionMapping("Trigger Press (Select)", AxisType.Digital, DeviceInputType.Select),
             new MixedRealityInteractionMapping("Bumper Press", AxisType.Digital, DeviceInputType.ButtonPress),
-            new MixedRealityInteractionMapping("Home Press", AxisType.Digital, DeviceInputType.ButtonPress),
+            new MixedRealityInteractionMapping("Home Press", AxisType.Digital, DeviceInputType.Menu),
             new MixedRealityInteractionMapping("Touchpad Position", AxisType.DualAxis, DeviceInputType.Touchpad),
             new MixedRealityInteractionMapping("Touchpad Press", AxisType.SingleAxis, DeviceInputType.TouchpadPress),
             new MixedRealityInteractionMapping("Touchpad Touch", AxisType.SingleAxis, DeviceInputType.TouchpadTouch),
@@ -50,28 +46,23 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override MixedRealityInteractionMapping[] DefaultRightHandedInteractions => DefaultInteractions;
 
-#if PLATFORM_LUMIN
-
-        internal MLInputController MlControllerReference { get; set; }
-        //internal LuminControllerGestureSettings ControllerGestureSettings { get; set; }
-
-        internal bool IsHomePressed;
-
-        private MixedRealityPose currentPointerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose lastControllerPose = MixedRealityPose.ZeroIdentity;
         private MixedRealityPose currentControllerPose = MixedRealityPose.ZeroIdentity;
         private Vector2 dualAxisPosition;
+        private MlTypes.MLTransform controllerTransform;
 
         /// <summary>
         /// Updates the controller's interaction mappings and ready the current input values.
         /// </summary>
-        public override void UpdateController()
+        /// <param name="inputState"></param>
+        /// <param name="controllerState"></param>
+        internal void UpdateController(MlInput.MLInputControllerState inputState, MlController.MLControllerState controllerState)
         {
             if (!Enabled) { return; }
 
             base.UpdateController();
 
-            UpdateControllerData();
+            UpdateControllerData(inputState, controllerState);
 
             if (Interactions == null)
             {
@@ -86,10 +77,15 @@ namespace XRTK.Lumin.Providers.Controllers
                 switch (interactionMapping.InputType)
                 {
                     case DeviceInputType.SpatialPointer:
-                        UpdatePoseData(interactionMapping);
+                        Debug.Assert(interactionMapping.AxisType == AxisType.SixDof);
+                        // Update the interaction data source
+                        interactionMapping.PoseData = currentControllerPose;
                         break;
                     case DeviceInputType.ButtonPress:
-                        UpdateButtonData(interactionMapping);
+                        interactionMapping.BoolData = inputState.button_state_bumper;
+                        break;
+                    case DeviceInputType.Menu:
+                        interactionMapping.BoolData = inputState.button_state_home_tap;
                         break;
                     case DeviceInputType.Select:
                     case DeviceInputType.Trigger:
@@ -97,10 +93,10 @@ namespace XRTK.Lumin.Providers.Controllers
                     case DeviceInputType.TriggerPress:
                     case DeviceInputType.TouchpadTouch:
                     case DeviceInputType.TouchpadPress:
-                        UpdateSingleAxisData(interactionMapping);
+                        UpdateSingleAxisData(interactionMapping, inputState);
                         break;
                     case DeviceInputType.Touchpad:
-                        UpdateDualAxisData(interactionMapping);
+                        UpdateDualAxisData(interactionMapping, inputState);
                         break;
                     default:
                         Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
@@ -111,28 +107,55 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateControllerData()
+        private void UpdateControllerData(MlInput.MLInputControllerState inputState, MlController.MLControllerState controllerState)
         {
             var lastState = TrackingState;
 
             lastControllerPose = currentControllerPose;
 
-            if (MlControllerReference.Type == MLInputControllerType.Control)
+            var bestStream = controllerState.stream[0];
+
+            for (int i = 0; i < controllerState.stream.Length; i++)
+            {
+                if (!controllerState.stream[i].is_active) { continue; }
+
+                if (bestStream.mode <= controllerState.stream[i].mode)
+                {
+                    bestStream = controllerState.stream[i];
+                }
+            }
+
+            if (!MlPerception.MLPerceptionGetSnapshot(out var snapshot).IsOk)
+            {
+                Debug.LogError("Failed to get perception snapshot!");
+            }
+
+            if (!MlSnapshot.MLSnapshotGetTransform(snapshot, bestStream.coord_frame_controller, ref controllerTransform).IsOk)
+            {
+                Debug.LogError($"Failed to get snapshot transform for controller {controllerState.controller_id}:{bestStream}");
+            }
+
+            if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
+            {
+                Debug.LogError("Failed to release perception snapshot!");
+            }
+
+            if (inputState.type == MlInput.MLInputControllerType.Device)
             {
                 // The source is either a hand or a controller that supports pointing.
                 // We can now check for position and rotation.
-                IsPositionAvailable = MlControllerReference.Dof != MLInputControllerDof.None;
+                IsPositionAvailable = bestStream.mode > MlController.MLControllerMode.Imu3Dof;
 
                 if (IsPositionAvailable)
                 {
-                    IsPositionApproximate = MlControllerReference.CalibrationAccuracy <= MLControllerCalibAccuracy.Medium;
+                    IsPositionApproximate = controllerState.accuracy <= MlController.MLControllerCalibAccuracy.Medium;
                 }
                 else
                 {
                     IsPositionApproximate = false;
                 }
 
-                IsRotationAvailable = MlControllerReference.Dof == MLInputControllerDof.Dof6;
+                IsRotationAvailable = bestStream.is_active;
 
                 // Devices are considered tracked if we receive position OR rotation data from the sensors.
                 TrackingState = (IsPositionAvailable || IsRotationAvailable) ? TrackingState.Tracked : TrackingState.NotTracked;
@@ -143,8 +166,8 @@ namespace XRTK.Lumin.Providers.Controllers
                 TrackingState = TrackingState.NotApplicable;
             }
 
-            currentControllerPose.Position = MlControllerReference.Position;
-            currentControllerPose.Rotation = MlControllerReference.Orientation;
+            currentControllerPose.Position = (Vector3)controllerTransform.position;
+            currentControllerPose.Rotation = (Quaternion)controllerTransform.rotation;
 
             // Raise input system events if it is enabled.
             if (lastState != TrackingState)
@@ -169,30 +192,12 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateButtonData(MixedRealityInteractionMapping interactionMapping)
-        {
-            Debug.Assert(interactionMapping.AxisType == AxisType.Digital);
-
-            var isHomeButton = interactionMapping.Description.Contains("Home");
-
-            if (!isHomeButton)
-            {
-                interactionMapping.BoolData = MlControllerReference.IsBumperDown;
-            }
-            else
-            {
-                interactionMapping.BoolData = IsHomePressed;
-                IsHomePressed = false;
-            }
-        }
-
-        private void UpdateSingleAxisData(MixedRealityInteractionMapping interactionMapping)
+        private void UpdateSingleAxisData(MixedRealityInteractionMapping interactionMapping, MlInput.MLInputControllerState inputState)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.SingleAxis || interactionMapping.AxisType == AxisType.Digital);
-
             interactionMapping.FloatData = interactionMapping.Description.Contains("Touchpad")
-                ? MlControllerReference.Touch1PosAndForce.z
-                : MlControllerReference.TriggerValue;
+                ? inputState.touch_pos_and_force[0].z
+                : inputState.trigger_normalized;
 
             switch (interactionMapping.InputType)
             {
@@ -214,14 +219,14 @@ namespace XRTK.Lumin.Providers.Controllers
             }
         }
 
-        private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping)
+        private void UpdateDualAxisData(MixedRealityInteractionMapping interactionMapping, MlInput.MLInputControllerState inputState)
         {
             Debug.Assert(interactionMapping.AxisType == AxisType.DualAxis);
 
-            if (MlControllerReference.Touch1PosAndForce.z > 0f)
+            if (inputState.touch_pos_and_force[0].z > 0f)
             {
-                dualAxisPosition.x = MlControllerReference.Touch1PosAndForce.x;
-                dualAxisPosition.y = MlControllerReference.Touch1PosAndForce.y;
+                dualAxisPosition.x = inputState.touch_pos_and_force[0].x;
+                dualAxisPosition.y = inputState.touch_pos_and_force[0].y;
             }
             else
             {
@@ -232,26 +237,5 @@ namespace XRTK.Lumin.Providers.Controllers
             // Update the interaction data source
             interactionMapping.Vector2Data = dualAxisPosition;
         }
-
-        private void UpdatePoseData(MixedRealityInteractionMapping interactionMapping)
-        {
-            Debug.Assert(interactionMapping.AxisType == AxisType.SixDof);
-
-            if (interactionMapping.InputType == DeviceInputType.SpatialPointer)
-            {
-                currentPointerPose.Position = MlControllerReference.Position;
-                currentPointerPose.Rotation = MlControllerReference.Orientation;
-            }
-            else
-            {
-                Debug.LogError($"Input [{interactionMapping.InputType}] is not handled for this controller [{GetType().Name}]");
-                return;
-            }
-
-            // Update the interaction data source
-            interactionMapping.PoseData = currentPointerPose;
-        }
-
-#endif // PLATFORM_LUMIN
     }
 }

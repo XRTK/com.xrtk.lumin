@@ -1,28 +1,25 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Lumin.Profiles;
-using XRTK.Interfaces.InputSystem;
-using XRTK.Providers.Controllers;
-
-#if PLATFORM_LUMIN
-
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
+using XRTK.Attributes;
 using XRTK.Definitions.Devices;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.Utilities;
+using XRTK.Interfaces.InputSystem;
+using XRTK.Lumin.Native;
+using XRTK.Lumin.Profiles;
+using XRTK.Providers.Controllers;
 using XRTK.Services;
-
-#endif // PLATFORM_LUMIN
+using XRTK.Utilities.Async;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
     [RuntimePlatform(typeof(LuminPlatform))]
-    [System.Runtime.InteropServices.Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
+    [Guid("851006A2-0762-49AA-80A5-A01C9A8DBB58")]
     public class LuminControllerDataProvider : BaseControllerDataProvider
     {
         /// <inheritdoc />
@@ -31,43 +28,72 @@ namespace XRTK.Lumin.Providers.Controllers
         {
         }
 
-#if PLATFORM_LUMIN
+        private readonly IntPtr statePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MlInput.MLInputControllerState)) * 2);
+        private readonly MlInput.MLInputConfiguration inputConfiguration = MlInput.MLInputConfiguration.Default;
+        private readonly MlController.MLControllerConfiguration controllerConfiguration = MlController.MLControllerConfiguration.Default;
 
         /// <summary>
         /// Dictionary to capture all active controllers detected
         /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
 
+        private MlApi.MLHandle inputHandle;
+        private MlApi.MLHandle controllerHandle;
+        private MlInput.MLInputControllerCallbacksEx controllerCallbacksEx;
+        private MlInput.MLInputControllerState[] controllerStates = new MlInput.MLInputControllerState[2];
+        private MlController.MLControllerSystemState controllerSystemState;
+
         /// <inheritdoc />
         public override void Enable()
         {
-            if (!MLInput.IsStarted)
-            {
-                var config = new MLInputConfiguration();
-                var result = MLInput.Start(config);
+            if (!Application.isPlaying) { return; }
 
-                if (!result.IsOk)
+            if (!inputHandle.IsValid)
+            {
+                if (MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
                 {
-                    Debug.LogError($"Error: failed starting MLInput: {result}");
-                    return;
+                    controllerCallbacksEx.on_connect += async (id, data) =>
+                    {
+                        await Awaiters.UnityMainThread;
+                        GetController(id);
+                    };
+                    controllerCallbacksEx.on_disconnect += async (id, data) =>
+                    {
+                        await Awaiters.UnityMainThread;
+                        RemoveController(id);
+                    };
+
+                    if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
+                    {
+                        MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to update the controller input state!");
+                    }
+
+                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                    {
+                        Debug.LogError("Failed to set controller callbacks!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to create input tracker!");
                 }
             }
 
-            for (byte i = 0; i < 3; i++)
+            if (!controllerHandle.IsValid)
             {
-                // Currently no way to know what controllers are already connected.
-                // Just guessing there could be no more than 3: Two Spatial Controllers and Mobile App Controller.
-                var controller = GetController(i);
-
-                if (controller != null)
+                if (!MlController.MLControllerCreateEx(controllerConfiguration, ref controllerHandle).IsOk)
                 {
-                    MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
+                    Debug.LogError("Failed to create controller tracker!");
+                }
+                else
+                {
+                    MlController.MLControllerGetState(controllerHandle, ref controllerSystemState);
                 }
             }
-
-            MLInput.OnControllerConnected += OnControllerConnected;
-            MLInput.OnControllerDisconnected += OnControllerDisconnected;
-            MLInput.OnControllerButtonDown += MlInputOnControllerButtonDown;
         }
 
         /// <inheritdoc />
@@ -75,19 +101,60 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             base.Update();
 
+            if (!Application.isPlaying) { return; }
+            if (!inputHandle.IsValid) { return; }
+            if (!controllerHandle.IsValid) { return; }
+
+            if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
+            {
+                MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
+            }
+            else
+            {
+                Debug.LogError($"Failed to update the controller input state!");
+            }
+
+            if (!MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
+            {
+                Debug.LogError("Failed to get the controller system state!");
+            }
+
             foreach (var controller in activeControllers)
             {
-                controller.Value?.UpdateController();
+                controller.Value?.UpdateController(controllerStates[controller.Key], controllerSystemState.controller_state[controller.Key]);
             }
         }
 
         /// <inheritdoc />
         public override void Disable()
         {
-            MLInput.OnControllerConnected -= OnControllerConnected;
-            MLInput.OnControllerDisconnected -= OnControllerDisconnected;
-            MLInput.OnControllerButtonDown -= MlInputOnControllerButtonDown;
-            MLInput.Stop();
+            if (!Application.isPlaying) { return; }
+
+            if (controllerHandle.IsValid)
+            {
+                controllerCallbacksEx.on_connect = null;
+                controllerCallbacksEx.on_disconnect = null;
+                controllerCallbacksEx.on_button_down = null;
+                controllerCallbacksEx.on_button_up = null;
+
+                if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                {
+                    Debug.LogError("Failed to clear controller callbacks!");
+                }
+
+                if (!MlController.MLControllerDestroy(controllerHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy {nameof(MlController)} tracker!");
+                }
+            }
+
+            if (inputHandle.IsValid)
+            {
+                if (!MlInput.MLInputDestroy(inputHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy the input tracker!");
+                }
+            }
 
             foreach (var activeController in activeControllers)
             {
@@ -95,6 +162,17 @@ namespace XRTK.Lumin.Providers.Controllers
             }
 
             activeControllers.Clear();
+        }
+
+        /// <inheritdoc />
+        protected override void OnDispose(bool finalizing)
+        {
+            if (finalizing)
+            {
+                Marshal.FreeHGlobal(statePointer);
+            }
+
+            base.OnDispose(finalizing);
         }
 
         private LuminController GetController(byte controllerId, bool addController = true)
@@ -109,28 +187,8 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (!addController) { return null; }
 
-            var mlController = MLInput.GetController(controllerId);
-
-            if (mlController == null) { return null; }
-
-            if (mlController.Type == MLInputControllerType.None) { return null; }
-
-            var handedness = Handedness.Any;
-
-            if (mlController.Type == MLInputControllerType.Control)
-            {
-                switch (mlController.Hand)
-                {
-                    case MLInput.Hand.Left:
-                        handedness = Handedness.Left;
-                        break;
-                    case MLInput.Hand.Right:
-                        handedness = Handedness.Right;
-                        break;
-                }
-            }
-
             LuminController detectedController;
+            var handedness = (Handedness)(controllerId + 1);
 
             try
             {
@@ -142,9 +200,9 @@ namespace XRTK.Lumin.Providers.Controllers
                 return null;
             }
 
-            detectedController.MlControllerReference = mlController;
             activeControllers.Add(controllerId, detectedController);
             AddController(detectedController);
+            MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
             return detectedController;
         }
 
@@ -163,40 +221,5 @@ namespace XRTK.Lumin.Providers.Controllers
                 activeControllers.Remove(controllerId);
             }
         }
-
-        #region Controller Events
-
-        private void OnControllerConnected(byte controllerId)
-        {
-            var controller = GetController(controllerId);
-
-            if (controller != null)
-            {
-                MixedRealityToolkit.InputSystem?.RaiseSourceDetected(controller.InputSource, controller);
-                controller.UpdateController();
-            }
-        }
-
-        private void OnControllerDisconnected(byte controllerId)
-        {
-            RemoveController(controllerId);
-        }
-
-        private void MlInputOnControllerButtonDown(byte controllerId, MLInputControllerButton button)
-        {
-            if (activeControllers.TryGetValue(controllerId, out var controller))
-            {
-                switch (button)
-                {
-                    case MLInputControllerButton.HomeTap:
-                        controller.IsHomePressed = true;
-                        break;
-                }
-            }
-        }
-
-        #endregion Controller Events
-
-#endif // PLATFORM_LUMIN
     }
 }
