@@ -1,25 +1,19 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
-using XRTK.Interfaces.SpatialAwarenessSystem;
-using XRTK.Lumin.Profiles;
-using XRTK.Providers.SpatialObservers;
-
-#if PLATFORM_LUMIN
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
-using UnityEngine.XR.MagicLeap;
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.SpatialAwarenessSystem;
+using XRTK.Interfaces.SpatialAwarenessSystem;
+using XRTK.Lumin.Native;
+using XRTK.Lumin.Profiles;
+using XRTK.Providers.SpatialObservers;
 using XRTK.Services;
 using XRTK.Utilities;
-
-#endif // PLATFORM_LUMIN
 
 namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
@@ -31,17 +25,19 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         public LuminSpatialMeshObserver(string name, uint priority, LuminSpatialMeshObserverProfile profile, IMixedRealitySpatialAwarenessSystem parentService)
             : base(name, priority, profile, parentService)
         {
+            meshingSettings = MlMeshing2.MLMeshingSettings.Default;
+
+            if (MeshRecalculateNormals)
+            {
+                meshingSettings.flags |= MlMeshing2.MeshingFlags.ComputeNormals;
+            }
         }
-
-#if PLATFORM_LUMIN
-
-        private readonly List<XRMeshSubsystemDescriptor> descriptors = new List<XRMeshSubsystemDescriptor>();
 
         private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
 
-        private XRMeshSubsystem meshSubsystem;
-
         private float lastUpdated = 0;
+        private MlApi.MLHandle meshingHandle;
+        private MlMeshing2.MLMeshingSettings meshingSettings;
 
         #region IMixedRealityService implementation
 
@@ -50,40 +46,20 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
         {
             base.Initialize();
 
-            if (!Application.isPlaying || Application.isEditor || meshSubsystem != null) { return; }
+            if (!Application.isPlaying || Application.isEditor) { return; }
 
-            descriptors.Clear();
-            SubsystemManager.GetSubsystemDescriptors(descriptors);
-
-            if (descriptors.Count > 0)
+            if (!meshingHandle.IsValid)
             {
-                var descriptorToUse = descriptors[0];
-
-                if (descriptors.Count > 1)
+                if (!MlMeshing2.MLMeshingInitSettings(ref meshingSettings).IsOk)
                 {
-                    var typeOfD = typeof(XRMeshSubsystemDescriptor);
-                    Debug.LogWarning($"Found {descriptors.Count} {typeOfD.Name}s. Using \"{descriptorToUse.id}\"");
+                    Debug.LogError($"Failed to initialize meshing settings!");
                 }
 
-                meshSubsystem = descriptorToUse.Create();
+                if (!MlMeshing2.MLMeshingCreateClient(ref meshingHandle, meshingSettings).IsOk)
+                {
+                    Debug.LogError($"failed to create meshing client!");
+                }
             }
-
-            if (meshSubsystem == null)
-            {
-                throw new Exception("Failed to start Lumin Mesh Subsystem!");
-            }
-
-            LuminApi.UnityMagicLeap_MeshingSetBatchSize(16);
-            var levelOfDetail = MLSpatialMapper.LevelOfDetail.Medium;
-
-            if (MeshLevelOfDetail == SpatialAwarenessMeshLevelOfDetail.Fine)
-            {
-                levelOfDetail = MLSpatialMapper.LevelOfDetail.Maximum;
-            }
-
-            LuminApi.UnityMagicLeap_MeshingSetLod(levelOfDetail);
-            var settings = GetMeshingSettings();
-            LuminApi.UnityMagicLeap_MeshingUpdateSettings(settings);
         }
 
         /// <inheritdoc />
@@ -93,7 +69,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             // Only update the observer if it is running.
             if (!IsRunning ||
-                meshSubsystem == null ||
                 !Application.isPlaying)
             {
                 return;
@@ -118,30 +93,29 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 }
             }
 
-            ConfigureObserverVolume();
-
-            if (meshSubsystem.TryGetMeshInfos(meshInfos))
-            {
-                for (int i = 0; i < meshInfos.Count; i++)
-                {
-                    MeshInfo_Update(meshInfos[i]);
-                }
-            }
+            //if (meshSubsystem.TryGetMeshInfos(meshInfos))
+            //{
+            //    for (int i = 0; i < meshInfos.Count; i++)
+            //    {
+            //        MeshInfo_Update(meshInfos[i]);
+            //    }
+            //}
 
             lastUpdated = Time.time;
         }
 
-        private void ConfigureObserverVolume()
-        {
-            LuminApi.UnityMagicLeap_MeshingSetBounds(ObserverOrigin, ObserverOrientation, ObservationExtents);
-        }
-
         /// <inheritdoc />
-        protected override void OnDispose(bool finalizing)
+        public override void Destroy()
         {
-            meshSubsystem?.Destroy();
+            if (!Application.isPlaying) { return; }
 
-            base.OnDispose(finalizing);
+            if (meshingHandle.IsValid)
+            {
+                if (!MlMeshing2.MLMeshingDestroyClient(ref meshingHandle).IsOk)
+                {
+                    Debug.LogError($"Failed to destroy meshing client!");
+                }
+            }
         }
 
         #endregion IMixedRealityService implementation
@@ -158,8 +132,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             base.StartObserving();
 
-            meshSubsystem?.Start();
-
             // We want the first update immediately.
             lastUpdated = 0;
         }
@@ -172,34 +144,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 return;
             }
 
-            meshSubsystem?.Stop();
-
             base.StopObserving();
         }
 
         #endregion IMixedRealitySpatialMeshObserver implementation
-
-        private LuminApi.MeshingSettings GetMeshingSettings()
-        {
-            var flags = LuminApi.MeshingFlags.IndexOrderCCW;
-
-            if (MeshRecalculateNormals)
-            {
-                flags |= LuminApi.MeshingFlags.ComputeNormals;
-            }
-
-            flags |= LuminApi.MeshingFlags.Planarize;
-            flags |= LuminApi.MeshingFlags.RemoveMeshSkirt;
-
-            var settings = new LuminApi.MeshingSettings
-            {
-                flags = flags,
-                fillHoleLength = 5f,
-                disconnectedComponentArea = 0.25f,
-            };
-
-            return settings;
-        }
 
         private async void MeshInfo_Update(MeshInfo meshInfo)
         {
@@ -215,7 +163,8 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                 try
                 {
-                    meshSubsystem.GenerateMeshAsync(meshInfo.MeshId, spatialMeshObject.Mesh, spatialMeshObject.Collider, meshAttributes, OnMeshGenerated);
+                    OnMeshGenerated(new MeshGenerationResult());
+                    //meshSubsystem.GenerateMeshAsync(meshInfo.MeshId, spatialMeshObject.Mesh, spatialMeshObject.Collider, meshAttributes, OnMeshGenerated);
                 }
                 catch (Exception e)
                 {
@@ -295,6 +244,5 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 RaiseMeshRemoved(meshObject);
             }
         }
-#endif // PLATFORM_LUMIN
     }
 }

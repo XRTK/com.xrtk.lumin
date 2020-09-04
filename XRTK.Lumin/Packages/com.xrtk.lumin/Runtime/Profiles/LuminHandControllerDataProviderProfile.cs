@@ -10,20 +10,20 @@ namespace XRTK.Lumin.Profiles
     {
         [SerializeField]
         [Tooltip("Configured level for keypoints filtering of keypoints and hand centers.")]
-        private int keyPointFilterLevel = 0;
+        private MLKeyPointFilterLevel keyPointFilterLevel = 0;
 
         /// <summary>
         /// Configured level for keypoints filtering of keypoints and hand centers.
         /// </summary>
-        public int KeyPointFilterLevel => keyPointFilterLevel;
+        public MLKeyPointFilterLevel KeyPointFilterLevel => keyPointFilterLevel;
 
         [SerializeField]
         [Tooltip("Configured level of filtering for static poses.")]
-        private int poseFilterLevel = 0;
+        private MLPoseFilterLevel poseFilterLevel = 0;
 
         /// <summary>
         /// Configured level of filtering for static poses.
         /// </summary>
-        public int PoseFilterLevel => poseFilterLevel;
+        public MLPoseFilterLevel PoseFilterLevel => poseFilterLevel;
     }
 }
