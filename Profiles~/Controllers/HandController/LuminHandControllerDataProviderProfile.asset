@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hasSetupDefaults: 1
   controllerMappingProfiles:
-  - {fileID: 11400000, guid: b43ff1b6f37e65946b1abc7e50af105f, type: 2}
-  - {fileID: 11400000, guid: 6c775257f26873e459a492f28125e129, type: 2}
-  handMeshingEnabled: 0
+  - {fileID: 11400000, guid: 6f6e30873d1ee554da130517de8a5ea4, type: 2}
+  - {fileID: 11400000, guid: 14f815e452eab2f48a45143f3795c546, type: 2}
+  renderingMode: 1
   handPhysicsEnabled: 0
   useTriggers: 0
   boundsMode: 0
+  trackedPoses: []
   keyPointFilterLevel: 0
   poseFilterLevel: 0
