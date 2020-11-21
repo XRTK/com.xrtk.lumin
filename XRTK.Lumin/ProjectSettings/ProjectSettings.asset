@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: XRTK
   productName: XRTK.Lumin
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -628,7 +628,7 @@ PlayerSettings:
     m_PortalFolderPath: 
   luminCert:
     m_CertPath: 
-    m_SignPackage: 1
+    m_SignPackage: 0
   luminIsChannelApp: 0
   luminVersion:
     m_VersionCode: 1
