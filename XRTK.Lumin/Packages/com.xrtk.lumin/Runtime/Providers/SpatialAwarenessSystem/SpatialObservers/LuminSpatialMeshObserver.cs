@@ -1,13 +1,9 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.XR;
 using XRTK.Attributes;
 using XRTK.Definitions.Platforms;
-using XRTK.Definitions.SpatialAwarenessSystem;
 using XRTK.Interfaces.SpatialAwarenessSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
@@ -33,8 +29,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             }
         }
 
-        private readonly List<MeshInfo> meshInfos = new List<MeshInfo>();
-
         private float lastUpdated = 0;
         private MlApi.MLHandle meshingHandle;
         private MlMeshing2.MLMeshingSettings meshingSettings;
@@ -52,12 +46,12 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             {
                 if (!MlMeshing2.MLMeshingInitSettings(ref meshingSettings).IsOk)
                 {
-                    Debug.LogError($"Failed to initialize meshing settings!");
+                    Debug.LogError("Failed to initialize meshing settings!");
                 }
 
                 if (!MlMeshing2.MLMeshingCreateClient(ref meshingHandle, meshingSettings).IsOk)
                 {
-                    Debug.LogError($"failed to create meshing client!");
+                    Debug.LogError("failed to create meshing client!");
                 }
             }
         }
@@ -113,7 +107,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             {
                 if (!MlMeshing2.MLMeshingDestroyClient(ref meshingHandle).IsOk)
                 {
-                    Debug.LogError($"Failed to destroy meshing client!");
+                    Debug.LogError("Failed to destroy meshing client!");
                 }
             }
         }
@@ -149,100 +143,100 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
         #endregion IMixedRealitySpatialMeshObserver implementation
 
-        private async void MeshInfo_Update(MeshInfo meshInfo)
-        {
-            if (meshInfo.ChangeState == MeshChangeState.Unchanged) { return; }
+        //private async void MeshInfo_Update(MeshInfo meshInfo)
+        //{
+        //    if (meshInfo.ChangeState == MeshChangeState.Unchanged) { return; }
 
-            // If we're adding or updating a mesh
-            if (meshInfo.ChangeState != MeshChangeState.Removed)
-            {
-                var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.MeshId.GetHashCode());
-                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId}";
+        //    // If we're adding or updating a mesh
+        //    if (meshInfo.ChangeState != MeshChangeState.Removed)
+        //    {
+        //        var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.MeshId.GetHashCode());
+        //        spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.MeshId}";
 
-                var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
+        //        var meshAttributes = MeshRecalculateNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
 
-                try
-                {
-                    OnMeshGenerated(new MeshGenerationResult());
-                    //meshSubsystem.GenerateMeshAsync(meshInfo.MeshId, spatialMeshObject.Mesh, spatialMeshObject.Collider, meshAttributes, OnMeshGenerated);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
+        //        try
+        //        {
+        //            OnMeshGenerated(new MeshGenerationResult());
+        //            //meshSubsystem.GenerateMeshAsync(meshInfo.MeshId, spatialMeshObject.Mesh, spatialMeshObject.Collider, meshAttributes, OnMeshGenerated);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Debug.LogError($"{e.Message}\n{e.StackTrace}");
+        //        }
 
-                void OnMeshGenerated(MeshGenerationResult result)
-                {
-                    if (result.Status == MeshGenerationStatus.GenerationAlreadyInProgress)
-                    {
-                        return;
-                    }
+        //        void OnMeshGenerated(MeshGenerationResult result)
+        //        {
+        //            if (result.Status == MeshGenerationStatus.GenerationAlreadyInProgress)
+        //            {
+        //                return;
+        //            }
 
-                    if (result.Status != MeshGenerationStatus.Success)
-                    {
-                        Debug.LogWarning($"No output for {result.MeshId} | {result.Status}");
-                        RaiseMeshRemoved(spatialMeshObject);
-                        return;
-                    }
+        //            if (result.Status != MeshGenerationStatus.Success)
+        //            {
+        //                Debug.LogWarning($"No output for {result.MeshId} | {result.Status}");
+        //                RaiseMeshRemoved(spatialMeshObject);
+        //                return;
+        //            }
 
-                    if (!SpatialMeshObjects.TryGetValue(result.MeshId.GetHashCode(), out var meshObject))
-                    {
-                        Debug.LogWarning($"Failed to find a spatial mesh object for {result.MeshId}!");
-                        // Likely it was removed before data could be cooked.
-                        return;
-                    }
+        //            if (!SpatialMeshObjects.TryGetValue(result.MeshId.GetHashCode(), out var meshObject))
+        //            {
+        //                Debug.LogWarning($"Failed to find a spatial mesh object for {result.MeshId}!");
+        //                // Likely it was removed before data could be cooked.
+        //                return;
+        //            }
 
-                    // Apply the appropriate material to the mesh.
-                    var displayOption = MeshDisplayOption;
+        //            // Apply the appropriate material to the mesh.
+        //            var displayOption = MeshDisplayOption;
 
-                    if (displayOption != SpatialMeshDisplayOptions.None)
-                    {
-                        meshObject.Collider.enabled = true;
-                        meshObject.Renderer.enabled = displayOption == SpatialMeshDisplayOptions.Visible ||
-                                                      displayOption == SpatialMeshDisplayOptions.Occlusion;
-                        meshObject.Renderer.sharedMaterial = displayOption == SpatialMeshDisplayOptions.Visible
-                            ? MeshVisibleMaterial
-                            : MeshOcclusionMaterial;
-                    }
-                    else
-                    {
-                        meshObject.Renderer.enabled = false;
-                        meshObject.Collider.enabled = false;
-                    }
+        //            if (displayOption != SpatialMeshDisplayOptions.None)
+        //            {
+        //                meshObject.Collider.enabled = true;
+        //                meshObject.Renderer.enabled = displayOption == SpatialMeshDisplayOptions.Visible ||
+        //                                              displayOption == SpatialMeshDisplayOptions.Occlusion;
+        //                meshObject.Renderer.sharedMaterial = displayOption == SpatialMeshDisplayOptions.Visible
+        //                    ? MeshVisibleMaterial
+        //                    : MeshOcclusionMaterial;
+        //            }
+        //            else
+        //            {
+        //                meshObject.Renderer.enabled = false;
+        //                meshObject.Collider.enabled = false;
+        //            }
 
-                    // Recalculate the mesh normals if requested.
-                    if (MeshRecalculateNormals)
-                    {
-                        if (meshObject.Filter.sharedMesh != null)
-                        {
-                            meshObject.Filter.sharedMesh.RecalculateNormals();
-                        }
-                        else
-                        {
-                            meshObject.Filter.mesh.RecalculateNormals();
-                        }
-                    }
+        //            // Recalculate the mesh normals if requested.
+        //            if (MeshRecalculateNormals)
+        //            {
+        //                if (meshObject.Filter.sharedMesh != null)
+        //                {
+        //                    meshObject.Filter.sharedMesh.RecalculateNormals();
+        //                }
+        //                else
+        //                {
+        //                    meshObject.Filter.mesh.RecalculateNormals();
+        //                }
+        //            }
 
-                    if (!meshObject.GameObject.activeInHierarchy)
-                    {
-                        meshObject.GameObject.SetActive(true);
-                    }
+        //            if (!meshObject.GameObject.activeInHierarchy)
+        //            {
+        //                meshObject.GameObject.SetActive(true);
+        //            }
 
-                    switch (meshInfo.ChangeState)
-                    {
-                        case MeshChangeState.Added:
-                            RaiseMeshAdded(meshObject);
-                            break;
-                        case MeshChangeState.Updated:
-                            RaiseMeshUpdated(meshObject);
-                            break;
-                    }
-                }
-            }
-            else if (SpatialMeshObjects.TryGetValue(meshInfo.MeshId.GetHashCode(), out var meshObject))
-            {
-                RaiseMeshRemoved(meshObject);
-            }
-        }
+        //            switch (meshInfo.ChangeState)
+        //            {
+        //                case MeshChangeState.Added:
+        //                    RaiseMeshAdded(meshObject);
+        //                    break;
+        //                case MeshChangeState.Updated:
+        //                    RaiseMeshUpdated(meshObject);
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    else if (SpatialMeshObjects.TryGetValue(meshInfo.MeshId.GetHashCode(), out var meshObject))
+        //    {
+        //        RaiseMeshRemoved(meshObject);
+        //    }
+        //}
     }
 }
