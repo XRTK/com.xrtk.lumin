@@ -81,6 +81,11 @@ namespace XRTK.Lumin.Editor
             }
             else
             {
+                foreach (var o in processResult.Output)
+                {
+                    Debug.Log(o);
+                }
+
                 foreach (var error in processResult.Errors)
                 {
                     Debug.LogError(error);
