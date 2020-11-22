@@ -22,18 +22,32 @@ namespace XRTK.Lumin.Editor
         private static readonly string LuminPackageRoot = PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder));
         private static readonly string LuminRemoteSupportPath = $"{LuminPackageRoot}\\Runtime\\Plugins\\Editor\\x64";
         private static readonly string LuminRemoteSupportFullPath = Path.GetFullPath(LuminRemoteSupportPath);
+        private static readonly string LuminSDKRoot = "LuminSDKRoot";
 
         private static string LuminSdkPath
         {
             get
             {
-                var path = EditorPrefs.GetString("LuminSDKRoot");
+                var path = EditorPrefs.GetString(nameof(LuminSDKRoot));
+                var environmentSdkPath = Environment.ExpandEnvironmentVariables("%mlsdk%");
 
                 if (string.IsNullOrWhiteSpace(path))
                 {
-                    var paths = Directory.GetDirectories(Environment.ExpandEnvironmentVariables("%mlsdk%"), "*", SearchOption.TopDirectoryOnly);
-                    path = paths.LastOrDefault();
-                    EditorPrefs.SetString("LuminSDKRoot", path);
+
+                    if (string.IsNullOrWhiteSpace(environmentSdkPath))
+                    {
+                        Debug.LogError("Missing 'mlsdk' in the system environment path!\n Ensure you've properly setup the path in your system environment variables!");
+                    }
+
+                    EditorPrefs.SetString(nameof(LuminSDKRoot), environmentSdkPath);
+                    path = environmentSdkPath;
+                }
+                else
+                {
+                    if (path != environmentSdkPath)
+                    {
+                        Debug.LogError($"The {nameof(LuminSDKRoot)} set in 'Preferences/External Tools' does not match the 'mlsdk' path found in the system environment variables!\n{nameof(LuminSDKRoot)}: {path}\nEnvPath: {environmentSdkPath}");
+                    }
                 }
 
                 return path;
@@ -84,6 +98,13 @@ namespace XRTK.Lumin.Editor
             var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSdkPath);
 
             await Awaiters.UnityMainThread;
+
+            if (supportPaths == null ||
+                supportPaths.Count == 0)
+            {
+                Debug.LogError("Failed to copy lumin remote support libraries!");
+                return;
+            }
 
             Directory.CreateDirectory(LuminRemoteSupportFullPath);
 
