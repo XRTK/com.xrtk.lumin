@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
@@ -29,25 +28,10 @@ namespace XRTK.Lumin.Editor
             get
             {
                 var path = EditorPrefs.GetString(nameof(LuminSDKRoot));
-                var environmentSdkPath = Environment.ExpandEnvironmentVariables("%mlsdk%");
 
                 if (string.IsNullOrWhiteSpace(path))
                 {
-
-                    if (string.IsNullOrWhiteSpace(environmentSdkPath))
-                    {
-                        Debug.LogError("Missing 'mlsdk' in the system environment path!\n Ensure you've properly setup the path in your system environment variables!");
-                    }
-
-                    EditorPrefs.SetString(nameof(LuminSDKRoot), environmentSdkPath);
-                    path = environmentSdkPath;
-                }
-                else
-                {
-                    if (path != environmentSdkPath)
-                    {
-                        Debug.LogError($"The {nameof(LuminSDKRoot)} set in 'Preferences/External Tools' does not match the 'mlsdk' path found in the system environment variables!\n{nameof(LuminSDKRoot)}: {path}\nEnvPath: {environmentSdkPath}");
-                    }
+                    Debug.LogError($"{nameof(LuminSDKRoot)} path not set in editor preferences.");
                 }
 
                 return path;
