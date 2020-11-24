@@ -1,6 +1,7 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using UnityEditor;
@@ -39,20 +40,29 @@ namespace XRTK.Lumin.Editor
             if (!Directory.Exists(LuminRemoteSupportFullPath) ||
                 EditorPreferences.Get($"ReImport_{nameof(LuminRemote)}", false))
             {
-                if (Directory.Exists(LuminRemoteSupportFullPath))
-                {
-                    var files = Directory.GetFiles(LuminRemoteSupportFullPath, "*", SearchOption.AllDirectories);
+                EditorPreferences.Set($"ReImport_{nameof(LuminRemote)}", false);
 
-                    foreach (var file in files)
+                try
+                {
+                    if (Directory.Exists(LuminRemoteSupportFullPath))
                     {
-                        File.Delete(file);
+                        var files = Directory.GetFiles(LuminRemoteSupportFullPath, "*", SearchOption.AllDirectories);
+
+                        foreach (var file in files)
+                        {
+                            File.Delete(file);
+                        }
+
+                        File.Delete($"{LuminRemoteSupportFullPath}.meta");
+                        Directory.Delete(LuminRemoteSupportFullPath);
                     }
 
-                    File.Delete($"{LuminRemoteSupportFullPath}.meta");
-                    Directory.Delete(LuminRemoteSupportFullPath);
+                    InstallLuminRemoteLibraries();
                 }
-
-                InstallLuminRemoteLibraries();
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
             }
             else
             {
@@ -63,7 +73,7 @@ namespace XRTK.Lumin.Editor
 
         private static async void InstallLuminRemoteLibraries()
         {
-            EditorPreferences.Set($"ReImport_{nameof(LuminRemote)}", false);
+            Directory.CreateDirectory(LuminRemoteSupportFullPath);
 
             var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSDKRoot);
 
@@ -73,10 +83,9 @@ namespace XRTK.Lumin.Editor
                 supportPaths.Count == 0)
             {
                 Debug.LogError("Failed to copy lumin remote support libraries!");
+                Directory.Delete(LuminRemoteSupportFullPath);
                 return;
             }
-
-            Directory.CreateDirectory(LuminRemoteSupportFullPath);
 
             foreach (var path in supportPaths)
             {
@@ -84,9 +93,48 @@ namespace XRTK.Lumin.Editor
                 {
                     var supportFiles = Directory.GetFiles(path, "*.dll", SearchOption.TopDirectoryOnly);
 
-                    foreach (var file in supportFiles)
+                    foreach (var sourceFile in supportFiles)
                     {
-                        File.Copy(file, file.ToBackSlashes().Replace(path.ToBackSlashes(), LuminRemoteSupportFullPath.ToBackSlashes()).ToBackSlashes());
+                        var destination = sourceFile.ToBackSlashes().Replace(path.ToBackSlashes(), LuminRemoteSupportFullPath.ToBackSlashes()).ToBackSlashes();
+
+                        try
+                        {
+                            File.Copy(sourceFile, destination);
+                            File.WriteAllText($"{destination}.meta", $@"fileFormatVersion: 2
+guid: {GUID.Generate()}
+PluginImporter:
+  externalObjects: {{}}
+  serializedVersion: 2
+  iconMap: {{}}
+  executionOrder: {{}}
+  defineConstraints: []
+  isPreloaded: 0
+  isOverridable: 1
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+  - first:
+      Any: 
+    second:
+      enabled: 0
+      settings: {{}}
+  - first:
+      Editor: Editor
+    second:
+      enabled: 1
+      settings:
+        CPU: x86_64
+        DefaultValueInitialized: true
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+");
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                        }
+
                     }
                 }
             }
