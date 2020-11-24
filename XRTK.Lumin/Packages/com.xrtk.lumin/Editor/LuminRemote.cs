@@ -1,7 +1,6 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using UnityEditor;
@@ -21,22 +20,8 @@ namespace XRTK.Lumin.Editor
         private static readonly string LuminPackageRoot = PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder));
         private static readonly string LuminRemoteSupportPath = $"{LuminPackageRoot}\\Runtime\\Plugins\\Editor\\x64";
         private static readonly string LuminRemoteSupportFullPath = Path.GetFullPath(LuminRemoteSupportPath);
-        private static readonly string LuminSDKRoot = "LuminSDKRoot";
 
-        private static string LuminSdkPath
-        {
-            get
-            {
-                var path = EditorPrefs.GetString(nameof(LuminSDKRoot));
-
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    Debug.LogError($"{nameof(LuminSDKRoot)} path not set in editor preferences.");
-                }
-
-                return path;
-            }
-        }
+        private static string LuminSDKRoot => EditorPrefs.GetString(nameof(LuminSDKRoot));
 
         private static bool isRemoteConfigured;
 
@@ -45,13 +30,14 @@ namespace XRTK.Lumin.Editor
             if (Application.isBatchMode) { return; }
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Lumin) { return; }
 
-            if (string.IsNullOrWhiteSpace(LuminSdkPath))
+            if (string.IsNullOrWhiteSpace(LuminSDKRoot))
             {
                 Debug.LogWarning("Failed to resolve Magic Leap Sdk Path! Be sure to set this path in the 'External Tools' section of the editor preferences.");
                 return;
             }
 
-            if (!Directory.Exists(LuminRemoteSupportFullPath) || EditorPreferences.Get($"ReImport_{nameof(LuminRemote)}", false))
+            if (!Directory.Exists(LuminRemoteSupportFullPath) ||
+                EditorPreferences.Get($"ReImport_{nameof(LuminRemote)}", false))
             {
                 if (Directory.Exists(LuminRemoteSupportFullPath))
                 {
@@ -79,7 +65,7 @@ namespace XRTK.Lumin.Editor
         {
             EditorPreferences.Set($"ReImport_{nameof(LuminRemote)}", false);
 
-            var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSdkPath);
+            var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSDKRoot);
 
             await Awaiters.UnityMainThread;
 
