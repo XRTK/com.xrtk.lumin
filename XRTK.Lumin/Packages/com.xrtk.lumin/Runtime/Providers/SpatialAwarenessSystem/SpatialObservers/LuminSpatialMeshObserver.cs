@@ -401,12 +401,9 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 return new MeshGenerationResult(meshInfo.id, MlMeshing2.MLMeshingResult.Failed);
             }
 
-            if (spatialMeshObject.Mesh == null)
-            {
-                spatialMeshObject.Mesh = new Mesh();
-            }
+            var mesh = spatialMeshObject.Mesh == null ? new Mesh() : spatialMeshObject.Mesh;
 
-            spatialMeshObject.Mesh.name = $"Mesh {meshInfo.id}";
+            mesh.name = $"Mesh {meshInfo.id}";
 
             if (outMeshResult.data.vertex_count == 0 ||
                 outMeshResult.data.vertex == null ||
@@ -431,8 +428,8 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     };
                 }
 
-                spatialMeshObject.Mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, NormalsLayout);
-                spatialMeshObject.Mesh.SetVertexBufferData(normals, 0, 0, (int)outMeshResult.data.vertex_count);
+                mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, NormalsLayout);
+                mesh.SetVertexBufferData(normals, 0, 0, (int)outMeshResult.data.vertex_count);
             }
             else
             {
@@ -443,16 +440,17 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     vertices[i] = outMeshResult.data.vertex[i];
                 }
 
-                spatialMeshObject.Mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, VertexLayout);
-                spatialMeshObject.Mesh.SetVertexBufferData(vertices, 0, 0, (int)outMeshResult.data.vertex_count);
+                mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, VertexLayout);
+                mesh.SetVertexBufferData(vertices, 0, 0, (int)outMeshResult.data.vertex_count);
             }
 
             var indices = new NativeArray<short>(outMeshResult.data.index_count, Allocator.None);
-            spatialMeshObject.Mesh.SetIndexBufferParams(outMeshResult.data.index_count, IndexFormat.UInt16);
-            spatialMeshObject.Mesh.SetIndexBufferData(indices, 0, 0, outMeshResult.data.index_count);
-            spatialMeshObject.Mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
-            spatialMeshObject.Mesh.Optimize();
-            spatialMeshObject.Mesh.RecalculateBounds();
+            mesh.SetIndexBufferParams(outMeshResult.data.index_count, IndexFormat.UInt16);
+            mesh.SetIndexBufferData(indices, 0, 0, outMeshResult.data.index_count);
+            mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
+            mesh.Optimize();
+            mesh.RecalculateBounds();
+            spatialMeshObject.Mesh = mesh;
 
             await Awaiters.UnityMainThread;
             return new MeshGenerationResult(meshInfo.id, outMeshResult.result);
