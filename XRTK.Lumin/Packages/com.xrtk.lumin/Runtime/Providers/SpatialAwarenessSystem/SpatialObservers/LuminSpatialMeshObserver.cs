@@ -160,7 +160,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
         private void RequestMeshInfo()
         {
-            if (!MlMeshing2.MLMeshingRequestMeshInfo(meshingClientHandle, in extents, out MlApi.MLHandle meshHandle).IsOk)
+            if (!MlMeshing2.MLMeshingRequestMeshInfo(meshingClientHandle, in extents, out var meshHandle).IsOk)
             {
                 Debug.LogError("Failed to request mesh info!");
                 return;
@@ -192,11 +192,9 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                     meshInfoRequests.RemoveAt(i);
 
-                    meshInfoResult = MlMeshing2.MLMeshingFreeResource(meshingClientHandle, in requestHandle);
-
-                    if (!meshInfoResult.IsOk)
+                    if (!MlMeshing2.MLMeshingFreeResource(meshingClientHandle, in requestHandle).IsOk)
                     {
-                        Debug.LogError($"Failed to release mesh info results resource! {meshInfoResult}");
+                        Debug.LogError("Failed to release mesh info result resource!");
                     }
                 }
             }
