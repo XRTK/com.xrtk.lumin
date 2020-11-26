@@ -403,7 +403,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             var mesh = spatialMeshObject.Mesh == null ? new Mesh() : spatialMeshObject.Mesh;
 
-            mesh.name = $"Mesh {meshInfo.id}";
+            mesh.name = $"Mesh_{meshInfo.id}";
 
             if (outMeshResult.data.vertex_count == 0 ||
                 outMeshResult.data.vertex == null ||
