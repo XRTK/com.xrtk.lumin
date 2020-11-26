@@ -526,8 +526,8 @@ namespace XRTK.Lumin.Native
         public static extern MlApi.MLResult MLMeshingGetMeshResult(MlApi.MLHandle client_handle, MlApi.MLHandle request_handle, out MlMeshing2.MLMeshingMesh out_mesh);
 
         /// <summary>
-        /// Free resources created by the meshing APIS Needs to be called whenever MLMeshingGetMeshInfoResult,
-        /// MLMeshingGetMeshResult return a success
+        /// Free resources created by the meshing APIS Needs to be called whenever <see cref="MLMeshingGetMeshInfoResult"/>,
+        /// <see cref="MLMeshingGetMeshInfoResult"/> return a success
         /// MLResult_InvalidParam Resources were not freed due to an invalid parameter
         /// MLResult_Ok Resources were freed successfully
         /// </summary>

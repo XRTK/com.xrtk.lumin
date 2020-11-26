@@ -32,8 +32,8 @@ namespace XRTK.Lumin.Native
                 this.y = y;
             }
 
-            public static explicit operator Vector2(MLVec2f v2) => new Vector2(v2.x, v2.y);
-            public static explicit operator MLVec2f(Vector2 v2) => new MLVec2f(v2.x, v2.y);
+            public static implicit operator Vector2(MLVec2f v2) => new Vector2(v2.x, v2.y);
+            public static implicit operator MLVec2f(Vector2 v2) => new MLVec2f(v2.x, v2.y);
 
             public override string ToString()
             {
@@ -59,8 +59,8 @@ namespace XRTK.Lumin.Native
                 this.z = z;
             }
 
-            public static explicit operator Vector3(MLVec3f v3) => new Vector3(v3.x, v3.y, -v3.z);
-            public static explicit operator MLVec3f(Vector3 v3) => new MLVec3f(v3.x, v3.y, -v3.z);
+            public static implicit operator Vector3(MLVec3f v3) => new Vector3(v3.x, v3.y, -v3.z);
+            public static implicit operator MLVec3f(Vector3 v3) => new MLVec3f(v3.x, v3.y, -v3.z);
 
             public override string ToString()
             {
@@ -88,8 +88,8 @@ namespace XRTK.Lumin.Native
                 this.w = w;
             }
 
-            public static explicit operator Quaternion(MLQuaternionf q) => new Quaternion(q.x, q.y, -q.z, -q.w);
-            public static explicit operator MLQuaternionf(Quaternion q) => new MLQuaternionf(q.x, q.y, -q.z, -q.w);
+            public static implicit operator Quaternion(MLQuaternionf q) => new Quaternion(q.x, q.y, -q.z, -q.w);
+            public static implicit operator MLQuaternionf(Quaternion q) => new MLQuaternionf(q.x, q.y, -q.z, -q.w);
 
             public static MLQuaternionf Identity()
             {
@@ -133,8 +133,8 @@ namespace XRTK.Lumin.Native
                 this.rotation = rotation;
             }
 
-            public static explicit operator Matrix4x4(MLTransform t) => Matrix4x4.TRS((Vector3)t.position, (Quaternion)t.rotation, Vector3.one);
-            public static explicit operator MLTransform(Matrix4x4 m) => new MLTransform((MlTypes.MLVec3f)(Vector3)m.GetColumn(3), (MlTypes.MLQuaternionf)Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1)));
+            public static implicit operator Matrix4x4(MLTransform t) => Matrix4x4.TRS((Vector3)t.position, (Quaternion)t.rotation, Vector3.one);
+            public static implicit operator MLTransform(Matrix4x4 m) => new MLTransform((MlTypes.MLVec3f)(Vector3)m.GetColumn(3), (MlTypes.MLQuaternionf)Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1)));
 
             public static MLTransform Identity()
             {
@@ -248,8 +248,8 @@ namespace XRTK.Lumin.Native
             public byte Node5;
 
 
-            public static explicit operator Guid(MLUUID uuid) => new Guid(uuid.TimeLow, uuid.TimeMid, uuid.TimeHiAndVersion, uuid.ClockSeqHiAndReserved, uuid.ClockSeqLow, uuid.Node0, uuid.Node1, uuid.Node2, uuid.Node3, uuid.Node4, uuid.Node5);
-            public static explicit operator MLUUID(Guid guid)
+            public static implicit operator Guid(MLUUID uuid) => new Guid(uuid.TimeLow, uuid.TimeMid, uuid.TimeHiAndVersion, uuid.ClockSeqHiAndReserved, uuid.ClockSeqLow, uuid.Node0, uuid.Node1, uuid.Node2, uuid.Node3, uuid.Node4, uuid.Node5);
+            public static implicit operator MLUUID(Guid guid)
             {
                 var result = new MLUUID();
                 var guidString = guid.ToString("N");

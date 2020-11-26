@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 using XRTK.Attributes;
 using XRTK.Definitions.Platforms;
 using XRTK.Definitions.SpatialAwarenessSystem;
@@ -19,7 +22,7 @@ using XRTK.Utilities.Async;
 namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 {
     [RuntimePlatform(typeof(LuminPlatform))]
-    [System.Runtime.InteropServices.Guid("A1E7BFED-F290-43E3-84B6-01C740CC9614")]
+    [Guid("A1E7BFED-F290-43E3-84B6-01C740CC9614")]
     public class LuminSpatialMeshObserver : BaseMixedRealitySpatialMeshObserver
     {
         /// <inheritdoc />
@@ -150,9 +153,9 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 ObserverOrientation = cameraTransform.rotation;
             }
 
-            extents.extents = (MlTypes.MLVec3f)ObservationExtents;
-            extents.center = (MlTypes.MLVec3f)ObserverOrigin;
-            extents.rotation = (MlTypes.MLQuaternionf)ObserverOrientation;
+            extents.extents = ObservationExtents;
+            extents.center = ObserverOrigin;
+            extents.rotation = ObserverOrientation;
         }
 
         private void RequestMeshInfo()
@@ -209,10 +212,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.GetHashCode());
                 spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.id}";
 
-                MeshGenerationResult result;
+                MeshGenerationResult meshResult;
                 try
                 {
-                    result = await GenerateMeshAsync(meshInfo.id, spatialMeshObject.Mesh, spatialMeshObject.Collider, MeshRecalculateNormals);
+                    meshResult = await GenerateMeshAsync(meshInfo, spatialMeshObject);
                 }
                 catch (Exception e)
                 {
@@ -221,21 +224,21 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     return;
                 }
 
-                if (result.Status == MeshGenerationStatus.GenerationAlreadyInProgress)
+                if (meshResult.Status == MlMeshing2.MLMeshingResult.Pending)
                 {
                     return;
                 }
 
-                if (result.Status != MeshGenerationStatus.Success)
+                if (meshResult.Status != MlMeshing2.MLMeshingResult.Success)
                 {
-                    Debug.LogWarning($"No output for {result.Id} | {result.Status}");
+                    Debug.LogWarning($"No output for {meshResult.Id} | {meshResult.Status}");
                     RaiseMeshRemoved(spatialMeshObject);
                     return;
                 }
 
-                if (!SpatialMeshObjects.TryGetValue(result.Id.GetHashCode(), out var meshObject))
+                if (!SpatialMeshObjects.TryGetValue(meshResult.Id.GetHashCode(), out var meshObject))
                 {
-                    Debug.LogWarning($"Failed to find a spatial mesh object for {result.Id}!");
+                    Debug.LogWarning($"Failed to find a spatial mesh object for {meshResult.Id}!");
                     // Likely it was removed before data could be cooked.
                     return;
                 }
@@ -294,32 +297,20 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
         #region Mesh Generation
 
-        /// <summary>
-        ///   <para>The status of a XRMeshSubsystem.GenerateMeshAsync.</para>
-        /// </summary>
-        private enum MeshGenerationStatus
+        private static readonly VertexAttributeDescriptor[] VertexLayout =
         {
-            /// <summary>
-            ///   <para>The mesh generation was successful.</para>
-            /// </summary>
-            Success,
-            /// <summary>
-            ///   <para>The XRMeshSubsystem was already generating the requested mesh.</para>
-            /// </summary>
-            GenerationAlreadyInProgress,
-            /// <summary>
-            ///   <para>The mesh generation was canceled.</para>
-            /// </summary>
-            Canceled,
-            /// <summary>
-            ///   <para>The mesh generation failed for unknown reasons.</para>
-            /// </summary>
-            UnknownError,
-        }
+            new VertexAttributeDescriptor(VertexAttribute.Position)
+        };
 
-        private struct MeshGenerationResult
+        private static readonly VertexAttributeDescriptor[] NormalsLayout =
         {
-            public MeshGenerationResult(MlTypes.MLCoordinateFrameUID id, MeshGenerationStatus status)
+            new VertexAttributeDescriptor(VertexAttribute.Position),
+            new VertexAttributeDescriptor(VertexAttribute.Normal)
+        };
+
+        private readonly struct MeshGenerationResult
+        {
+            public MeshGenerationResult(MlTypes.MLCoordinateFrameUID id, MlMeshing2.MLMeshingResult status)
             {
                 Id = id;
                 Status = status;
@@ -327,17 +318,146 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
             public MlTypes.MLCoordinateFrameUID Id { get; }
 
-            public MeshGenerationStatus Status { get; }
+            public MlMeshing2.MLMeshingResult Status { get; }
         }
 
-        private static async Task<MeshGenerationResult> GenerateMeshAsync(MlTypes.MLCoordinateFrameUID id, Mesh mesh, MeshCollider collider, bool meshRecalculateNormals)
+        /// <summary>
+        /// Helper struct used as layout when normals are requested.
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        private struct VertexData
         {
-            var result = new MeshGenerationResult(id, MeshGenerationStatus.GenerationAlreadyInProgress);
+            /// <summary>
+            /// Position data of vertex.
+            /// </summary>
+            public Vector3 Position;
 
-            // TODO populate mesh data
+            /// <summary>
+            /// Normal data of vertex.
+            /// </summary>
+            public Vector3 Normal;
+
+        }
+
+        private async Task<MeshGenerationResult> GenerateMeshAsync(MlMeshing2.MLMeshingBlockInfo meshInfo, SpatialMeshObject spatialMeshObject)
+        {
+            int levelOfDetail = (int)MeshLevelOfDetail;
+
+            if (levelOfDetail < 0)
+            {
+                Debug.LogWarning($"{MeshLevelOfDetail} is unsupported! Falling back to low level of detail.");
+                levelOfDetail = 0;
+            }
+
+            var blockRequest = new MlMeshing2.MLMeshingBlockRequest
+            {
+                id = meshInfo.id,
+                level = (MlMeshing2.MLMeshingLOD)levelOfDetail
+            };
+
+            var meshRequest = new MlMeshing2.MLMeshingMeshRequest
+            {
+                request_count = 1,
+                data = blockRequest
+            };
+
+            if (!MlMeshing2.MLMeshingRequestMesh(meshingClientHandle, in meshRequest, out var outRequestHandle).IsOk)
+            {
+                Debug.LogError("Failed to request a new mesh!");
+                return new MeshGenerationResult(meshInfo.id, MlMeshing2.MLMeshingResult.Failed);
+            }
+
+            var meshRequestResult = new MlApi.MLResult(MlApi.MLResult.Code.Pending);
+
+            var outMeshResult = new MlMeshing2.MLMeshingMesh
+            {
+                result = MlMeshing2.MLMeshingResult.Pending
+            };
+
+            await Awaiters.BackgroundThread;
+
+            while (meshRequestResult.Value == MlApi.MLResult.Code.Pending)
+            {
+                meshRequestResult = MlMeshing2.MLMeshingGetMeshResult(meshingClientHandle, outRequestHandle, out outMeshResult);
+                await Task.Delay(25); // TODO make this delay configurable?
+            }
 
             await Awaiters.UnityMainThread;
-            return result;
+
+            if (!meshRequestResult.IsOk ||
+                outMeshResult.result == MlMeshing2.MLMeshingResult.Failed ||
+                !MlMeshing2.MLMeshingFreeResource(meshingClientHandle, outRequestHandle).IsOk)
+            {
+                return new MeshGenerationResult(meshInfo.id, MlMeshing2.MLMeshingResult.Failed);
+            }
+
+            if (outMeshResult.data_count != meshRequest.request_count)
+            {
+                Debug.LogError($"Mesh Block count mismatch! Expected {meshRequest.request_count} but got {outMeshResult.data_count} blocks.");
+                return new MeshGenerationResult(meshInfo.id, MlMeshing2.MLMeshingResult.Failed);
+            }
+
+            if (meshInfo.id != outMeshResult.data.id)
+            {
+                Debug.LogError($"Mesh info id mismatch!\n->{meshInfo.id}\n<-{outMeshResult.data.id}");
+                return new MeshGenerationResult(meshInfo.id, MlMeshing2.MLMeshingResult.Failed);
+            }
+
+            if (spatialMeshObject.Mesh == null)
+            {
+                spatialMeshObject.Mesh = new Mesh();
+            }
+
+            spatialMeshObject.Mesh.name = $"Mesh {meshInfo.id}";
+
+            if (outMeshResult.data.vertex_count == 0 ||
+                outMeshResult.data.vertex == null ||
+                outMeshResult.data.index_count == 0 ||
+                outMeshResult.data.index == null)
+            {
+                return new MeshGenerationResult(meshInfo.id, outMeshResult.result);
+            }
+
+            await Awaiters.BackgroundThread;
+
+            if (MeshRecalculateNormals)
+            {
+                var normals = new NativeArray<VertexData>((int)outMeshResult.data.vertex_count, Allocator.None);
+
+                for (int i = 0; i < normals.Length; i++)
+                {
+                    normals[i] = new VertexData
+                    {
+                        Position = outMeshResult.data.vertex[i],
+                        Normal = outMeshResult.data.normal[i]
+                    };
+                }
+
+                spatialMeshObject.Mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, NormalsLayout);
+                spatialMeshObject.Mesh.SetVertexBufferData(normals, 0, 0, (int)outMeshResult.data.vertex_count);
+            }
+            else
+            {
+                var vertices = new NativeArray<Vector3>((int)outMeshResult.data.vertex_count, Allocator.None);
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = outMeshResult.data.vertex[i];
+                }
+
+                spatialMeshObject.Mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, VertexLayout);
+                spatialMeshObject.Mesh.SetVertexBufferData(vertices, 0, 0, (int)outMeshResult.data.vertex_count);
+            }
+
+            var indices = new NativeArray<short>(outMeshResult.data.index_count, Allocator.None);
+            spatialMeshObject.Mesh.SetIndexBufferParams(outMeshResult.data.index_count, IndexFormat.UInt16);
+            spatialMeshObject.Mesh.SetIndexBufferData(indices, 0, 0, outMeshResult.data.index_count);
+            spatialMeshObject.Mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
+            spatialMeshObject.Mesh.Optimize();
+            spatialMeshObject.Mesh.RecalculateBounds();
+
+            await Awaiters.UnityMainThread;
+            return new MeshGenerationResult(meshInfo.id, outMeshResult.result);
         }
 
         #endregion Mesh Generation
