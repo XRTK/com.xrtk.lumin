@@ -23,6 +23,6 @@ MonoBehaviour:
   transparentQualityLevel: 0
   cameraRigType:
     reference: 8e0ee4fc-c8a5-4b10-9fca-ee55b6d421ff
-  defaultHeadHeight: 1.6
+  defaultHeadHeight: 0
   bodyAdjustmentAngle: 60
   bodyAdjustmentSpeed: 1

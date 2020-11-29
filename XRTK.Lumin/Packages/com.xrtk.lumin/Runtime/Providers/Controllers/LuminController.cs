@@ -1,7 +1,6 @@
 ﻿// Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using UnityEngine;
 using XRTK.Definitions.Controllers;
 using XRTK.Definitions.Devices;
@@ -130,9 +129,12 @@ namespace XRTK.Lumin.Providers.Controllers
                 Debug.LogError("Failed to get perception snapshot!");
             }
 
-            if (!MlSnapshot.MLSnapshotGetTransform(snapshot, bestStream.coord_frame_controller, ref controllerTransform).IsOk)
+            if (bestStream.is_active)
             {
-                Debug.LogError($"Failed to get snapshot transform for controller {controllerState.controller_id}:{bestStream}");
+                if (!MlSnapshot.MLSnapshotGetTransform(snapshot, bestStream.coord_frame_controller, ref controllerTransform).IsOk)
+                {
+                    Debug.LogError($"Failed to get snapshot transform for controller {controllerState.controller_id}:{bestStream}");
+                }
             }
 
             if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
@@ -166,8 +168,8 @@ namespace XRTK.Lumin.Providers.Controllers
                 TrackingState = TrackingState.NotApplicable;
             }
 
-            currentControllerPose.Position = (Vector3)controllerTransform.position;
-            currentControllerPose.Rotation = (Quaternion)controllerTransform.rotation;
+            currentControllerPose.Position = controllerTransform.position;
+            currentControllerPose.Rotation = controllerTransform.rotation;
 
             // Raise input system events if it is enabled.
             if (lastState != TrackingState)

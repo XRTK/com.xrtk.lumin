@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using AOT;
 using UnityEngine;
 
 namespace XRTK.Lumin.Native
@@ -1244,6 +1245,21 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputControllerCallbacksEx
         {
+            public static MLInputControllerCallbacksEx Default
+            {
+                get => new MLInputControllerCallbacksEx
+                {
+                    version = 1u,
+                    on_touchpad_gesture = OnTouchpadGestureHandler,
+                    on_touchpad_gesture_continue = OnTouchpadGestureContinueHandler,
+                    on_touchpad_gesture_end = OnTouchGestureEndHandler,
+                    on_button_down = OnButtonDownHandler,
+                    on_button_up = OnButtonUpHandler,
+                    on_connect = OnConnectHandler,
+                    on_disconnect = OnDisconnectHandler
+                };
+            }
+
             /// <summary>
             /// Version of this structure
             /// </summary>
@@ -1254,35 +1270,91 @@ namespace XRTK.Lumin.Native
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_touchpad_gesture_delegate(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data);
 
+            public static event MlInput.MLInputControllerCallbacksEx.on_touchpad_gesture_delegate OnTouchpadGesture;
+
+            [MonoPInvokeCallback(typeof(on_touchpad_gesture_delegate))]
+            private static void OnTouchpadGestureHandler(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data)
+            {
+                OnTouchpadGesture?.Invoke(controller_id, touchpad_gesture, data);
+            }
+
             public MlInput.MLInputControllerCallbacksEx.on_touchpad_gesture_continue_delegate on_touchpad_gesture_continue;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_touchpad_gesture_continue_delegate(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data);
+
+            public static event MlInput.MLInputControllerCallbacksEx.on_touchpad_gesture_continue_delegate OnTouchpadGestureContinue;
+
+            [MonoPInvokeCallback(typeof(on_touchpad_gesture_continue_delegate))]
+            private static void OnTouchpadGestureContinueHandler(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data)
+            {
+                OnTouchpadGestureContinue?.Invoke(controller_id, touchpad_gesture, data);
+            }
 
             public MlInput.MLInputControllerCallbacksEx.on_touchpad_gesture_end_delegate on_touchpad_gesture_end;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_touchpad_gesture_end_delegate(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data);
 
+            public static event MlInput.MLInputControllerCallbacksEx.on_touchpad_gesture_end_delegate OnTouchpadGestureEnd;
+
+            [MonoPInvokeCallback(typeof(on_touchpad_gesture_end_delegate))]
+            private static void OnTouchGestureEndHandler(byte controller_id, in MlInput.MLInputControllerTouchpadGesture touchpad_gesture, IntPtr data)
+            {
+                OnTouchpadGestureEnd?.Invoke(controller_id, touchpad_gesture, data);
+            }
+
             public MlInput.MLInputControllerCallbacksEx.on_button_down_delegate on_button_down;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_button_down_delegate(byte controller_id, MlInput.MLInputControllerButton button, IntPtr data);
+
+            public static event MlInput.MLInputControllerCallbacksEx.on_button_down_delegate OnButtonDown;
+
+            [MonoPInvokeCallback(typeof(on_button_down_delegate))]
+            private static void OnButtonDownHandler(byte controller_id, MlInput.MLInputControllerButton button, IntPtr data)
+            {
+                OnButtonDown?.Invoke(controller_id, button, data);
+            }
 
             public MlInput.MLInputControllerCallbacksEx.on_button_up_delegate on_button_up;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_button_up_delegate(byte controller_id, MlInput.MLInputControllerButton button, IntPtr data);
 
+            public static event MlInput.MLInputControllerCallbacksEx.on_button_up_delegate OnButtonUp;
+
+            [MonoPInvokeCallback(typeof(on_button_up_delegate))]
+            private static void OnButtonUpHandler(byte controller_id, MlInput.MLInputControllerButton button, IntPtr data)
+            {
+                OnButtonUp?.Invoke(controller_id, button, data);
+            }
+
             public MlInput.MLInputControllerCallbacksEx.on_connect_delegate on_connect;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_connect_delegate(byte controller_id, IntPtr data);
 
+            public static event MlInput.MLInputControllerCallbacksEx.on_connect_delegate OnConnect;
+
+            [MonoPInvokeCallback(typeof(on_connect_delegate))]
+            private static void OnConnectHandler(byte controller_id, IntPtr data)
+            {
+                OnConnect?.Invoke(controller_id, data);
+            }
+
+            public static event MlInput.MLInputControllerCallbacksEx.on_disconnect_delegate OnDisconnect;
+
             public MlInput.MLInputControllerCallbacksEx.on_disconnect_delegate on_disconnect;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_disconnect_delegate(byte controller_id, IntPtr data);
+
+            [MonoPInvokeCallback(typeof(on_disconnect_delegate))]
+            private static void OnDisconnectHandler(byte controller_id, IntPtr data)
+            {
+                OnDisconnect?.Invoke(controller_id, data);
+            }
         }
 
         /// <summary>
@@ -1385,20 +1457,54 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputKeyboardCallbacks
         {
+            public static MLInputKeyboardCallbacks Default
+            {
+                get => new MLInputKeyboardCallbacks
+                {
+                    on_char = OnCharHandler,
+                    on_key_down = OnKeyDownHandler,
+                    on_key_up = OnKeyUpHandler
+                };
+            }
+
+            public static event MlInput.MLInputKeyboardCallbacks.on_char_delegate OnChar;
+
             public MlInput.MLInputKeyboardCallbacks.on_char_delegate on_char;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_char_delegate(uint char_utf32, IntPtr data);
+
+            [MonoPInvokeCallback(typeof(on_char_delegate))]
+            private static void OnCharHandler(uint char_utf32, IntPtr data)
+            {
+                OnChar?.Invoke(char_utf32, data);
+            }
+
+            public static event MlInput.MLInputKeyboardCallbacks.on_key_down_delegate OnKeyDown;
 
             public MlInput.MLInputKeyboardCallbacks.on_key_down_delegate on_key_down;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_key_down_delegate(MLKeyCode key_code, uint modifier_mask, IntPtr data);
 
+            [MonoPInvokeCallback(typeof(on_key_down_delegate))]
+            private static void OnKeyDownHandler(MLKeyCode key_code, uint modifier_mask, IntPtr data)
+            {
+                OnKeyDown?.Invoke(key_code, modifier_mask, data);
+            }
+
+            public static event MlInput.MLInputKeyboardCallbacks.on_key_up_delegate OnKeyUp;
+
             public MlInput.MLInputKeyboardCallbacks.on_key_up_delegate on_key_up;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_key_up_delegate(MLKeyCode key_code, uint modifier_mask, IntPtr data);
+
+            [MonoPInvokeCallback(typeof(on_key_up_delegate))]
+            private static void OnKeyUpHandler(MLKeyCode key_code, uint modifier_mask, IntPtr data)
+            {
+                OnKeyUp?.Invoke(key_code, modifier_mask, data);
+            }
         }
 
         /// <summary>
@@ -1502,7 +1608,7 @@ namespace XRTK.Lumin.Native
             public uint count;
 
             /// <summary>
-            /// Pointer referring to the array of MLInputTabletDeviceState
+            /// Pointer referring to the array of <see cref="MLInputTabletDeviceState"/>s
             /// </summary>
             public IntPtr data;
         }
@@ -1559,6 +1665,20 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLInputTabletDeviceCallbacks
         {
+            public static MLInputTabletDeviceCallbacks Default
+            {
+                get => new MLInputTabletDeviceCallbacks
+                {
+                    version = 1u,
+                    on_pen_touch_event = OnPenTouchEventHandler,
+                    on_touch_ring_event = OnTouchRingEventHandler,
+                    on_button_down = OnButtonDownHandler,
+                    on_button_up = OnButtonUpHandler,
+                    on_connect = OnConnectHandler,
+                    on_disconnect = OnDisconnectHandler
+                };
+            }
+
             /// <summary>
             /// Version of this callback
             /// </summary>
@@ -1569,30 +1689,78 @@ namespace XRTK.Lumin.Native
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_pen_touch_event_delegate(byte tablet_device_id, in MlInput.MLInputTabletDeviceState tablet_device_state, IntPtr data);
 
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_pen_touch_event_delegate OnPenTouchEvent;
+
+            [MonoPInvokeCallback(typeof(on_pen_touch_event_delegate))]
+            private static void OnPenTouchEventHandler(byte tablet_device_id, in MlInput.MLInputTabletDeviceState tablet_device_state, IntPtr data)
+            {
+                OnPenTouchEvent?.Invoke(tablet_device_id, tablet_device_state, data);
+            }
+
             public MlInput.MLInputTabletDeviceCallbacks.on_touch_ring_event_delegate on_touch_ring_event;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_touch_ring_event_delegate(byte tablet_device_id, int touch_ring_value, ulong timestamp, IntPtr data);
+
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_touch_ring_event_delegate OnTouchRingEvent;
+
+            [MonoPInvokeCallback(typeof(on_touch_ring_event_delegate))]
+            private static void OnTouchRingEventHandler(byte tablet_device_id, int touch_ring_value, ulong timestamp, IntPtr data)
+            {
+                OnTouchRingEvent?.Invoke(tablet_device_id, touch_ring_value, timestamp, data);
+            }
 
             public MlInput.MLInputTabletDeviceCallbacks.on_button_down_delegate on_button_down;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_button_down_delegate(byte tablet_device_id, MlInput.MLInputTabletDeviceButton tablet_device_button, ulong timestamp, IntPtr data);
 
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_button_down_delegate OnButtonDown;
+
+            [MonoPInvokeCallback(typeof(on_button_down_delegate))]
+            private static void OnButtonDownHandler(byte tablet_device_id, MlInput.MLInputTabletDeviceButton tablet_device_button, ulong timestamp, IntPtr data)
+            {
+                OnButtonDown?.Invoke(tablet_device_id, tablet_device_button, timestamp, data);
+            }
+
             public MlInput.MLInputTabletDeviceCallbacks.on_button_up_delegate on_button_up;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_button_up_delegate(byte tablet_device_id, MlInput.MLInputTabletDeviceButton tablet_device_button, ulong timestamp, IntPtr data);
+
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_button_up_delegate OnButtonUp;
+
+            [MonoPInvokeCallback(typeof(on_button_up_delegate))]
+            private static void OnButtonUpHandler(byte tablet_device_id, MlInput.MLInputTabletDeviceButton tablet_device_button, ulong timestamp, IntPtr data)
+            {
+                OnButtonUp?.Invoke(tablet_device_id, tablet_device_button, timestamp, data);
+            }
 
             public MlInput.MLInputTabletDeviceCallbacks.on_connect_delegate on_connect;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_connect_delegate(byte tablet_device_id, IntPtr data);
 
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_connect_delegate OnConnect;
+
+            [MonoPInvokeCallback(typeof(on_connect_delegate))]
+            private static void OnConnectHandler(byte tablet_device_id, IntPtr data)
+            {
+                OnConnect?.Invoke(tablet_device_id, data);
+            }
+
             public MlInput.MLInputTabletDeviceCallbacks.on_disconnect_delegate on_disconnect;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_disconnect_delegate(byte tablet_device_id, IntPtr data);
+
+            public static event MlInput.MLInputTabletDeviceCallbacks.on_disconnect_delegate OnDisconnect;
+
+            [MonoPInvokeCallback(typeof(on_disconnect_delegate))]
+            private static void OnDisconnectHandler(byte tablet_device_id, IntPtr data)
+            {
+                OnDisconnect?.Invoke(tablet_device_id, data);
+            }
         }
 
         /// <summary>
@@ -1669,7 +1837,7 @@ namespace XRTK.Lumin.Native
         /// @apilevel 8
         /// </remarks>
         [DllImport("ml_input", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLInputSetControllerCallbacksEx(MlApi.MLHandle handle, in MlInput.MLInputControllerCallbacksEx controller_callbacks, IntPtr user_data);
+        public static extern MlApi.MLResult MLInputSetControllerCallbacksEx(MlApi.MLHandle handle, in MLInputControllerCallbacksEx controller_callbacks, IntPtr user_data);
 
         /// <summary>
         /// Return current state of all possible input controllers
