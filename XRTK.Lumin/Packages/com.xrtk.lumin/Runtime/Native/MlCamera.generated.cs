@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using AOT;
 
 namespace XRTK.Lumin.Native
 {
@@ -290,40 +291,110 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLCameraDeviceStatusCallbacks
         {
+            public static MLCameraDeviceStatusCallbacks Default
+            {
+                get => new MLCameraDeviceStatusCallbacks
+                {
+                    on_device_available = OnDeviceAvailableHandler,
+                    on_device_unavailable = OnDeviceUnavailableHandler,
+                    on_device_opened = OnDeviceOpenedHandler,
+                    on_device_closed = OnDeviceClosedHandler,
+                    on_device_disconnected = OnDeviceDisconnectedHandler,
+                    on_device_error = OnDeviceErrorHandler,
+                    on_preview_buffer_available = OnPreviewBufferAvailableHandler
+                };
+            }
+
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_available_delegate on_device_available;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_available_delegate(IntPtr data);
+
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_available_delegate OnDeviceAvailable;
+
+            [MonoPInvokeCallback(typeof(on_device_available_delegate))]
+            private static void OnDeviceAvailableHandler(IntPtr data)
+            {
+                OnDeviceAvailable?.Invoke(data);
+            }
 
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_unavailable_delegate on_device_unavailable;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_unavailable_delegate(IntPtr data);
 
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_unavailable_delegate OnDeviceUnavailable;
+
+            [MonoPInvokeCallback(typeof(on_device_unavailable_delegate))]
+            private static void OnDeviceUnavailableHandler(IntPtr data)
+            {
+                OnDeviceUnavailable?.Invoke(data);
+            }
+
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_opened_delegate on_device_opened;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_opened_delegate(IntPtr data);
+
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_opened_delegate OnDeviceOpened;
+
+            [MonoPInvokeCallback(typeof(on_device_opened_delegate))]
+            private static void OnDeviceOpenedHandler(IntPtr data)
+            {
+                OnDeviceOpened?.Invoke(data);
+            }
 
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_closed_delegate on_device_closed;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_closed_delegate(IntPtr data);
 
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_closed_delegate OnDeviceClosed;
+
+            [MonoPInvokeCallback(typeof(on_device_closed_delegate))]
+            private static void OnDeviceClosedHandler(IntPtr data)
+            {
+                OnDeviceClosed?.Invoke(data);
+            }
+
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_disconnected_delegate on_device_disconnected;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_disconnected_delegate(IntPtr data);
+
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_disconnected_delegate OnDeviceDisconnected;
+
+            [MonoPInvokeCallback(typeof(on_device_disconnected_delegate))]
+            private static void OnDeviceDisconnectedHandler(IntPtr data)
+            {
+                OnDeviceDisconnected?.Invoke(data);
+            }
 
             public MlCamera.MLCameraDeviceStatusCallbacks.on_device_error_delegate on_device_error;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_error_delegate(MlCamera.MLCameraError error, IntPtr data);
 
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_device_error_delegate OnDeviceError;
+
+            [MonoPInvokeCallback(typeof(on_device_error_delegate))]
+            private static void OnDeviceErrorHandler(MlCamera.MLCameraError error, IntPtr data)
+            {
+                OnDeviceError?.Invoke(error, data);
+            }
+
             public MlCamera.MLCameraDeviceStatusCallbacks.on_preview_buffer_available_delegate on_preview_buffer_available;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_preview_buffer_available_delegate(MlApi.MLHandle output, IntPtr data);
+
+            public static event MlCamera.MLCameraDeviceStatusCallbacks.on_preview_buffer_available_delegate OnPreviewBufferAvailable;
+
+            [MonoPInvokeCallback(typeof(on_preview_buffer_available_delegate))]
+            private static void OnPreviewBufferAvailableHandler(MlApi.MLHandle output, IntPtr data)
+            {
+                OnPreviewBufferAvailable?.Invoke(output, data);
+            }
         }
 
         /// <summary>
@@ -336,6 +407,21 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLCameraCaptureCallbacksEx
         {
+            public static MLCameraCaptureCallbacksEx Default
+            {
+                get => new MLCameraCaptureCallbacksEx
+                {
+                    version = 1u,
+                    on_capture_started = OnCaptureStartedHandler,
+                    on_capture_failed = OnCaptureFailedHandler,
+                    on_capture_buffer_lost = OnCaptureBufferLostHandler,
+                    on_capture_progressed = OnCaptureProgressedHandler,
+                    on_capture_completed = OnCaptureCompletedHandler,
+                    on_image_buffer_available = OnImageBufferAvailableHandler,
+                    on_video_buffer_available = OnVideoBufferAvailableHandler
+                };
+            }
+
             /// <summary>
             /// version contains the version number for this structure
             /// </summary>
@@ -344,37 +430,93 @@ namespace XRTK.Lumin.Native
             public MlCamera.MLCameraCaptureCallbacksEx.on_capture_started_delegate on_capture_started;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_capture_started_delegate(in MlCamera.MLCameraResultExtras extra, IntPtr data);
+            public delegate void on_capture_started_delegate(ref MlCamera.MLCameraResultExtras extra, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_capture_started_delegate OnCaptureStarted;
+
+            [MonoPInvokeCallback(typeof(on_capture_started_delegate))]
+            private static void OnCaptureStartedHandler(ref MlCamera.MLCameraResultExtras extra, IntPtr data)
+            {
+                OnCaptureStarted?.Invoke(ref extra, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_capture_failed_delegate on_capture_failed;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_capture_failed_delegate(in MlCamera.MLCameraResultExtras extra, IntPtr data);
+            public delegate void on_capture_failed_delegate(ref MlCamera.MLCameraResultExtras extra, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_capture_failed_delegate OnCaptureFailed;
+
+            [MonoPInvokeCallback(typeof(on_capture_failed_delegate))]
+            private static void OnCaptureFailedHandler(ref MlCamera.MLCameraResultExtras extra, IntPtr data)
+            {
+                OnCaptureFailed?.Invoke(ref extra, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_capture_buffer_lost_delegate on_capture_buffer_lost;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_capture_buffer_lost_delegate(in MlCamera.MLCameraResultExtras extra, IntPtr data);
+            public delegate void on_capture_buffer_lost_delegate(ref MlCamera.MLCameraResultExtras extra, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_capture_buffer_lost_delegate OnCaptureBufferLost;
+
+            [MonoPInvokeCallback(typeof(on_capture_buffer_lost_delegate))]
+            private static void OnCaptureBufferLostHandler(ref MlCamera.MLCameraResultExtras extra, IntPtr data)
+            {
+                OnCaptureBufferLost?.Invoke(ref extra, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_capture_progressed_delegate on_capture_progressed;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_capture_progressed_delegate(MlApi.MLHandle metadata_handle, in MlCamera.MLCameraResultExtras extra, IntPtr data);
+            public delegate void on_capture_progressed_delegate(MlApi.MLHandle metadata_handle, ref MlCamera.MLCameraResultExtras extra, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_capture_progressed_delegate OnCaptureProgressed;
+
+            [MonoPInvokeCallback(typeof(on_capture_progressed_delegate))]
+            private static void OnCaptureProgressedHandler(MlApi.MLHandle metadata_handle, ref MlCamera.MLCameraResultExtras extra, IntPtr data)
+            {
+                OnCaptureProgressed?.Invoke(metadata_handle, ref extra, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_capture_completed_delegate on_capture_completed;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_capture_completed_delegate(MlApi.MLHandle metadata_handle, in MlCamera.MLCameraResultExtras extra, IntPtr data);
+            public delegate void on_capture_completed_delegate(MlApi.MLHandle metadata_handle, ref MlCamera.MLCameraResultExtras extra, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_capture_completed_delegate OnCaptureCompleted;
+
+            [MonoPInvokeCallback(typeof(on_capture_completed_delegate))]
+            private static void OnCaptureCompletedHandler(MlApi.MLHandle metadata_handle, ref MlCamera.MLCameraResultExtras extra, IntPtr data)
+            {
+                OnCaptureCompleted?.Invoke(metadata_handle, ref extra, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_image_buffer_available_delegate on_image_buffer_available;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_image_buffer_available_delegate(in MlCamera.MLCameraOutput output, IntPtr data);
+            public delegate void on_image_buffer_available_delegate(ref MlCamera.MLCameraOutput output, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_image_buffer_available_delegate OnImageBufferAvailable;
+
+            [MonoPInvokeCallback(typeof(on_image_buffer_available_delegate))]
+            private static void OnImageBufferAvailableHandler(ref MlCamera.MLCameraOutput output, IntPtr data)
+            {
+                OnImageBufferAvailable?.Invoke(ref output, data);
+            }
 
             public MlCamera.MLCameraCaptureCallbacksEx.on_video_buffer_available_delegate on_video_buffer_available;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void on_video_buffer_available_delegate(in MlCamera.MLCameraOutput output, in MlCamera.MLCameraResultExtras extra, in MlCamera.MLCameraFrameMetadata frame_metadata, IntPtr data);
+            public delegate void on_video_buffer_available_delegate(ref MlCamera.MLCameraOutput output, ref MlCamera.MLCameraResultExtras extra, ref MlCamera.MLCameraFrameMetadata frame_metadata, IntPtr data);
+
+            public static event MlCamera.MLCameraCaptureCallbacksEx.on_video_buffer_available_delegate OnVideoBufferAvailable;
+
+            [MonoPInvokeCallback(typeof(on_video_buffer_available_delegate))]
+            private static void OnVideoBufferAvailableHandler(ref MlCamera.MLCameraOutput output, ref MlCamera.MLCameraResultExtras extra, ref MlCamera.MLCameraFrameMetadata frame_metadata, IntPtr data)
+            {
+                OnVideoBufferAvailable?.Invoke(ref output, ref extra, ref frame_metadata, data);
+            }
         }
 
         /// <summary>

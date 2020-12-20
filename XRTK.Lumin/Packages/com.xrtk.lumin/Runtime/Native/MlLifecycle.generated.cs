@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using AOT;
 
 namespace XRTK.Lumin.Native
 {
@@ -45,6 +46,24 @@ namespace XRTK.Lumin.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct MLLifecycleCallbacksEx
         {
+            public static MLLifecycleCallbacksEx Default
+            {
+                get => new MLLifecycleCallbacksEx
+                {
+                    version = 1u,
+                    on_stop = OnStopHandler,
+                    on_pause = OnPauseHandler,
+                    on_resume = OnResumeHandler,
+                    on_unload_resources = OnUnloadResourcesHandler,
+                    on_new_initarg = OnNewInitArgHandler,
+                    on_device_active = OnDeviceActiveHandler,
+                    on_device_reality = OnDeviceRealityHandler,
+                    on_device_standby = OnDeviceStandbyHandler,
+                    on_focus_lost = OnFocusLostHandler,
+                    on_focus_gained = OnFocusGainedHandler
+                };
+            }
+
             public uint version;
 
             public MlLifecycle.MLLifecycleCallbacksEx.on_stop_delegate on_stop;
@@ -52,50 +71,130 @@ namespace XRTK.Lumin.Native
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_stop_delegate(IntPtr context);
 
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_stop_delegate OnStop;
+
+            [MonoPInvokeCallback(typeof(on_stop_delegate))]
+            private static void OnStopHandler(IntPtr context)
+            {
+                OnStop?.Invoke(context);
+            }
+
             public MlLifecycle.MLLifecycleCallbacksEx.on_pause_delegate on_pause;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_pause_delegate(IntPtr context);
+
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_pause_delegate OnPause;
+
+            [MonoPInvokeCallback(typeof(on_pause_delegate))]
+            private static void OnPauseHandler(IntPtr context)
+            {
+                OnPause?.Invoke(context);
+            }
 
             public MlLifecycle.MLLifecycleCallbacksEx.on_resume_delegate on_resume;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_resume_delegate(IntPtr context);
 
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_resume_delegate OnResume;
+
+            [MonoPInvokeCallback(typeof(on_resume_delegate))]
+            private static void OnResumeHandler(IntPtr context)
+            {
+                OnResume?.Invoke(context);
+            }
+
             public MlLifecycle.MLLifecycleCallbacksEx.on_unload_resources_delegate on_unload_resources;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_unload_resources_delegate(IntPtr context);
+
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_unload_resources_delegate OnUnloadresources;
+
+            [MonoPInvokeCallback(typeof(on_unload_resources_delegate))]
+            private static void OnUnloadResourcesHandler(IntPtr context)
+            {
+                OnUnloadresources?.Invoke(context);
+            }
 
             public MlLifecycle.MLLifecycleCallbacksEx.on_new_initarg_delegate on_new_initarg;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_new_initarg_delegate(IntPtr context);
 
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_new_initarg_delegate OnNewInitArg;
+
+            [MonoPInvokeCallback(typeof(on_new_initarg_delegate))]
+            private static void OnNewInitArgHandler(IntPtr context)
+            {
+                OnNewInitArg?.Invoke(context);
+            }
+
             public MlLifecycle.MLLifecycleCallbacksEx.on_device_active_delegate on_device_active;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_active_delegate(IntPtr context);
+
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_device_active_delegate OnDeviceActive;
+
+            [MonoPInvokeCallback(typeof(on_device_active_delegate))]
+            private static void OnDeviceActiveHandler(IntPtr context)
+            {
+                OnDeviceActive?.Invoke(context);
+            }
 
             public MlLifecycle.MLLifecycleCallbacksEx.on_device_reality_delegate on_device_reality;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_reality_delegate(IntPtr context);
 
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_device_reality_delegate OnDeviceReality;
+
+            [MonoPInvokeCallback(typeof(on_device_reality_delegate))]
+            private static void OnDeviceRealityHandler(IntPtr context)
+            {
+                OnDeviceReality?.Invoke(context);
+            }
+
             public MlLifecycle.MLLifecycleCallbacksEx.on_device_standby_delegate on_device_standby;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_device_standby_delegate(IntPtr context);
+
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_device_standby_delegate OnDeviceStandby;
+
+            [MonoPInvokeCallback(typeof(on_device_standby_delegate))]
+            private static void OnDeviceStandbyHandler(IntPtr context)
+            {
+                OnDeviceStandby?.Invoke(context);
+            }
 
             public MlLifecycle.MLLifecycleCallbacksEx.on_focus_lost_delegate on_focus_lost;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_focus_lost_delegate(IntPtr context, MlLifecycle.MLLifecycleFocusLostReason reason);
 
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_focus_lost_delegate OnFocusLost;
+
+            [MonoPInvokeCallback(typeof(on_focus_lost_delegate))]
+            private static void OnFocusLostHandler(IntPtr context, MlLifecycle.MLLifecycleFocusLostReason reason)
+            {
+                OnFocusLost?.Invoke(context, reason);
+            }
+
             public MlLifecycle.MLLifecycleCallbacksEx.on_focus_gained_delegate on_focus_gained;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate void on_focus_gained_delegate(IntPtr context);
+
+            public static event MlLifecycle.MLLifecycleCallbacksEx.on_focus_gained_delegate OnFocusGained;
+
+            [MonoPInvokeCallback(typeof(on_focus_gained_delegate))]
+            private static void OnFocusGainedHandler(IntPtr context)
+            {
+                OnFocusGained?.Invoke(context);
+            }
         }
 
         /// <summary>
