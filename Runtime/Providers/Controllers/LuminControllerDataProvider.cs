@@ -30,16 +30,13 @@ namespace XRTK.Lumin.Providers.Controllers
 
         private readonly IntPtr statePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MlInput.MLInputControllerState)) * 2);
         private readonly MlInput.MLInputConfiguration inputConfiguration = MlInput.MLInputConfiguration.Default;
+        private readonly MlInput.MLInputControllerCallbacksEx controllerCallbacks = MlInput.MLInputControllerCallbacksEx.Default;
         private readonly MlController.MLControllerConfiguration controllerConfiguration = MlController.MLControllerConfiguration.Default;
 
-        /// <summary>
-        /// Dictionary to capture all active controllers detected
-        /// </summary>
         private readonly Dictionary<byte, LuminController> activeControllers = new Dictionary<byte, LuminController>();
 
         private MlApi.MLHandle inputHandle;
         private MlApi.MLHandle controllerHandle;
-        private MlInput.MLInputControllerCallbacksEx controllerCallbacksEx;
         private MlInput.MLInputControllerState[] controllerStates = new MlInput.MLInputControllerState[2];
         private MlController.MLControllerSystemState controllerSystemState;
 
@@ -52,27 +49,19 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (MlInput.MLInputCreate(inputConfiguration, ref inputHandle).IsOk)
                 {
-                    controllerCallbacksEx.on_connect += async (id, data) =>
-                    {
-                        await Awaiters.UnityMainThread;
-                        GetController(id);
-                    };
-                    controllerCallbacksEx.on_disconnect += async (id, data) =>
-                    {
-                        await Awaiters.UnityMainThread;
-                        RemoveController(id);
-                    };
-
                     if (MlInput.MLInputGetControllerState(inputHandle, statePointer).IsOk)
                     {
                         MlInput.MLInputControllerState.GetControllerStates(statePointer, ref controllerStates);
                     }
                     else
                     {
-                        Debug.LogError($"Failed to update the controller input state!");
+                        Debug.LogError("Failed to update the controller input state!");
                     }
 
-                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                    MlInput.MLInputControllerCallbacksEx.OnConnect += MlInputControllerCallbacksEx_OnConnect;
+                    MlInput.MLInputControllerCallbacksEx.OnDisconnect += MlInputControllerCallbacksEx_OnDisconnect;
+                    
+                    if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, in controllerCallbacks, IntPtr.Zero).IsOk)
                     {
                         Debug.LogError("Failed to set controller callbacks!");
                     }
@@ -111,12 +100,21 @@ namespace XRTK.Lumin.Providers.Controllers
             }
             else
             {
-                Debug.LogError($"Failed to update the controller input state!");
+                Debug.LogError("Failed to update the controller input state!");
             }
 
             if (!MlController.MLControllerGetState(controllerHandle, ref controllerSystemState).IsOk)
             {
                 Debug.LogError("Failed to get the controller system state!");
+            }
+
+            for (int i = 0; i < controllerStates.Length; i++)
+            {
+                if (controllerStates[i].is_connected &&
+                    !activeControllers.ContainsKey(controllerStates[i].hardware_index))
+                {
+                    GetController(controllerStates[i].hardware_index);
+                }
             }
 
             foreach (var controller in activeControllers)
@@ -132,12 +130,10 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (controllerHandle.IsValid)
             {
-                controllerCallbacksEx.on_connect = null;
-                controllerCallbacksEx.on_disconnect = null;
-                controllerCallbacksEx.on_button_down = null;
-                controllerCallbacksEx.on_button_up = null;
+                MlInput.MLInputControllerCallbacksEx.OnConnect -= MlInputControllerCallbacksEx_OnConnect;
+                MlInput.MLInputControllerCallbacksEx.OnDisconnect -= MlInputControllerCallbacksEx_OnDisconnect;
 
-                if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, controllerCallbacksEx, IntPtr.Zero).IsOk)
+                if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, default, IntPtr.Zero).IsOk)
                 {
                     Debug.LogError("Failed to clear controller callbacks!");
                 }
@@ -152,7 +148,7 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (!MlInput.MLInputDestroy(inputHandle).IsOk)
                 {
-                    Debug.LogError($"Failed to destroy the input tracker!");
+                    Debug.LogError("Failed to destroy the input tracker!");
                 }
             }
 
@@ -221,5 +217,21 @@ namespace XRTK.Lumin.Providers.Controllers
                 activeControllers.Remove(controllerId);
             }
         }
+
+        #region Controller Callback Events
+
+        private async void MlInputControllerCallbacksEx_OnConnect(byte id, IntPtr data)
+        {
+            await Awaiters.UnityMainThread;
+            GetController(id);
+        }
+
+        private async void MlInputControllerCallbacksEx_OnDisconnect(byte id, IntPtr data)
+        {
+            await Awaiters.UnityMainThread;
+            RemoveController(id);
+        }
+
+        #endregion
     }
 }

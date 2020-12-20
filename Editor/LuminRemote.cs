@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
@@ -23,22 +22,7 @@ namespace XRTK.Lumin.Editor
         private static readonly string LuminRemoteSupportPath = $"{LuminPackageRoot}\\Runtime\\Plugins\\Editor\\x64";
         private static readonly string LuminRemoteSupportFullPath = Path.GetFullPath(LuminRemoteSupportPath);
 
-        private static string LuminSdkPath
-        {
-            get
-            {
-                var path = EditorPrefs.GetString("LuminSDKRoot");
-
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    var paths = Directory.GetDirectories(Environment.ExpandEnvironmentVariables("%mlsdk%"), "*", SearchOption.TopDirectoryOnly);
-                    path = paths.LastOrDefault();
-                    EditorPrefs.SetString("LuminSDKRoot", path);
-                }
-
-                return path;
-            }
-        }
+        private static string LuminSDKRoot => EditorPrefs.GetString(nameof(LuminSDKRoot));
 
         private static bool isRemoteConfigured;
 
@@ -47,28 +31,38 @@ namespace XRTK.Lumin.Editor
             if (Application.isBatchMode) { return; }
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Lumin) { return; }
 
-            if (string.IsNullOrWhiteSpace(LuminSdkPath))
+            if (string.IsNullOrWhiteSpace(LuminSDKRoot))
             {
                 Debug.LogWarning("Failed to resolve Magic Leap Sdk Path! Be sure to set this path in the 'External Tools' section of the editor preferences.");
                 return;
             }
 
-            if (!Directory.Exists(LuminRemoteSupportFullPath) || EditorPreferences.Get($"ReImport_{nameof(LuminRemote)}", false))
+            if (!Directory.Exists(LuminRemoteSupportFullPath) ||
+                EditorPreferences.Get($"ReImport_{nameof(LuminRemote)}", false))
             {
-                if (Directory.Exists(LuminRemoteSupportFullPath))
-                {
-                    var files = Directory.GetFiles(LuminRemoteSupportFullPath, "*", SearchOption.AllDirectories);
+                EditorPreferences.Set($"ReImport_{nameof(LuminRemote)}", false);
 
-                    foreach (var file in files)
+                try
+                {
+                    if (Directory.Exists(LuminRemoteSupportFullPath))
                     {
-                        File.Delete(file);
+                        var files = Directory.GetFiles(LuminRemoteSupportFullPath, "*", SearchOption.AllDirectories);
+
+                        foreach (var file in files)
+                        {
+                            File.Delete(file);
+                        }
+
+                        File.Delete($"{LuminRemoteSupportFullPath}.meta");
+                        Directory.Delete(LuminRemoteSupportFullPath);
                     }
 
-                    File.Delete($"{LuminRemoteSupportFullPath}.meta");
-                    Directory.Delete(LuminRemoteSupportFullPath);
+                    InstallLuminRemoteLibraries();
                 }
-
-                InstallLuminRemoteLibraries();
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
             }
             else
             {
@@ -79,13 +73,19 @@ namespace XRTK.Lumin.Editor
 
         private static async void InstallLuminRemoteLibraries()
         {
-            EditorPreferences.Set($"ReImport_{nameof(LuminRemote)}", false);
+            Directory.CreateDirectory(LuminRemoteSupportFullPath);
 
-            var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSdkPath);
+            var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSDKRoot);
 
             await Awaiters.UnityMainThread;
 
-            Directory.CreateDirectory(LuminRemoteSupportFullPath);
+            if (supportPaths == null ||
+                supportPaths.Count == 0)
+            {
+                Debug.LogError("Failed to copy lumin remote support libraries!");
+                Directory.Delete(LuminRemoteSupportFullPath);
+                return;
+            }
 
             foreach (var path in supportPaths)
             {
@@ -93,9 +93,48 @@ namespace XRTK.Lumin.Editor
                 {
                     var supportFiles = Directory.GetFiles(path, "*.dll", SearchOption.TopDirectoryOnly);
 
-                    foreach (var file in supportFiles)
+                    foreach (var sourceFile in supportFiles)
                     {
-                        File.Copy(file, file.ToBackSlashes().Replace(path.ToBackSlashes(), LuminRemoteSupportFullPath.ToBackSlashes()).ToBackSlashes());
+                        var destination = sourceFile.ToBackSlashes().Replace(path.ToBackSlashes(), LuminRemoteSupportFullPath.ToBackSlashes()).ToBackSlashes();
+
+                        try
+                        {
+                            File.Copy(sourceFile, destination);
+                            File.WriteAllText($"{destination}.meta", $@"fileFormatVersion: 2
+guid: {GUID.Generate()}
+PluginImporter:
+  externalObjects: {{}}
+  serializedVersion: 2
+  iconMap: {{}}
+  executionOrder: {{}}
+  defineConstraints: []
+  isPreloaded: 0
+  isOverridable: 1
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+  - first:
+      Any: 
+    second:
+      enabled: 0
+      settings: {{}}
+  - first:
+      Editor: Editor
+    second:
+      enabled: 1
+      settings:
+        CPU: x86_64
+        DefaultValueInitialized: true
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+");
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                        }
+
                     }
                 }
             }

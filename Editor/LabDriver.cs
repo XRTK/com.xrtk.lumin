@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) XRTK. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -78,6 +81,11 @@ namespace XRTK.Lumin.Editor
             }
             else
             {
+                foreach (var o in processResult.Output)
+                {
+                    Debug.Log(o);
+                }
+
                 foreach (var error in processResult.Errors)
                 {
                     Debug.LogError(error);

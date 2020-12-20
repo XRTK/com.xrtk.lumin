@@ -1142,6 +1142,11 @@ namespace XRTK.Lumin.Native
                 this.Value = (Code)value;
             }
 
+            public MLResult(Code code)
+            {
+                this.Value = code;
+            }
+
             public readonly Code Value;
 
             public bool IsOk

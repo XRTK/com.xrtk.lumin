@@ -35,6 +35,9 @@ namespace XRTK.Lumin.Providers.Controllers
         private readonly MixedRealityPose[] tempRightKeyPoses = new MixedRealityPose[24];
         private readonly Dictionary<Handedness, MixedRealityHandController> activeControllers = new Dictionary<Handedness, MixedRealityHandController>();
 
+        private HandData leftHandData = new HandData();
+        private HandData rightHandData = new HandData();
+
         private MlApi.MLHandle handTrackingHandle;
         private MlHandTracking.MLHandTrackingConfiguration configuration = new MlHandTracking.MLHandTrackingConfiguration();
         private MlHandTracking.MLHandTrackingDataEx handTrackingDataEx = new MlHandTracking.MLHandTrackingDataEx();
@@ -45,6 +48,8 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override void Initialize()
         {
+            base.Initialize();
+
             if (!Application.isPlaying) { return; }
 
             if (!handTrackingHandle.IsValid)
@@ -69,16 +74,9 @@ namespace XRTK.Lumin.Providers.Controllers
                 configuration.key_points_filter_level = keyPointFilterLevel;
                 configuration.pose_filter_level = poseFilterLevel;
 
-                if (MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
+                if (!MlHandTracking.MLHandTrackingSetConfiguration(handTrackingHandle, ref configuration).IsOk)
                 {
-                    if (!MlHandTracking.MLHandTrackingGetConfiguration(handTrackingHandle, ref configuration).IsOk)
-                    {
-                        Debug.LogError($"Failed to get {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}:{configuration}!");
+                    Debug.LogError($"Failed to set {nameof(MlHandTracking.MLHandTrackingConfiguration)}!");
                 }
             }
         }
@@ -92,9 +90,6 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (handTrackingHandle.IsValid)
             {
-                var leftHandData = new HandData();
-                var rightHandData = new HandData();
-
                 if (MlHandTracking.MLHandTrackingGetDataEx(handTrackingHandle, ref handTrackingDataEx).IsOk)
                 {
                     leftHandData.TrackingState = handTrackingDataEx.left_hand_state.keypose < MlHandTracking.MLHandTrackingKeyPose.NoHand && !handTrackingDataEx.left_hand_state.is_holding_control ? TrackingState.Tracked : TrackingState.NotTracked;
@@ -195,7 +190,7 @@ namespace XRTK.Lumin.Providers.Controllers
             {
                 if (MlSnapshot.MLSnapshotGetTransform(snapshot, keyPoint.frame_id, ref tempTransform).IsOk)
                 {
-                    pose.Position = (Vector3)tempTransform.position;
+                    pose.Position = tempTransform.position;
                 }
                 else
                 {
@@ -214,6 +209,8 @@ namespace XRTK.Lumin.Providers.Controllers
         /// <inheritdoc />
         public override void Destroy()
         {
+            base.Destroy();
+
             if (!Application.isPlaying) { return; }
 
             if (handTrackingHandle.IsValid)
@@ -292,6 +289,11 @@ namespace XRTK.Lumin.Providers.Controllers
         private HandData SyncHandPoseData(HandData handData, Handedness handedness)
         {
             var jointData = handedness == Handedness.Left ? tempLeftKeyPoses : tempRightKeyPoses;
+
+            if (handData.Joints == null)
+            {
+                handData.Joints = new MixedRealityPose[HandData.JointCount];
+            }
 
             for (int i = 0; i < HandData.JointCount; i++)
             {

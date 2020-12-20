@@ -8,11 +8,11 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace XRTK.Lumin.Native
 {
-    using System.Runtime.InteropServices;
-
     internal static class MlMeshing2
     {
         /// <summary>
@@ -233,6 +233,17 @@ namespace XRTK.Lumin.Native
             /// The state of the Mesh Block
             /// </summary>
             public MlMeshing2.MLMeshingMeshState state;
+
+            /// <summary>
+            /// Gets the managed structure from the unmanaged one.
+            /// </summary>
+            public MLMeshingBlockInfo Data => new MLMeshingBlockInfo
+            {
+                id = id,
+                extents = extents,
+                timestamp = timestamp,
+                state = state
+            };
         }
 
         /// <summary>
@@ -254,7 +265,30 @@ namespace XRTK.Lumin.Native
             /// <summary>
             /// The meshinfo returned by the system
             /// </summary>
-            public MLMeshingBlockInfo data;
+            public IntPtr block_data;
+
+            public List<MLMeshingBlockInfo> Data
+            {
+                get
+                {
+                    var indexPtr = block_data;
+                    var blocks = new List<MLMeshingBlockInfo>((int)data_count);
+                    var blockSize = Marshal.SizeOf(typeof(MLMeshingBlockInfo));
+
+                    for (int i = 0; i < data_count; ++i)
+                    {
+                        unsafe
+                        {
+                            var newBlock = (MLMeshingBlockInfo*)indexPtr;
+                            blocks.Add(newBlock->Data);
+                        }
+
+                        indexPtr = new IntPtr(indexPtr.ToInt64() + blockSize);
+                    }
+
+                    return blocks;
+                }
+            }
         }
 
         /// <summary>
@@ -445,7 +479,7 @@ namespace XRTK.Lumin.Native
         /// @priv WorldReconstruction
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLMeshingRequestMeshInfo(MlApi.MLHandle client_handle, in MlMeshing2.MLMeshingExtents extents, ref MlApi.MLHandle out_request_handle);
+        public static extern MlApi.MLResult MLMeshingRequestMeshInfo(MlApi.MLHandle client_handle, in MlMeshing2.MLMeshingExtents extents, out MlApi.MLHandle out_request_handle);
 
         /// <summary>
         /// Get the Result of a previous MeshInfo request
@@ -460,7 +494,7 @@ namespace XRTK.Lumin.Native
         /// @priv WorldReconstruction
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLMeshingGetMeshInfoResult(MlApi.MLHandle client_handle, MlApi.MLHandle request_handle, ref MlMeshing2.MLMeshingMeshInfo out_info);
+        public static extern MlApi.MLResult MLMeshingGetMeshInfoResult(MlApi.MLHandle client_handle, MlApi.MLHandle request_handle, out MlMeshing2.MLMeshingMeshInfo out_info);
 
         /// <summary>
         /// Request the Mesh for all CFUIDs populated in request
@@ -474,7 +508,7 @@ namespace XRTK.Lumin.Native
         /// @priv WorldReconstruction
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLMeshingRequestMesh(MlApi.MLHandle client_handle, in MlMeshing2.MLMeshingMeshRequest request, ref MlApi.MLHandle out_request_handle);
+        public static extern MlApi.MLResult MLMeshingRequestMesh(MlApi.MLHandle client_handle, in MlMeshing2.MLMeshingMeshRequest request, out MlApi.MLHandle out_request_handle);
 
         /// <summary>
         /// Get the Result of a previous Mesh request
@@ -489,11 +523,11 @@ namespace XRTK.Lumin.Native
         /// @priv WorldReconstruction
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLMeshingGetMeshResult(MlApi.MLHandle client_handle, MlApi.MLHandle request_handle, ref MlMeshing2.MLMeshingMesh out_mesh);
+        public static extern MlApi.MLResult MLMeshingGetMeshResult(MlApi.MLHandle client_handle, MlApi.MLHandle request_handle, out MlMeshing2.MLMeshingMesh out_mesh);
 
         /// <summary>
-        /// Free resources created by the meshing APIS Needs to be called whenever MLMeshingGetMeshInfoResult,
-        /// MLMeshingGetMeshResult return a success
+        /// Free resources created by the meshing APIS Needs to be called whenever <see cref="MLMeshingGetMeshInfoResult"/>,
+        /// <see cref="MLMeshingGetMeshInfoResult"/> return a success
         /// MLResult_InvalidParam Resources were not freed due to an invalid parameter
         /// MLResult_Ok Resources were freed successfully
         /// </summary>
@@ -503,6 +537,6 @@ namespace XRTK.Lumin.Native
         /// @priv WorldReconstruction
         /// </remarks>
         [DllImport("ml_perception_client", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MlApi.MLResult MLMeshingFreeResource(MlApi.MLHandle client_handle, ref MlApi.MLHandle request_handle);
+        public static extern MlApi.MLResult MLMeshingFreeResource(MlApi.MLHandle client_handle, in MlApi.MLHandle request_handle);
     }
 }

@@ -97,6 +97,8 @@ namespace XRTK.Lumin.Providers.CameraSystem
         /// <inheritdoc />
         public override void Update()
         {
+            base.Update();
+
             if (!Application.isPlaying) { return; }
 
             if (!headTrackerHandle.IsValid) { return; }
@@ -131,8 +133,8 @@ namespace XRTK.Lumin.Providers.CameraSystem
 
             if (MlSnapshot.MLSnapshotGetTransform(snapshot, staticHeadData.coord_frame_head, ref headTransform).IsOk)
             {
-                CameraRig.CameraTransform.localPosition = (Vector3)headTransform.position;
-                CameraRig.CameraTransform.localRotation = (Quaternion)headTransform.rotation;
+                CameraRig.CameraTransform.localPosition = headTransform.position;
+                CameraRig.CameraTransform.localRotation = headTransform.rotation;
             }
 
             if (!MlPerception.MLPerceptionReleaseSnapshot(snapshot).IsOk)
