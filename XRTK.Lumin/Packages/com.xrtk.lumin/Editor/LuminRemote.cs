@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 using XRTK.Extensions;
 using XRTK.Lumin.Native;
 using XRTK.Utilities.Async;
-using XRTK.Utilities.Editor;
+using XRTK.Editor.Utilities;
 using Debug = UnityEngine.Debug;
 
 namespace XRTK.Lumin.Editor
