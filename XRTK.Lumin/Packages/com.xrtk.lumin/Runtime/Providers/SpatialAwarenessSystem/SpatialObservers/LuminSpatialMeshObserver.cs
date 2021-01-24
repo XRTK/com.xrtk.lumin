@@ -11,6 +11,7 @@ using UnityEngine.Rendering;
 using XRTK.Attributes;
 using XRTK.Definitions.Platforms;
 using XRTK.Definitions.SpatialAwarenessSystem;
+using XRTK.Interfaces.CameraSystem;
 using XRTK.Interfaces.SpatialAwarenessSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
@@ -141,10 +142,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
         private void UpdateObserverLocation()
         {
-            if (MixedRealityToolkit.CameraSystem != null)
+            if (MixedRealityToolkit.TryGetSystem<IMixedRealityCameraSystem>(out var cameraSystem))
             {
-                ObserverOrigin = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.localPosition;
-                ObserverOrientation = MixedRealityToolkit.CameraSystem.MainCameraRig.CameraTransform.localRotation;
+                ObserverOrigin = cameraSystem.MainCameraRig.CameraTransform.localPosition;
+                ObserverOrientation = cameraSystem.MainCameraRig.CameraTransform.localRotation;
             }
             else
             {

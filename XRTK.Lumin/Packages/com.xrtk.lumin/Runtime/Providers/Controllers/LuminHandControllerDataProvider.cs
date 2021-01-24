@@ -13,7 +13,6 @@ using XRTK.Interfaces.InputSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers.Hands;
-using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -253,7 +252,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
             activeControllers.Add(handedness, detectedController);
             AddController(detectedController);
-            MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
+            InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
 
             return detectedController;
         }
@@ -262,7 +261,7 @@ namespace XRTK.Lumin.Providers.Controllers
         {
             if (TryGetController(handedness, out var controller))
             {
-                MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
+                InputSystem?.RaiseSourceLost(controller.InputSource, controller);
 
                 if (removeFromRegistry)
                 {
