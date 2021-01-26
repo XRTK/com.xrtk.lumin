@@ -16,6 +16,7 @@ MonoBehaviour:
   controllerMappingProfiles:
   - {fileID: 11400000, guid: 6f6e30873d1ee554da130517de8a5ea4, type: 2}
   - {fileID: 11400000, guid: 14f815e452eab2f48a45143f3795c546, type: 2}
+  gripThreshold: 0.8
   renderingMode: 1
   handPhysicsEnabled: 0
   useTriggers: 0
