@@ -9,7 +9,6 @@ using XRTK.Extensions;
 using XRTK.Interfaces.Providers.Controllers;
 using XRTK.Lumin.Native;
 using XRTK.Providers.Controllers;
-using XRTK.Services;
 
 namespace XRTK.Lumin.Providers.Controllers
 {
@@ -174,22 +173,22 @@ namespace XRTK.Lumin.Providers.Controllers
             // Raise input system events if it is enabled.
             if (lastState != TrackingState)
             {
-                MixedRealityToolkit.InputSystem?.RaiseSourceTrackingStateChanged(InputSource, this, TrackingState);
+                InputSystem?.RaiseSourceTrackingStateChanged(InputSource, this, TrackingState);
             }
 
             if (TrackingState == TrackingState.Tracked && lastControllerPose != currentControllerPose)
             {
                 if (IsPositionAvailable && IsRotationAvailable)
                 {
-                    MixedRealityToolkit.InputSystem?.RaiseSourcePoseChanged(InputSource, this, currentControllerPose);
+                    InputSystem?.RaiseSourcePoseChanged(InputSource, this, currentControllerPose);
                 }
                 else if (IsPositionAvailable && !IsRotationAvailable)
                 {
-                    MixedRealityToolkit.InputSystem?.RaiseSourcePositionChanged(InputSource, this, currentControllerPose.Position);
+                    InputSystem?.RaiseSourcePositionChanged(InputSource, this, currentControllerPose.Position);
                 }
                 else if (!IsPositionAvailable && IsRotationAvailable)
                 {
-                    MixedRealityToolkit.InputSystem?.RaiseSourceRotationChanged(InputSource, this, currentControllerPose.Rotation);
+                    InputSystem?.RaiseSourceRotationChanged(InputSource, this, currentControllerPose.Rotation);
                 }
             }
         }
