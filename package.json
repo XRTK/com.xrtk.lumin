@@ -23,7 +23,7 @@
   "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.2.6-preview.1"
+    "com.xrtk.core": "0.2.6"
   },
   "profiles": [
     {
