@@ -13,7 +13,6 @@ using XRTK.Interfaces.InputSystem;
 using XRTK.Lumin.Native;
 using XRTK.Lumin.Profiles;
 using XRTK.Providers.Controllers;
-using XRTK.Services;
 using XRTK.Utilities.Async;
 
 namespace XRTK.Lumin.Providers.Controllers
@@ -60,7 +59,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
                     MlInput.MLInputControllerCallbacksEx.OnConnect += MlInputControllerCallbacksEx_OnConnect;
                     MlInput.MLInputControllerCallbacksEx.OnDisconnect += MlInputControllerCallbacksEx_OnDisconnect;
-                    
+
                     if (!MlInput.MLInputSetControllerCallbacksEx(inputHandle, in controllerCallbacks, IntPtr.Zero).IsOk)
                     {
                         Debug.LogError("Failed to set controller callbacks!");
@@ -198,7 +197,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
             activeControllers.Add(controllerId, detectedController);
             AddController(detectedController);
-            MixedRealityToolkit.InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
+            InputSystem?.RaiseSourceDetected(detectedController.InputSource, detectedController);
             return detectedController;
         }
 
@@ -208,7 +207,7 @@ namespace XRTK.Lumin.Providers.Controllers
 
             if (controller != null)
             {
-                MixedRealityToolkit.InputSystem?.RaiseSourceLost(controller.InputSource, controller);
+                InputSystem?.RaiseSourceLost(controller.InputSource, controller);
             }
 
             if (removeFromRegistry)
