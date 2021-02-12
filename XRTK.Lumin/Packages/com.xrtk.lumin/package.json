@@ -20,7 +20,6 @@
     "type": "git",
     "url": "git+https://github.com/XRTK/Lumin.git"
   },
-  "src": "Assets/XRTK.Lumin",
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
     "com.xrtk.core": "0.2.6"
