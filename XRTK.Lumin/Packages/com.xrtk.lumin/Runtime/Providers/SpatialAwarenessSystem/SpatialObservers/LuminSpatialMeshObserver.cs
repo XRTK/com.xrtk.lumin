@@ -208,7 +208,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             // If we're adding or updating a mesh
             if (meshInfo.state != MlMeshing2.MLMeshingMeshState.Deleted)
             {
-                var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.GetHashCode());
+                var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.ToGuid());
                 spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.id}";
 
                 MeshGenerationResult meshResult;
@@ -235,7 +235,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     return;
                 }
 
-                if (!SpatialMeshObjects.TryGetValue(meshResult.Id.GetHashCode(), out var meshObject))
+                if (!SpatialMeshObjects.TryGetValue(meshResult.Id.ToGuid(), out var meshObject))
                 {
                     Debug.LogWarning($"Failed to find a spatial mesh object for {meshResult.Id}!");
                     // Likely it was removed before data could be cooked.
@@ -288,7 +288,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                         break;
                 }
             }
-            else if (SpatialMeshObjects.TryGetValue(meshInfo.id.GetHashCode(), out var meshObject))
+            else if (SpatialMeshObjects.TryGetValue(meshInfo.id.ToGuid(), out var meshObject))
             {
                 RaiseMeshRemoved(meshObject);
             }
