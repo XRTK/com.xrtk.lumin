@@ -7,12 +7,15 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using XRTK.Attributes;
+using XRTK.Definitions.Platforms;
 using XRTK.Extensions;
 using XRTK.Services;
 using Debug = UnityEngine.Debug;
 
 namespace XRTK.Editor.BuildPipeline
 {
+    [RuntimePlatform(typeof(LuminPlatform))]
     public class LuminBuildInfo : BuildInfo
     {
         /// <inheritdoc />
