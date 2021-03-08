@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -23,6 +24,19 @@ namespace XRTK.Editor.BuildPipeline
 
         /// <inheritdoc />
         public override bool Install => true;
+
+        /// <inheritdoc />
+        public override string ExecutableFileExtension => ".mpk";
+
+        /// <inheritdoc />
+        public override void OnPreprocessBuild(BuildReport report)
+        {
+            if (IsCommandLine &&
+                Directory.Exists($"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu"))
+            {
+                Directory.Delete($"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu", true);
+            }
+        }
 
         /// <inheritdoc />
         public override void OnPostprocessBuild(BuildReport buildReport)
