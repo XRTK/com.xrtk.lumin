@@ -31,10 +31,12 @@ namespace XRTK.Editor.BuildPipeline
         /// <inheritdoc />
         public override void OnPreprocessBuild(BuildReport report)
         {
+            var mabuPath = $"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu";
+
             if (IsCommandLine &&
-                Directory.Exists($"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu"))
+                Directory.Exists(mabuPath))
             {
-                Directory.Delete($"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu", true);
+                Directory.Delete(mabuPath, true);
             }
         }
 
