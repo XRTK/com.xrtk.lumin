@@ -31,6 +31,11 @@ namespace XRTK.Editor.BuildPipeline
         /// <inheritdoc />
         public override void OnPreprocessBuild(BuildReport report)
         {
+            if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
+            {
+                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPreprocessBuild)}");
+            }
+
             var mabuPath = $"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu";
 
             if (IsCommandLine &&
@@ -45,7 +50,7 @@ namespace XRTK.Editor.BuildPipeline
         {
             if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
             {
-                Debug.Log("LuminBuildInfo.OnPostprocessBuild");
+                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPostprocessBuild)}");
             }
 
             if (!MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform) ||
