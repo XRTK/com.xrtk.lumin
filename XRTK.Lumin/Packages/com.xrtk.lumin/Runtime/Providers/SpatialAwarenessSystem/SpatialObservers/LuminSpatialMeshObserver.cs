@@ -343,7 +343,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             /// Normal data of vertex.
             /// </summary>
             public Vector3 Normal;
-
         }
 
         private async Task<MeshGenerationResult> GenerateMeshAsync(MlMeshing2.MLMeshingBlockInfo meshInfo, SpatialMeshObject spatialMeshObject)
@@ -439,6 +438,8 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                 mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, NormalsLayout);
                 mesh.SetVertexBufferData(normals, 0, 0, (int)outMeshResult.data.vertex_count);
+
+                normals.Dispose();
             }
             else
             {
@@ -451,11 +452,22 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                 mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, VertexLayout);
                 mesh.SetVertexBufferData(vertices, 0, 0, (int)outMeshResult.data.vertex_count);
+
+                vertices.Dispose();
             }
 
             var indices = new NativeArray<short>(outMeshResult.data.index_count, Allocator.None);
+
+            for (int i = 0; i < outMeshResult.data.index_count; i++)
+            {
+                indices[i] = (short)outMeshResult.data.index[i];
+            }
+
             mesh.SetIndexBufferParams(outMeshResult.data.index_count, IndexFormat.UInt16);
             mesh.SetIndexBufferData(indices, 0, 0, outMeshResult.data.index_count);
+
+            indices.Dispose();
+
             mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
             mesh.Optimize();
             mesh.RecalculateBounds();
