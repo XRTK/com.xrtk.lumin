@@ -268,19 +268,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     meshObject.Collider.enabled = false;
                 }
 
-                // Recalculate the mesh normals if requested.
-                if (MeshRecalculateNormals)
-                {
-                    if (meshObject.Filter.sharedMesh != null)
-                    {
-                        meshObject.Filter.sharedMesh.RecalculateNormals();
-                    }
-                    else
-                    {
-                        meshObject.Filter.mesh.RecalculateNormals();
-                    }
-                }
-
                 if (!meshObject.GameObject.activeInHierarchy)
                 {
                     meshObject.GameObject.SetActive(true);
@@ -471,6 +458,12 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
             mesh.Optimize();
             mesh.RecalculateBounds();
+
+            if (MeshRecalculateNormals)
+            {
+                mesh.RecalculateNormals();
+            }
+
             spatialMeshObject.Mesh = mesh;
 
             await Awaiters.UnityMainThread;
