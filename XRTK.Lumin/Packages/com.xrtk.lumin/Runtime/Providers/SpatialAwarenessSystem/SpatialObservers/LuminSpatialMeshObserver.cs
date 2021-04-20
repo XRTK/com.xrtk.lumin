@@ -86,6 +86,9 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 UpdateObserverLocation();
             }
 
+            // The application can update the observer volume at any time, make sure we are using the latest.
+            UpdateObserverVolume();
+
             // and If enough time has passed since the previous observer update
             if (Time.time - lastUpdated >= UpdateInterval)
             {
@@ -154,9 +157,13 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 ObserverOrientation = cameraTransform.rotation;
             }
 
+            extents.rotation = ObserverOrientation;
+        }
+
+        private void UpdateObserverVolume()
+        {
             extents.extents = ObservationExtents;
             extents.center = ObserverOrigin;
-            extents.rotation = ObserverOrientation;
         }
 
         private void RequestMeshInfo()
@@ -212,6 +219,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.id}";
 
                 MeshGenerationResult meshResult;
+
                 try
                 {
                     meshResult = await GenerateMeshAsync(meshInfo, spatialMeshObject);
