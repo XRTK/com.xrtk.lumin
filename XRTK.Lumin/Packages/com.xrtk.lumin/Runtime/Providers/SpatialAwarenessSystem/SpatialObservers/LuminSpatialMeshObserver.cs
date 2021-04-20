@@ -216,7 +216,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             if (meshInfo.state != MlMeshing2.MLMeshingMeshState.Deleted)
             {
                 var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.ToGuid());
-                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.id}";
 
                 MeshGenerationResult meshResult;
 
