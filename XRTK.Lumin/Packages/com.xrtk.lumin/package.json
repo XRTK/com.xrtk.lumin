@@ -13,13 +13,21 @@
     "reality",
     "lumin"
   ],
-  "version": "0.1.10",
-  "unity": "2019.1",
+  "version": "0.2.4",
+  "unity": "2019.4",
   "license": "MIT",
-  "src": "Assets/XRTK.Lumin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XRTK/Lumin.git"
+  },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.unity.xr.magicleap": "2.0.0-preview.19",
-    "com.xrtk.core": "0.1.27"
-  }
+    "com.xrtk.core": "0.2.10"
+  },
+  "profiles": [
+    {
+      "displayName": "Default Profiles",
+      "path": "Profiles~/"
+    }
+  ]
 }
