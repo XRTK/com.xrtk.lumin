@@ -86,6 +86,9 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 UpdateObserverLocation();
             }
 
+            // The application can update the observer volume at any time, make sure we are using the latest.
+            UpdateObserverVolume();
+
             // and If enough time has passed since the previous observer update
             if (Time.time - lastUpdated >= UpdateInterval)
             {
@@ -154,9 +157,13 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                 ObserverOrientation = cameraTransform.rotation;
             }
 
+            extents.rotation = ObserverOrientation;
+        }
+
+        private void UpdateObserverVolume()
+        {
             extents.extents = ObservationExtents;
             extents.center = ObserverOrigin;
-            extents.rotation = ObserverOrientation;
         }
 
         private void RequestMeshInfo()
@@ -208,10 +215,10 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             // If we're adding or updating a mesh
             if (meshInfo.state != MlMeshing2.MLMeshingMeshState.Deleted)
             {
-                var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.GetHashCode());
-                spatialMeshObject.GameObject.name = $"SpatialMesh_{meshInfo.id}";
+                var spatialMeshObject = await RequestSpatialMeshObject(meshInfo.id.ToGuid());
 
                 MeshGenerationResult meshResult;
+
                 try
                 {
                     meshResult = await GenerateMeshAsync(meshInfo, spatialMeshObject);
@@ -235,7 +242,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     return;
                 }
 
-                if (!SpatialMeshObjects.TryGetValue(meshResult.Id.GetHashCode(), out var meshObject))
+                if (!SpatialMeshObjects.TryGetValue(meshResult.Id.ToGuid(), out var meshObject))
                 {
                     Debug.LogWarning($"Failed to find a spatial mesh object for {meshResult.Id}!");
                     // Likely it was removed before data could be cooked.
@@ -260,19 +267,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                     meshObject.Collider.enabled = false;
                 }
 
-                // Recalculate the mesh normals if requested.
-                if (MeshRecalculateNormals)
-                {
-                    if (meshObject.Filter.sharedMesh != null)
-                    {
-                        meshObject.Filter.sharedMesh.RecalculateNormals();
-                    }
-                    else
-                    {
-                        meshObject.Filter.mesh.RecalculateNormals();
-                    }
-                }
-
                 if (!meshObject.GameObject.activeInHierarchy)
                 {
                     meshObject.GameObject.SetActive(true);
@@ -288,7 +282,7 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
                         break;
                 }
             }
-            else if (SpatialMeshObjects.TryGetValue(meshInfo.id.GetHashCode(), out var meshObject))
+            else if (SpatialMeshObjects.TryGetValue(meshInfo.id.ToGuid(), out var meshObject))
             {
                 RaiseMeshRemoved(meshObject);
             }
@@ -335,7 +329,6 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
             /// Normal data of vertex.
             /// </summary>
             public Vector3 Normal;
-
         }
 
         private async Task<MeshGenerationResult> GenerateMeshAsync(MlMeshing2.MLMeshingBlockInfo meshInfo, SpatialMeshObject spatialMeshObject)
@@ -431,6 +424,8 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                 mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, NormalsLayout);
                 mesh.SetVertexBufferData(normals, 0, 0, (int)outMeshResult.data.vertex_count);
+
+                normals.Dispose();
             }
             else
             {
@@ -443,14 +438,31 @@ namespace XRTK.Lumin.Providers.SpatialAwareness.SpatialObservers
 
                 mesh.SetVertexBufferParams((int)outMeshResult.data.vertex_count, VertexLayout);
                 mesh.SetVertexBufferData(vertices, 0, 0, (int)outMeshResult.data.vertex_count);
+
+                vertices.Dispose();
             }
 
             var indices = new NativeArray<short>(outMeshResult.data.index_count, Allocator.None);
+
+            for (int i = 0; i < outMeshResult.data.index_count; i++)
+            {
+                indices[i] = (short)outMeshResult.data.index[i];
+            }
+
             mesh.SetIndexBufferParams(outMeshResult.data.index_count, IndexFormat.UInt16);
             mesh.SetIndexBufferData(indices, 0, 0, outMeshResult.data.index_count);
+
+            indices.Dispose();
+
             mesh.SetSubMesh(0, new SubMeshDescriptor(0, outMeshResult.data.index_count));
             mesh.Optimize();
             mesh.RecalculateBounds();
+
+            if (MeshRecalculateNormals)
+            {
+                mesh.RecalculateNormals();
+            }
+
             spatialMeshObject.Mesh = mesh;
 
             await Awaiters.UnityMainThread;
