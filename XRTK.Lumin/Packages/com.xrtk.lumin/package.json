@@ -22,7 +22,7 @@
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.2.13-preview.1"
+    "com.xrtk.core": "0.2.13-preview.2"
   },
   "profiles": [
     {
