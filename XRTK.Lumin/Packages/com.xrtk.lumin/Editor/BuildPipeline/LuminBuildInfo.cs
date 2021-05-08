@@ -29,11 +29,33 @@ namespace XRTK.Editor.BuildPipeline
         public override string ExecutableFileExtension => ".mpk";
 
         /// <inheritdoc />
-        public override void OnPreprocessBuild(BuildReport report)
+        public override void OnPreProcessBuild(BuildReport report)
         {
+            if (!MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform) ||
+                EditorUserBuildSettings.activeBuildTarget != BuildTarget)
+            {
+                return;
+            }
+
             if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
             {
-                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPreprocessBuild)}");
+                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPreProcessBuild)}");
+            }
+
+            if (VersionCode.HasValue)
+            {
+                PlayerSettings.Lumin.versionCode = VersionCode.Value;
+            }
+            else
+            {
+                // Usually version codes are unique and not tied to the usual semver versions
+                // see https://developer.android.com/studio/publish/versioning#appversioning
+                // versionCode - A positive integer used as an internal version number.
+                // This number is used only to determine whether one version is more recent than another,
+                // with higher numbers indicating more recent versions. The Android system uses the
+                // versionCode value to protect against downgrades by preventing users from installing
+                // an APK with a lower versionCode than the version currently installed on their device.
+                PlayerSettings.Lumin.versionCode++;
             }
 
             var mabuPath = $"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu";
@@ -46,22 +68,21 @@ namespace XRTK.Editor.BuildPipeline
         }
 
         /// <inheritdoc />
-        public override void OnPostprocessBuild(BuildReport buildReport)
+        public override void OnPostProcessBuild(BuildReport buildReport)
         {
-            if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
-            {
-                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPostprocessBuild)}");
-            }
-
             if (!MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform) ||
                 EditorUserBuildSettings.activeBuildTarget != BuildTarget ||
-                buildReport.summary.result == BuildResult.Failed ||
-                Application.isBatchMode)
+                buildReport.summary.result == BuildResult.Failed)
             {
                 return;
             }
 
-            if (Install)
+            if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
+            {
+                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPostProcessBuild)}");
+            }
+
+            if (Install && !Application.isBatchMode)
             {
                 InstallOnDevice();
             }
