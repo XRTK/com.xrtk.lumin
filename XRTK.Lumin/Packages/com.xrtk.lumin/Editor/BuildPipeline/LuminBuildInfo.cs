@@ -37,11 +37,6 @@ namespace XRTK.Editor.BuildPipeline
                 return;
             }
 
-            if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
-            {
-                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPreProcessBuild)}");
-            }
-
             if (VersionCode.HasValue)
             {
                 PlayerSettings.Lumin.versionCode = VersionCode.Value;
@@ -75,11 +70,6 @@ namespace XRTK.Editor.BuildPipeline
                 buildReport.summary.result == BuildResult.Failed)
             {
                 return;
-            }
-
-            if (MixedRealityToolkit.ActivePlatforms.Contains(BuildPlatform))
-            {
-                Debug.Log($"{nameof(LuminBuildInfo)}.{nameof(OnPostProcessBuild)}");
             }
 
             if (Install && !Application.isBatchMode)
