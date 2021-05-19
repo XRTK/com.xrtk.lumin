@@ -13,7 +13,7 @@ namespace XRTK.Lumin.Editor
     internal static class LuminPackageInstaller
     {
         private static readonly string DefaultPath = $"{MixedRealityPreferences.ProfileGenerationPath}Lumin";
-        private static readonly string HiddenPath = Path.GetFullPath($"{PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder)).ToForwardSlashes()}\\{MixedRealityPreferences.HIDDEN_PROFILES_PATH}");
+        private static readonly string HiddenPath = Path.GetFullPath($"{PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder)).BackSlashes()}\\{MixedRealityPreferences.HIDDEN_PROFILES_PATH}");
 
         static LuminPackageInstaller()
         {

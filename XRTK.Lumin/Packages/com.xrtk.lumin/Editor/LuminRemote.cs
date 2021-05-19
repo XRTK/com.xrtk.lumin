@@ -95,7 +95,7 @@ namespace XRTK.Lumin.Editor
 
                     foreach (var sourceFile in supportFiles)
                     {
-                        var destination = sourceFile.ToBackSlashes().Replace(path.ToBackSlashes(), LuminRemoteSupportFullPath.ToBackSlashes()).ToBackSlashes();
+                        var destination = sourceFile.ForwardSlashes().Replace(path.ForwardSlashes(), LuminRemoteSupportFullPath.ForwardSlashes()).ForwardSlashes();
 
                         try
                         {
