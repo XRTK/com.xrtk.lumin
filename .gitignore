@@ -74,8 +74,5 @@ ThirdParty/
 ThirdParty.meta
 --Version/
 
-XRTK.Lumin/Assets/XRTK.Generated/Lumin.meta
-XRTK.Lumin/Assets/XRTK.Generated/Lumin/Profiles
-XRTK.Lumin/Assets/XRTK.Generated/Lumin/Profiles.meta
 XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins
 XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins.meta
