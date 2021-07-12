@@ -7,5 +7,5 @@ using System.Reflection;
 [assembly: InternalsVisibleTo("XRTK.Lumin")]
 [assembly: InternalsVisibleTo("XRTK.Lumin.Editor")]
 
-[assembly: AssemblyVersion("0.2.10")]
+[assembly: AssemblyVersion("0.3.0")]
 [assembly: AssemblyTitle("com.xrtk.lumin.native")]
