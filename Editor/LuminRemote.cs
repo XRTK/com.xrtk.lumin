@@ -19,7 +19,7 @@ namespace XRTK.Lumin.Editor
     public static class LuminRemote
     {
         private static readonly string LuminPackageRoot = PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder));
-        private static readonly string LuminRemoteSupportPath = $"{LuminPackageRoot}\\Runtime\\Plugins\\Editor\\x64";
+        private static readonly string LuminRemoteSupportPath = "Assets\\Plugins\\Lumin\\Editor\\x64";
         private static readonly string LuminRemoteSupportFullPath = Path.GetFullPath(LuminRemoteSupportPath);
 
         private static string LuminSDKRoot => EditorPrefs.GetString(nameof(LuminSDKRoot));
@@ -73,8 +73,6 @@ namespace XRTK.Lumin.Editor
 
         private static async void InstallLuminRemoteLibraries()
         {
-            Directory.CreateDirectory(LuminRemoteSupportFullPath);
-
             var supportPaths = await LabDriver.GetLuminRemoteSupportLibrariesAsync(LuminSDKRoot);
 
             await Awaiters.UnityMainThread;
@@ -82,10 +80,12 @@ namespace XRTK.Lumin.Editor
             if (supportPaths == null ||
                 supportPaths.Count == 0)
             {
-                Debug.LogError("Failed to copy lumin remote support libraries!");
-                Directory.Delete(LuminRemoteSupportFullPath);
+                Debug.LogError("Failed to find lumin remote support libraries!");
+                Debug.LogError("Did you install the Magic Leap SDK from The Lab and Package Manager?");
                 return;
             }
+
+            Directory.CreateDirectory(LuminRemoteSupportFullPath);
 
             foreach (var path in supportPaths)
             {

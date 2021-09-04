@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using XRTK.Definitions.Utilities;
@@ -37,6 +38,12 @@ namespace XRTK.Lumin.Editor
             }
         }
 
+        private static readonly string[] SysEnvVariables = new[]
+        {
+            "\"%USERPROFILE%\\MagicLeap\\mlsdk\\v0.24.1\"",
+            "\"%USERPROFILE%\\MagicLeap\\TheLab\""
+        };
+
         /// <summary>
         /// Queries for the Magic Leap Lab shim paths for remote support libraries.
         /// </summary>
@@ -46,6 +53,18 @@ namespace XRTK.Lumin.Editor
         {
             var result = new List<string>();
             ProcessResult processResult;
+
+            var paths = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Process);
+
+            var pathVariables = paths?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(0);
+            var hasLabDriver = pathVariables.Any(path => path.Contains("TheLab"));
+
+            if (!hasLabDriver)
+            {
+                pathVariables.Add("%USERPROFILE%\\MagicLeap\\TheLab");
+                pathVariables.Add("C:\\Users\\Public\\MagicLeap\\TheLab");
+                Environment.SetEnvironmentVariable("Path", string.Join(";", pathVariables), EnvironmentVariableTarget.Process);
+            }
 
             try
             {
