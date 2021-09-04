@@ -73,6 +73,7 @@ artifacts/
 ThirdParty/
 ThirdParty.meta
 --Version/
-
-XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins
-XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins.meta
+XRTK.Lumin/Assets/Plugins.meta
+XRTK.Lumin/Assets/Plugins/Lumin.meta
+XRTK.Lumin/Assets/Plugins/Lumin/Editor
+XRTK.Lumin/Assets/Plugins/Lumin/Editor.meta
