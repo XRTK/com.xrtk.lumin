@@ -26,23 +26,6 @@ namespace XRTK.Lumin.Providers.CameraSystem
         /// <inheritdoc />
         public override bool IsOpaque => false;
 
-        private float headHeight;
-
-        /// <inheritdoc />
-        public override float HeadHeight
-        {
-            get => headHeight;
-            set
-            {
-                if (value.Equals(headHeight))
-                {
-                    return;
-                }
-
-                headHeight = value;
-            }
-        }
-
         /// <inheritdoc />
         protected override void ResetRigTransforms()
         {
