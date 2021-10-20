@@ -26,6 +26,7 @@ namespace XRTK.Lumin.Providers.CameraSystem
         /// <inheritdoc />
         public override bool IsOpaque => false;
 
+#if XRTK_USE_LEGACYVR
         private float headHeight;
 
         /// <inheritdoc />
@@ -42,6 +43,7 @@ namespace XRTK.Lumin.Providers.CameraSystem
                 headHeight = value;
             }
         }
+#endif
 
         /// <inheritdoc />
         protected override void ResetRigTransforms()
