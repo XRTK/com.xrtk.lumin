@@ -13,7 +13,7 @@ namespace XRTK.Lumin.Editor
     internal static class LuminPackageInstaller
     {
         private static readonly string DefaultPath = $"{MixedRealityPreferences.ProfileGenerationPath}Lumin";
-        private static readonly string HiddenPath = Path.GetFullPath($"{PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder)).BackSlashes()}\\{MixedRealityPreferences.HIDDEN_PROFILES_PATH}");
+        private static readonly string HiddenPath = Path.GetFullPath($"{PathFinderUtility.ResolvePath<IPathFinder>(typeof(LuminPathFinder))}{Path.DirectorySeparatorChar}{MixedRealityPreferences.HIDDEN_PROFILES_PATH}");
 
         static LuminPackageInstaller()
         {
@@ -23,7 +23,7 @@ namespace XRTK.Lumin.Editor
         [MenuItem("Mixed Reality Toolkit/Packages/Install Lumin Package Assets...", true)]
         private static bool ImportPackageAssetsValidation()
         {
-            return !Directory.Exists($"{DefaultPath}\\Profiles");
+            return !Directory.Exists($"{DefaultPath}{Path.DirectorySeparatorChar}Profiles");
         }
 
         [MenuItem("Mixed Reality Toolkit/Packages/Install Lumin Package Assets...")]
@@ -37,7 +37,7 @@ namespace XRTK.Lumin.Editor
         {
             if (!EditorPreferences.Get($"{nameof(LuminPackageInstaller)}.Profiles", false))
             {
-                EditorPreferences.Set($"{nameof(LuminPackageInstaller)}.Profiles", PackageInstaller.TryInstallAssets(HiddenPath, $"{DefaultPath}\\Profiles"));
+                EditorPreferences.Set($"{nameof(LuminPackageInstaller)}.Profiles", PackageInstaller.TryInstallAssets(HiddenPath, $"{DefaultPath}{Path.DirectorySeparatorChar}Profiles"));
             }
         }
     }
