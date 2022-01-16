@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace XRTK.Definitions.Platforms
+namespace XRTK.Lumin
 {
     /// <summary>
     /// Used by the XRTK to signal that the feature is available on the Lumin platform.
