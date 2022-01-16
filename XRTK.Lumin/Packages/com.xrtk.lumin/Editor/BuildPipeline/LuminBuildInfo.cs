@@ -53,7 +53,7 @@ namespace XRTK.Editor.BuildPipeline
                 PlayerSettings.Lumin.versionCode++;
             }
 
-            var mabuPath = $"{Directory.GetParent(Application.dataPath)}\\Library\\Mabu";
+            var mabuPath = $"{Directory.GetParent(Application.dataPath)}{Path.DirectorySeparatorChar}Library{Path.DirectorySeparatorChar}Mabu";
 
             if (IsCommandLine &&
                 Directory.Exists(mabuPath))
