@@ -9,8 +9,8 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using XRTK.Attributes;
-using XRTK.Definitions.Platforms;
 using XRTK.Extensions;
+using XRTK.Lumin;
 using XRTK.Services;
 using Debug = UnityEngine.Debug;
 

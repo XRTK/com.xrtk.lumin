@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using XRTK.Definitions.Platforms;
 
 namespace XRTK.Lumin
 {
