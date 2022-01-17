@@ -5,9 +5,12 @@
 [Oo]bj/
 [Bb]in/
 [Bb]uilds/
+[Uu]serSettings/
 [Bb]uild/
 [Ll]ibrary/
 [Aa]pp/
+[Aa]pp.meta
+UserSettings/
 UWP/
 WindowsStoreApp/
 UnityGenerated/
@@ -19,6 +22,7 @@ project.lock.json
 *.package
 TextMesh Pro.meta
 TextMesh Pro/
+UIElementsSchema/
 *packages-lock.json
 
 # ============ #
@@ -65,6 +69,10 @@ obj/
 .idea/
 _ReSharper.Caches
 
+# ===================== #
+# System Specific List #
+# ===================== #
+.DS_Store
 
 # ===================== #
 # Project Specific List #
@@ -73,6 +81,7 @@ artifacts/
 ThirdParty/
 ThirdParty.meta
 --Version/
-
-XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins
-XRTK.Lumin/Packages/com.xrtk.lumin/Runtime/Plugins.meta
+XRTK.Lumin/Assets/Plugins.meta
+XRTK.Lumin/Assets/Plugins/Lumin.meta
+XRTK.Lumin/Assets/Plugins/Lumin/Editor
+XRTK.Lumin/Assets/Plugins/Lumin/Editor.meta

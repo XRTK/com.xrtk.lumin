@@ -26,6 +26,7 @@ namespace XRTK.Lumin.Providers.CameraSystem
         /// <inheritdoc />
         public override bool IsOpaque => false;
 
+#if XRTK_USE_LEGACYVR
         private float headHeight;
 
         /// <inheritdoc />
@@ -42,12 +43,13 @@ namespace XRTK.Lumin.Providers.CameraSystem
                 headHeight = value;
             }
         }
+#endif
 
         /// <inheritdoc />
         protected override void ResetRigTransforms()
         {
-            CameraRig.PlayspaceTransform.position = new Vector3(0f, HeadHeight, 0f);
-            CameraRig.PlayspaceTransform.rotation = Quaternion.identity;
+            CameraRig.RigTransform.position = new Vector3(0f, HeadHeight, 0f);
+            CameraRig.RigTransform.rotation = Quaternion.identity;
             CameraRig.CameraTransform.localPosition = Vector3.zero;
             CameraRig.CameraTransform.localRotation = Quaternion.identity;
             CameraRig.BodyTransform.localPosition = Vector3.zero;
